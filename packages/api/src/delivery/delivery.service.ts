@@ -77,7 +77,7 @@ export async function getPendingDeliveries(): Promise<PendingDelivery[]> {
     return [];
   }
 
-  return (data ?? []).map((row) => ({
+  return (data ?? []).map((row: any) => ({
     deliveryId: row.delivery_id,
     slotId: row.slot_id,
     txHash: row.tx_hash,
