@@ -1,0 +1,26 @@
+{
+  "name": "project-clarity",
+  "version": "0.0.1",
+  "private": true,
+  "description": "SlingDePIN Phase 0 — Sub-500ms MOQ ad insertion + x402 micropayments",
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build",
+    "build:dashboard": "pnpm --filter @clarity/dashboard build",
+    "build:api": "pnpm --filter @clarity/api build",
+    "test": "pnpm --filter @clarity/api test",
+    "test:contracts": "cd packages/contracts && forge test -vv",
+    "test:ci": "pnpm test && pnpm build:dashboard",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

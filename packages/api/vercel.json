@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm --filter @clarity/api build",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "crons": [
+    {
+      "path": "/api/sla/trigger",
+      "schedule": "*/5 * * * *",
+      "headers": { "X-Admin-Token": "@admin_token" }
+    }
+  ],
+  "env": {
+    "SELLER_WALLET_ADDRESS": "@seller_wallet_address",
+    "ORACLE_PRIVATE_KEY": "@oracle_private_key",
+    "BASE_SEPOLIA_RPC_URL": "@base_sepolia_rpc_url",
+    "BASESCAN_API_KEY": "@basescan_api_key",
+    "CHAIN_ID": "84532",
+    "USDC_BASE_SEPOLIA": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "X402_FACILITATOR_URL": "https://x402.org/facilitator",
+    "AD_PRICE_USDC": "0.0001",
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "ORACLE_CONTRACT_ADDRESS": "@oracle_contract_address",
+    "CMXS_CONTRACT_ADDRESS": "@cmxs_contract_address",
+    "NODE_REGISTRY_ADDRESS": "@node_registry_address",
+    "NODE_WALLET_ADDRESS": "@node_wallet_address",
+    "ADMIN_TOKEN": "@admin_token",
+    "DASHBOARD_URL": "@dashboard_url"
+  },
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 60
+    }
+  }
+}

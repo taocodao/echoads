@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+out/
+.next/
+build/
+
+# Foundry
+packages/contracts/cache/
+packages/contracts/out/
+packages/contracts/broadcast/
+# Keep lib/ — it's forge's dependency directory (tracked if using --no-commit)
+
+# Certs (generate locally — never commit)
+certs/
+*.pem
+*.key
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Test coverage
+coverage/
+lcov.info
+
+# Benchmark results (keep generated reports, ignore raw data)
+packages/player/src/benchmark/data/

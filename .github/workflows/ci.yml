@@ -1,0 +1,131 @@
+name: CI — Test & Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ── TypeScript lint ──────────────────────────────────────────────────────────
+  lint:
+    name: TypeScript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint shared package
+        run: pnpm --filter @clarity/shared lint
+
+      - name: Lint API package
+        run: pnpm --filter @clarity/api lint
+
+      - name: Lint dashboard package
+        run: pnpm --filter @clarity/dashboard lint
+
+  # ── API unit tests ───────────────────────────────────────────────────────────
+  test-api:
+    name: API Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    env:
+      SELLER_WALLET_ADDRESS: "0x0000000000000000000000000000000000000001"
+      ORACLE_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      BASE_SEPOLIA_RPC_URL: "https://sepolia.base.org"
+      CHAIN_ID: "84532"
+      USDC_BASE_SEPOLIA: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+      X402_FACILITATOR_URL: "https://x402.org/facilitator"
+      AD_PRICE_USDC: "0.0001"
+      SUPABASE_URL: "http://localhost:54321"
+      SUPABASE_SERVICE_ROLE_KEY: "test-key"
+      ORACLE_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000002"
+      CMXS_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000003"
+      NODE_WALLET_ADDRESS: "0x0000000000000000000000000000000000000004"
+      ADMIN_TOKEN: "test-token"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run API tests
+        run: pnpm --filter @clarity/api test
+
+  # ── Smart contract tests ─────────────────────────────────────────────────────
+  test-contracts:
+    name: Solidity Tests (Foundry)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install OpenZeppelin
+        working-directory: packages/contracts
+        run: forge install OpenZeppelin/openzeppelin-contracts@v5.1.0 --no-commit
+
+      - name: Run contract tests
+        working-directory: packages/contracts
+        run: forge test -vv
+
+      - name: Check coverage
+        working-directory: packages/contracts
+        run: forge coverage --report summary
+
+  # ── Dashboard build check ────────────────────────────────────────────────────
+  build-dashboard:
+    name: Dashboard Build Check
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: "https://placeholder.vercel.app"
+      NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder"
+      NEXT_PUBLIC_CHAIN_ID: "84532"
+      NEXT_PUBLIC_MOQ_RELAY_URL: "https://localhost:4443"
+      NEXT_PUBLIC_CMXS_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000001"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dashboard
+        run: pnpm --filter @clarity/dashboard build

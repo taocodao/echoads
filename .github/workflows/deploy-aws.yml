@@ -1,0 +1,70 @@
+name: Deploy — AWS EC2 Node
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/node/**"
+      - "infra/aws/**"
+      - ".github/workflows/deploy-aws.yml"
+
+jobs:
+  deploy-node:
+    name: Deploy MOQ Node to EC2
+    runs-on: ubuntu-latest
+    # Only runs after CI passes
+    needs: []
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .env.node file
+        run: |
+          cat > infra/aws/.env.node << EOF
+          MOQ_RELAY_URL=https://0.0.0.0:4443
+          SELLER_WALLET_ADDRESS=${{ secrets.SELLER_WALLET_ADDRESS }}
+          ORACLE_PRIVATE_KEY=${{ secrets.ORACLE_PRIVATE_KEY }}
+          BASE_SEPOLIA_RPC_URL=${{ secrets.BASE_SEPOLIA_RPC_URL }}
+          CHAIN_ID=84532
+          USDC_BASE_SEPOLIA=0x036CbD53842c5426634e7929541eC2318f3dCF7e
+          X402_FACILITATOR_URL=https://x402.org/facilitator
+          ORACLE_CONTRACT_ADDRESS=${{ secrets.ORACLE_CONTRACT_ADDRESS }}
+          CMXS_CONTRACT_ADDRESS=${{ secrets.CMXS_CONTRACT_ADDRESS }}
+          NODE_REGISTRY_ADDRESS=${{ secrets.NODE_REGISTRY_ADDRESS }}
+          NODE_WALLET_ADDRESS=${{ secrets.NODE_WALLET_ADDRESS }}
+          EOF
+
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USER }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          source: "packages/node/,infra/aws/"
+          target: "/home/ubuntu/project-clarity/"
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USER }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/ubuntu/project-clarity
+
+            # Copy env file to node package
+            cp infra/aws/.env.node packages/node/.env
+
+            # Pull latest Docker images
+            cd packages/node
+            docker compose -f docker-compose.node.yml pull
+
+            # Restart services with zero downtime
+            docker compose -f docker-compose.node.yml up -d --remove-orphans
+
+            # Verify relay is running
+            sleep 5
+            docker compose -f docker-compose.node.yml ps
+
+            echo "✅ EC2 deployment complete"

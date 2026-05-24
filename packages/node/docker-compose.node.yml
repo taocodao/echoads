@@ -1,0 +1,93 @@
+services:
+  # ── MOQ Relay ────────────────────────────────────────────────────────────────
+  # Serves media tracks over QUIC/WebTransport (UDP 4443)
+  # Built from kixelated/moq-rs during EC2 setup
+  moq-relay:
+    image: ubuntu:24.04
+    container_name: clarity-moq-relay
+    command: >
+      /usr/local/bin/moq-relay
+      --listen [::]:4443
+      --tls-cert /certs/cert.pem
+      --tls-key  /certs/key.pem
+    ports:
+      - "4443:4443/udp"
+      - "4443:4443/tcp"
+    volumes:
+      - /usr/local/bin/moq-relay:/usr/local/bin/moq-relay:ro
+      - /home/ubuntu/project-clarity/certs:/certs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo '' > /dev/tcp/localhost/4443"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── x402 Gateway ─────────────────────────────────────────────────────────────
+  # Handles payment verification and CMXS reward triggers
+  # Runs as a sidecar to the MOQ relay on EC2
+  x402-gateway:
+    image: node:20-alpine
+    container_name: clarity-x402-gateway
+    working_dir: /app
+    command: ["node", "--loader", "tsx/esm", "src/index.local.ts"]
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - API_PORT=3001
+    volumes:
+      - ./:/app:ro
+      - /app/node_modules
+    depends_on:
+      moq-relay:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Metrics (Grafana + Prometheus) ────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: clarity-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: clarity-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  grafana-data:
+
+networks:
+  default:
+    name: project-clarity-node

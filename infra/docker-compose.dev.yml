@@ -1,0 +1,50 @@
+services:
+  # ── Project Clarity Local Dev Stack ──────────────────────────────────────────
+  # Runs: API server + dashboard
+  # MOQ relay runs separately in WSL2 (see packages/node/scripts/setup-relay.sh)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  api:
+    build:
+      context: ../../packages/api
+      dockerfile: Dockerfile.dev
+    image: project-clarity-api:dev
+    container_name: clarity-api
+    ports:
+      - "3001:3001"
+    environment:
+      - API_PORT=3001
+      - NODE_ENV=development
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../packages/api/src:/app/src:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  dashboard:
+    build:
+      context: ../../packages/dashboard
+      dockerfile: Dockerfile.dev
+    image: project-clarity-dashboard:dev
+    container_name: clarity-dashboard
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../packages/dashboard:/app:ro
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+
+networks:
+  default:
+    name: project-clarity-dev

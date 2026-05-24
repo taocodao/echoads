@@ -1,0 +1,55 @@
+name: Deploy — Contracts to Base Sepolia
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'deploy' to confirm contract deployment"
+        required: true
+
+jobs:
+  deploy-contracts:
+    name: Forge Deploy to Base Sepolia
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'deploy'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install OpenZeppelin
+        working-directory: packages/contracts
+        run: forge install OpenZeppelin/openzeppelin-contracts@v5.1.0 --no-commit
+
+      - name: Run tests before deploy
+        working-directory: packages/contracts
+        run: forge test -vv
+
+      - name: Deploy contracts
+        working-directory: packages/contracts
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ORACLE_SIGNER_ADDRESS: ${{ secrets.ORACLE_SIGNER_ADDRESS }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+        run: |
+          forge script script/Deploy.s.sol:Deploy \
+            --rpc-url $BASE_SEPOLIA_RPC_URL \
+            --broadcast \
+            --private-key $DEPLOYER_PRIVATE_KEY \
+            --verify \
+            --etherscan-api-key $BASESCAN_API_KEY \
+            -vvvv
+
+      - name: Save deployment addresses
+        working-directory: packages/contracts
+        run: |
+          echo "## Contract Deployment Addresses" >> $GITHUB_STEP_SUMMARY
+          echo "Check the forge output above for ORACLE_CONTRACT_ADDRESS, CMXS_CONTRACT_ADDRESS, NODE_REGISTRY_ADDRESS" >> $GITHUB_STEP_SUMMARY
+          echo "Add these to Vercel environment variables and re-deploy both projects." >> $GITHUB_STEP_SUMMARY
