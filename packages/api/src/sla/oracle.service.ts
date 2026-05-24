@@ -1,4 +1,4 @@
-import { createWalletClient, http, keccak256, encodePacked, type `0x${string}` } from "viem";
+import { createWalletClient, http, keccak256, encodePacked } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 

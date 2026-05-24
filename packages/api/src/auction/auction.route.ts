@@ -27,7 +27,7 @@ auctionRouter.use(
     {
       facilitatorUrl: X402_FACILITATOR_URL,
       evm,
-      onSuccess: async (req, _res, paymentInfo) => {
+      onSuccess: async (req: any, _res: any, paymentInfo: any) => {
         // Log the payment immediately on settlement
         const slotId = req.param("slotId");
         console.log(`[x402] Payment settled:`, {

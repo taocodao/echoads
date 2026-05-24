@@ -12,6 +12,9 @@
   "scripts": {
     "lint": "tsc --noEmit"
   },
+  "dependencies": {
+    "@kixelated/moq": "^0.9.4"
+  },
   "devDependencies": {
     "typescript": "^5.4.0"
   }

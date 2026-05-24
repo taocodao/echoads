@@ -49,7 +49,7 @@ export class ProjectClarityAdManager {
   /** Connect to the MOQ relay and subscribe to the content track */
   async init(): Promise<void> {
     await this.transport.connect(this.config.relayUrl, {
-      certFingerprint: this.config.certFingerprint,
+      certFingerprint: this.config.certFingerprint as string | undefined,
     });
 
     this.currentSub = await this.transport.subscribe(MOQ_NAMESPACE, MOQ_CONTENT_TRACK);

@@ -16,9 +16,10 @@ export class OpenSourceMoqTransport implements MoqTransport {
     this.relayUrl = relayUrl;
 
     // Dynamic import — browser only
-    const { Client } = await import("@kixelated/moq");
+    const moq = await import("@kixelated/moq");
 
-    this.client = new Client({
+    // @ts-ignore
+    this.client = new moq.Client({
       url: relayUrl,
       // Pass cert fingerprint for local dev with self-signed certs
       ...(options?.certFingerprint && {
