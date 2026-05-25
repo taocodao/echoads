@@ -3,13 +3,15 @@ services:
   # Serves media tracks over QUIC/WebTransport (UDP 4443)
   # Built from kixelated/moq-rs during EC2 setup
   moq-relay:
-    image: kixelated/moq-relay:0.10.14
+    image: kixelated/moq-relay:latest
     container_name: clarity-moq-relay
     command: >
       --listen [::]:4443
       --tls-cert /certs/cert.pem
       --tls-key  /certs/key.pem
       --auth-public ""
+    environment:
+      - MALLOC_CONF=prof:true
     ports:
       - "4443:4443/udp"
       - "4443:4443/tcp"
