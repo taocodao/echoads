@@ -3,13 +3,5 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm --filter @clarity/dashboard build",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@api_url",
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "NEXT_PUBLIC_CHAIN_ID": "84532",
-    "NEXT_PUBLIC_MOQ_RELAY_URL": "@moq_relay_url",
-    "NEXT_PUBLIC_CMXS_CONTRACT_ADDRESS": "@cmxs_contract_address"
-  }
+  "outputDirectory": ".next"
 }
