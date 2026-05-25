@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EchoAds — Interactive Demo</title>
+<meta name="description" content="EchoAds live interactive demo. Trigger ad breaks, view on-chain receipts, explore node earnings and benchmark results.">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="demo-logo">
+    <div class="demo-logo-icon">E</div>
+    <h1>Echo<span>Ads</span> <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:8px">Interactive Demo</span></h1>
+  </div>
+  <div class="demo-header-right">
+    <a href="../" class="btn-back">← Back to Hub</a>
+    <span class="live-badge"><span class="infra-dot"></span> Infrastructure Live</span>
+  </div>
+</header>
+
+<!-- Dashboard UI -->
+<div style="max-width:1200px;margin:0 auto;padding:20px">
+
+  <!-- Product nav -->
+  <div class="product-nav" style="border-radius:12px 12px 0 0;border:1px solid var(--border);border-bottom:none">
+    <div class="product-logo">EchoAds <span class="tag tag-green" style="font-size:9px;padding:2px 6px">LIVE</span></div>
+    <div class="product-nav-links">
+      <span class="nav-link active" id="nav-advertiser" data-tab="advertiser">Advertiser Dashboard</span>
+      <span class="nav-link" id="nav-node" data-tab="node">Node Dashboard</span>
+      <span class="nav-link" id="nav-benchmark" data-tab="benchmark">Benchmark</span>
+    </div>
+    <div class="product-status">
+      <span class="infra-dot"></span>
+      <span style="font-size:11px;color:var(--green);font-weight:600">54.80.47.153:4443</span>
+    </div>
+  </div>
+
+  <!-- Tab: Advertiser Dashboard -->
+  <div id="tab-advertiser" class="product-tab active-tab" style="border:1px solid var(--border);border-radius:0 0 12px 12px">
+    <div class="product-inner">
+
+      <!-- Stat cards -->
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-label">Total Impressions</div><div class="stat-val" id="stat-impressions">0</div></div>
+        <div class="stat-card"><div class="stat-label">USDC Settled</div><div class="stat-val" id="stat-usdc">$0.0000</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Latency</div><div class="stat-val" id="stat-latency">—</div></div>
+        <div class="stat-card"><div class="stat-label">SLA Pass Rate</div><div class="stat-val" id="stat-sla">—</div></div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="dashboard-grid">
+
+        <!-- Players -->
+        <div>
+          <div class="player-row">
+            <span class="player-section-label">Live Stream Comparison</span>
+            <button class="small-btn" id="force-ad-btn">⚡ Force Ad Break</button>
+          </div>
+          <div class="player-container">
+            <div class="player-pane hls-pane">
+              <div class="player-label">⚠ HLS / TCP — Current Sling TV</div>
+              <div class="player-screen">
+                <div class="video-bars"></div>
+                <div class="content-overlay">
+                  <div class="content-icon">⚽</div>
+                  <div class="content-title">UEFA Champions League</div>
+                  <div class="content-sub">HLS Stream · TCP</div>
+                </div>
+                <div class="black-screen hidden" id="hls-black">
+                  <div class="black-screen-text">BUFFERING…</div>
+                  <div class="black-timer" id="hls-timer">0.000s</div>
+                  <div style="font-size:10px;color:#444;margin-top:4px">TCP reconnect · waiting for segment</div>
+                </div>
+                <div class="latency-badge bad" id="hls-badge">⚠ Segment load: 3,847ms (HLS baseline)</div>
+              </div>
+            </div>
+            <div class="player-pane moq-pane">
+              <div class="player-label">✅ MOQ / QUIC — EchoAds</div>
+              <div class="player-screen">
+                <div class="video-bars green-bars"></div>
+                <div class="content-overlay">
+                  <div class="content-icon">⚽</div>
+                  <div class="content-title">UEFA Champions League</div>
+                  <div class="content-sub">MOQ/QUIC · 54.80.47.153:4443</div>
+                </div>
+                <div class="ad-overlay hidden" id="moq-ad">
+                  <div class="ad-badge">AD PLAYING</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">Track switched · QUIC</div>
+                  <div class="ad-switch-time">287ms</div>
+                </div>
+                <div class="latency-badge good" id="moq-badge">✅ Track switch: 287ms · SLA Met</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:12px 16px;background:rgba(0,170,255,.06);border:1px solid rgba(0,170,255,.15);border-radius:9px;font-size:12px;color:var(--muted)">
+            Click <strong style="color:var(--text)">⚡ Force Ad Break</strong> to fire an ad signal on both sides simultaneously. Watch left go black while right switches seamlessly at 287ms.
+          </div>
+        </div>
+
+        <!-- Impression feed -->
+        <div>
+          <div class="feed-label">On-Chain Impression Feed</div>
+          <div class="imp-feed" id="imp-feed">
+            <div class="imp-empty" id="imp-empty">Waiting for first impression…</div>
+          </div>
+          <div style="margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:9px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">DeliveryOracle Contract</div>
+            <div class="node-contract-addr">0x0e2af6786E207560De979eF5bAB07b5796DB9B2a</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Base Sepolia · <a href="https://sepolia.basescan.org/address/0x0e2af6786E207560De979eF5bAB07b5796DB9B2a" target="_blank" rel="noopener" style="color:var(--blue)">Verify on Basescan ↗</a></div>
+          </div>
+        </div>
+
+      </div><!-- /dashboard-grid -->
+    </div><!-- /product-inner -->
+  </div><!-- /tab-advertiser -->
+
+  <!-- Tab: Node Dashboard -->
+  <div id="tab-node" class="product-tab" style="border:1px solid var(--border);border-radius:0 0 12px 12px">
+    <div class="product-inner">
+      <div class="node-header">
+        <div class="node-icon">🗼</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">EchoStar Node · AWS us-east-1</div>
+          <div style="font-size:12px;color:var(--green)">● Online · QUIC relay active · 54.80.47.153:4443</div>
+        </div>
+      </div>
+      <div class="node-grid">
+        <div class="node-metric"><div class="node-metric-label">CMXS Earned Today</div><div class="node-metric-value" id="node-cmxs">0.000</div></div>
+        <div class="node-metric"><div class="node-metric-label">SLA Pass Rate</div><div class="node-metric-value" id="node-sla">—</div></div>
+        <div class="node-metric"><div class="node-metric-label">Deliveries Today</div><div class="node-metric-value blue-v" id="node-del">0</div></div>
+        <div class="node-metric"><div class="node-metric-label">Est. Monthly CMXS</div><div class="node-metric-value blue-v">43.2</div></div>
+      </div>
+      <div class="node-info-box green">
+        <strong style="color:var(--text)">DePIN Scale Projection:</strong><br>
+        60,000 EchoStar towers × 1,440 deliveries/day = <strong style="color:var(--green)">2.6M CMXS/month</strong> distributed automatically to tower operators. No invoicing. No manual reconciliation.
+      </div>
+      <div class="node-info-box surface" style="margin-top:10px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">CMXS Token Contract</div>
+        <div class="node-contract-addr">0x9fEf4679BB07aa1B28a4e33330e1e38ADcfb7819</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Base Sepolia · <a href="https://sepolia.basescan.org/address/0x9fEf4679BB07aa1B28a4e33330e1e38ADcfb7819" target="_blank" rel="noopener" style="color:var(--blue)">Verify on Basescan ↗</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Benchmark -->
+  <div id="tab-benchmark" class="product-tab" style="border:1px solid var(--border);border-radius:0 0 12px 12px">
+    <div class="product-inner">
+      <div class="bench-intro">100 consecutive ad switch trials · Recorded May 2026 · AWS us-east-1</div>
+      <div id="benchmark-chart"></div>
+      <div class="bench-summary">
+        <span style="font-size:22px;font-weight:900;color:var(--green)">13× faster</span>
+        <span style="color:var(--muted);font-size:14px"> at P95 · </span>
+        <span style="font-size:14px;color:var(--cyan);font-weight:600">Clears 500ms sports-betting regulatory threshold ✅</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script src="../shared/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    EchoApp.buildBenchmarkHTML();
+
+    document.getElementById('force-ad-btn').addEventListener('click', function () {
+      EchoApp.triggerAdBreak();
+    });
+
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        EchoApp.switchTab(link.dataset.tab);
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EchoAds — Auto Presentation | EchoStar Leadership</title>
+<meta name="description" content="15-scene guided presentation. Simulated cursor walkthrough with voice narration covering all four industry problems and the scale of opportunity.">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="demo-logo">
+    <div class="demo-logo-icon">E</div>
+    <h1>Echo<span>Ads</span> <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:8px">Auto Presentation</span></h1>
+  </div>
+  <div class="demo-header-right">
+    <a href="../" class="btn-back">← Hub</a>
+    <span id="pres-step-label" class="demo-step-label">Ready</span>
+    <button id="pres-ctrl-btn" class="btn-primary">▶ Start Demo</button>
+  </div>
+</header>
+<div class="progress-wrap"><div class="progress-bar" id="pres-progress"></div></div>
+
+<!-- Two-column layout -->
+<div class="pres-layout">
+
+  <!-- Stage (left) -->
+  <div class="pres-stage" id="pres-stage">
+
+    <!-- Scene badge -->
+    <div class="scene-strip">
+      <span class="scene-badge" id="pres-scene-badge">Click Start Demo to begin</span>
+    </div>
+
+    <!-- Browser chrome wrapping dashboard + slides -->
+    <div class="browser-chrome">
+      <div class="browser-bar">
+        <div class="browser-dots">
+          <span style="background:#ff5f57"></span>
+          <span style="background:#febc2e"></span>
+          <span style="background:#28c840"></span>
+        </div>
+        <div class="browser-url">
+          <span id="browser-url-text">https://echoads.tv</span>
+        </div>
+        <div style="width:55px"></div>
+      </div>
+
+      <!-- Dashboard area (scenes 1–9) -->
+      <div id="dashboard-area">
+
+        <!-- Product nav (uses IDs with -pres suffix to avoid JS conflicts) -->
+        <div class="product-nav">
+          <div class="product-logo">EchoAds <span class="tag tag-green" style="font-size:9px;padding:2px 6px">LIVE</span></div>
+          <div class="product-nav-links">
+            <span class="nav-link active" id="nav-advertiser-pres" data-tab="advertiser">Advertiser Dashboard</span>
+            <span class="nav-link" id="nav-node-pres" data-tab="node">Node Dashboard</span>
+            <span class="nav-link" id="nav-benchmark-pres" data-tab="benchmark">Benchmark</span>
+          </div>
+          <div class="product-status">
+            <span class="infra-dot"></span>
+            <span style="font-size:11px;color:var(--green);font-weight:600">54.80.47.153:4443</span>
+          </div>
+        </div>
+
+        <!-- Tab: Advertiser -->
+        <div id="tab-advertiser" class="product-tab active-tab">
+          <div class="product-inner">
+            <div class="stat-row">
+              <div class="stat-card"><div class="stat-label">Total Impressions</div><div class="stat-val" id="stat-impressions">0</div></div>
+              <div class="stat-card"><div class="stat-label">USDC Settled</div><div class="stat-val" id="stat-usdc">$0.0000</div></div>
+              <div class="stat-card"><div class="stat-label">Avg Latency</div><div class="stat-val" id="stat-latency">—</div></div>
+              <div class="stat-card"><div class="stat-label">SLA Pass Rate</div><div class="stat-val" id="stat-sla">—</div></div>
+            </div>
+            <div class="dashboard-grid">
+              <!-- Players -->
+              <div id="player-section">
+                <div class="player-row">
+                  <span class="player-section-label">Live Stream Comparison</span>
+                  <button class="small-btn" id="force-ad-btn-pres">⚡ Force Ad Break</button>
+                </div>
+                <div class="player-container">
+                  <div class="player-pane hls-pane">
+                    <div class="player-label">⚠ HLS / TCP — Current Sling TV</div>
+                    <div class="player-screen">
+                      <div class="video-bars"></div>
+                      <div class="content-overlay">
+                        <div class="content-icon">⚽</div>
+                        <div class="content-title">UEFA Champions League</div>
+                        <div class="content-sub">HLS Stream · TCP</div>
+                      </div>
+                      <div class="black-screen hidden" id="hls-black">
+                        <div class="black-screen-text">BUFFERING…</div>
+                        <div class="black-timer" id="hls-timer">0.000s</div>
+                        <div style="font-size:10px;color:#444;margin-top:4px">TCP reconnect · waiting for segment</div>
+                      </div>
+                      <div class="latency-badge bad" id="hls-badge">⚠ Segment load: 3,847ms (HLS baseline)</div>
+                    </div>
+                  </div>
+                  <div class="player-pane moq-pane">
+                    <div class="player-label">✅ MOQ / QUIC — EchoAds</div>
+                    <div class="player-screen">
+                      <div class="video-bars green-bars"></div>
+                      <div class="content-overlay">
+                        <div class="content-icon">⚽</div>
+                        <div class="content-title">UEFA Champions League</div>
+                        <div class="content-sub">MOQ/QUIC · 54.80.47.153:4443</div>
+                      </div>
+                      <div class="ad-overlay hidden" id="moq-ad">
+                        <div class="ad-badge">AD PLAYING</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">Track switched · QUIC</div>
+                        <div class="ad-switch-time">287ms</div>
+                      </div>
+                      <div class="latency-badge good" id="moq-badge">✅ Track switch: 287ms · SLA Met</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Impression feed -->
+              <div>
+                <div class="feed-label">On-Chain Impression Feed</div>
+                <div class="imp-feed" id="imp-feed">
+                  <div class="imp-empty" id="imp-empty">Waiting for first impression…</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Node -->
+        <div id="tab-node" class="product-tab">
+          <div class="product-inner">
+            <div class="node-header">
+              <div class="node-icon">🗼</div>
+              <div>
+                <div style="font-weight:700;font-size:14px">EchoStar Node · AWS us-east-1</div>
+                <div style="font-size:11px;color:var(--green)">● Online · QUIC relay active · 54.80.47.153:4443</div>
+              </div>
+            </div>
+            <div class="node-grid">
+              <div class="node-metric"><div class="node-metric-label">CMXS Earned Today</div><div class="node-metric-value" id="node-cmxs">0.000</div></div>
+              <div class="node-metric"><div class="node-metric-label">SLA Pass Rate</div><div class="node-metric-value" id="node-sla">—</div></div>
+              <div class="node-metric"><div class="node-metric-label">Deliveries Today</div><div class="node-metric-value blue-v" id="node-del">0</div></div>
+              <div class="node-metric"><div class="node-metric-label">Est. Monthly CMXS</div><div class="node-metric-value blue-v">43.2</div></div>
+            </div>
+            <div class="node-info-box green">
+              <strong style="color:var(--text)">DePIN Scale:</strong> 60,000 EchoStar towers × 1,440 deliveries/day = <strong style="color:var(--green)">2.6M CMXS/month</strong> distributed automatically.
+            </div>
+            <div class="node-info-box surface" style="margin-top:9px">
+              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">CMXS Token Contract</div>
+              <div class="node-contract-addr">0x9fEf4679BB07aa1B28a4e33330e1e38ADcfb7819</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">Base Sepolia · <a href="https://sepolia.basescan.org/address/0x9fEf4679BB07aa1B28a4e33330e1e38ADcfb7819" target="_blank" rel="noopener" style="color:var(--blue)">Verify on Basescan ↗</a></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Benchmark -->
+        <div id="tab-benchmark" class="product-tab">
+          <div class="product-inner">
+            <div class="bench-intro">100 consecutive ad switch trials · Recorded May 2026</div>
+            <div id="benchmark-chart"></div>
+            <div class="bench-summary">
+              <span style="font-size:20px;font-weight:900;color:var(--green)">13× faster</span>
+              <span style="color:var(--muted);font-size:13px"> at P95 · </span>
+              <span style="font-size:13px;color:var(--cyan);font-weight:600">Clears 500ms sports-betting threshold ✅</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /dashboard-area -->
+
+      <!-- Slide area (scenes 10–15) -->
+      <div id="slide-area" class="hidden"></div>
+
+    </div><!-- /browser-chrome -->
+
+    <!-- Animated cursor (positioned over stage) -->
+    <div id="sim-cursor">
+      <svg width="20" height="24" viewBox="0 0 20 24">
+        <path d="M0 0 L0 20 L5 15 L9 24 L11 23 L7 14 L14 14 Z" fill="white" stroke="#000" stroke-width="1.2"/>
+      </svg>
+    </div>
+
+  </div><!-- /pres-stage -->
+
+  <!-- Sidebar (right) -->
+  <div class="pres-sidebar">
+
+    <div class="sidebar-section">
+      <h3>Node Status</h3>
+      <div class="infra-list">
+        <div class="infra-row"><span>MOQ Relay</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span>Prometheus</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span>Grafana</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span>CMXS Contract</span><span class="infra-dot"></span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1;display:flex;flex-direction:column">
+      <h3>Presenter Narration</h3>
+      <div class="narration-box" style="flex:1">
+        <div class="narration-text" id="narration-text">Click Start Demo to begin the 15-scene guided presentation with voice narration.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Timeline (15 Scenes)</h3>
+      <div class="timeline-list" id="timeline-list"></div>
+    </div>
+
+  </div><!-- /pres-sidebar -->
+
+</div><!-- /pres-layout -->
+
+<script src="../shared/app.js"></script>
+<script src="slides.js"></script>
+<script src="../shared/autopilot.js"></script>
+
+<style>
+/* Override nav-link IDs for presentation page to avoid conflicts with app.js tab-switcher */
+#nav-advertiser-pres.active,
+#nav-node-pres.active,
+#nav-benchmark-pres.active {
+  color: var(--text);
+  background: rgba(0,170,255,.12);
+  border: 1px solid rgba(0,170,255,.2);
+}
+/* Slide area fills the chrome */
+#slide-area { min-height: 420px; }
+</style>
+
+</body>
+</html>
