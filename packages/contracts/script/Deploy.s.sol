@@ -50,7 +50,7 @@ contract Deploy is Script {
 
         // Output deployed addresses
         console.log("======================================");
-        console.log("Project Clarity — Deployed Contracts");
+        console.log("Project Clarity - Deployed Contracts");
         console.log("======================================");
         console.log("DeliveryOracle:  ", address(oracle));
         console.log("CMXS Token:      ", address(cmxs));
