@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EchoAds — Live Demo | EchoStar Leadership Presentation</title>
+<meta name="description" content="SlingDePIN Phase 0 interactive demo for EchoStar senior leadership. Sub-500ms ad insertion, on-chain delivery receipts, CMXS node rewards.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────── -->
+<header id="header">
+  <div id="logo">
+    <div id="logo-icon">E</div>
+    <h1>Echo<span>Ads</span> <span style="font-size:13px;font-weight:400;color:var(--muted);margin-left:6px">EchoStar Leadership Demo · May 2026</span></h1>
+  </div>
+  <div id="header-right">
+    <span id="scene-label">Ready</span>
+    <button id="ctrl-btn">▶ Start Demo</button>
+  </div>
+</header>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<!-- ── Intro splash (shown before demo starts) ─────────── -->
+<div id="intro-screen">
+  <div class="intro-badge"><span class="intro-badge-dot"></span> Infrastructure Live · echoads.tv</div>
+  <h2>The Future of<br><span>Connected TV Advertising</span><br>Is Already Running.</h2>
+  <p>A 5-minute guided demonstration of EchoAds Phase 0 — built on EchoStar's existing infrastructure, solving four industry crises simultaneously.</p>
+  <div class="proof-grid">
+    <div class="proof-card"><div class="proof-card-num">&lt;500ms</div><div class="proof-card-text">Ad insertion — zero black screen</div></div>
+    <div class="proof-card"><div class="proof-card-num">100%</div><div class="proof-card-text">Impressions with on-chain receipt</div></div>
+    <div class="proof-card"><div class="proof-card-num">13×</div><div class="proof-card-text">Faster than current Sling HLS</div></div>
+    <div class="proof-card"><div class="proof-card-num">$0→$</div><div class="proof-card-text">Tower revenue per ad delivery</div></div>
+  </div>
+  <button class="intro-start-btn" id="intro-start-btn">▶ Begin Presentation</button>
+  <p style="font-size:12px;color:var(--muted)">Voice narration plays automatically · Chrome recommended</p>
+</div>
+
+<!-- ── Main Demo Layout (hidden until started) ──────────── -->
+<div id="main" class="hidden">
+
+  <!-- Stage: simulated browser viewport showing the real UI -->
+  <div id="stage">
+
+    <!-- Scene header -->
+    <div class="scene-header">
+      <div class="scene-number" id="scene-number">Scene 1</div>
+      <div class="scene-title" id="scene-title">Loading...</div>
+      <div class="scene-subtitle" id="scene-subtitle"></div>
+    </div>
+
+    <!-- Browser chrome mockup wrapping the simulated live UI -->
+    <div id="browser-chrome">
+      <div id="browser-bar">
+        <div id="browser-dots">
+          <span style="background:#ff5f57"></span>
+          <span style="background:#febc2e"></span>
+          <span style="background:#28c840"></span>
+        </div>
+        <div id="browser-url">
+          <span id="url-text">https://echoads.tv</span>
+        </div>
+        <div style="width:60px"></div>
+      </div>
+
+      <!-- The simulated product UI lives here -->
+      <div id="product-ui">
+
+        <!-- Product nav bar -->
+        <div id="product-nav">
+          <div id="product-logo">EchoAds <span class="tag tag-green" style="font-size:9px;padding:2px 6px">LIVE</span></div>
+          <div id="product-nav-links">
+            <span class="nav-link active" id="nav-advertiser" data-tab="advertiser">Advertiser Dashboard</span>
+            <span class="nav-link" id="nav-node" data-tab="node">Node Dashboard</span>
+            <span class="nav-link" id="nav-benchmark" data-tab="benchmark">Benchmark</span>
+          </div>
+          <div id="product-status">
+            <span class="infra-dot"></span>
+            <span style="font-size:11px;color:var(--green);font-weight:600">54.80.47.153:4443</span>
+          </div>
+        </div>
+
+        <!-- Tab: Advertiser Dashboard -->
+        <div id="tab-advertiser" class="product-tab active-tab">
+          <div class="product-inner">
+            <!-- Stats row -->
+            <div id="ad-stats-row">
+              <div class="ad-stat-card">
+                <div class="ad-stat-label">Total Impressions</div>
+                <div class="ad-stat-val" id="stat-impressions">0</div>
+              </div>
+              <div class="ad-stat-card">
+                <div class="ad-stat-label">USDC Settled</div>
+                <div class="ad-stat-val" id="stat-usdc">$0.0000</div>
+              </div>
+              <div class="ad-stat-card">
+                <div class="ad-stat-label">Avg Latency</div>
+                <div class="ad-stat-val" id="stat-latency">—</div>
+              </div>
+              <div class="ad-stat-card">
+                <div class="ad-stat-label">SLA Pass Rate</div>
+                <div class="ad-stat-val" id="stat-sla">—</div>
+              </div>
+            </div>
+
+            <!-- Side-by-side player + impression feed -->
+            <div id="ad-main-grid">
+
+              <!-- Player section -->
+              <div id="player-section">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                  <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Live Stream Comparison</div>
+                  <button id="force-ad-btn" class="small-btn">⚡ Force Ad Break</button>
+                </div>
+                <div id="player-container">
+                  <div class="player-pane hls-pane">
+                    <div class="player-label">⚠ HLS / TCP — Current Sling TV</div>
+                    <div class="player-screen" id="hls-screen">
+                      <div class="video-bars"></div>
+                      <div class="content-overlay" id="hls-content">
+                        <div class="content-icon">⚽</div>
+                        <div class="content-title">UEFA Champions League</div>
+                        <div class="content-sub">HLS Stream · TCP</div>
+                      </div>
+                      <div class="black-screen hidden" id="hls-black">
+                        <div class="black-screen-text">BUFFERING...</div>
+                        <div class="black-timer" id="hls-timer">0.000s</div>
+                        <div style="font-size:10px;color:#444;margin-top:4px">TCP reconnect · waiting for segment</div>
+                      </div>
+                      <div class="latency-badge bad hidden" id="hls-badge">⚠ Segment load: 3,847ms (HLS baseline)</div>
+                    </div>
+                  </div>
+                  <div class="player-pane moq-pane">
+                    <div class="player-label">✅ MOQ / QUIC — EchoAds</div>
+                    <div class="player-screen" id="moq-screen">
+                      <div class="video-bars" style="background:linear-gradient(180deg,#061a0e,#0d2418,#061a0e)"></div>
+                      <div class="content-overlay" id="moq-content">
+                        <div class="content-icon">⚽</div>
+                        <div class="content-title">UEFA Champions League</div>
+                        <div class="content-sub">MOQ/QUIC · 54.80.47.153:4443</div>
+                      </div>
+                      <div class="ad-overlay hidden" id="moq-ad">
+                        <div class="ad-badge">AD PLAYING</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px">Track switched · QUIC</div>
+                        <div class="ad-timer">287ms</div>
+                      </div>
+                      <div class="latency-badge good hidden" id="moq-badge">✅ Track switch: 287ms · SLA Met</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Impression feed -->
+              <div id="impression-section">
+                <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">
+                  On-Chain Impression Feed
+                </div>
+                <div id="imp-feed">
+                  <div id="imp-empty" style="text-align:center;padding:32px;color:var(--muted);font-size:13px">
+                    Waiting for first impression...
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /ad-main-grid -->
+          </div><!-- /product-inner -->
+        </div><!-- /tab-advertiser -->
+
+        <!-- Tab: Node Dashboard -->
+        <div id="tab-node" class="product-tab">
+          <div class="product-inner">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+              <div style="width:42px;height:42px;border-radius:10px;background:rgba(0,232,122,0.12);border:1px solid rgba(0,232,122,0.3);display:flex;align-items:center;justify-content:center;font-size:20px">🗼</div>
+              <div>
+                <div style="font-weight:700;font-size:15px">EchoStar Node · AWS us-east-1</div>
+                <div style="font-size:12px;color:var(--green)">● Online · QUIC relay accepting connections · 54.80.47.153:4443</div>
+              </div>
+            </div>
+            <div id="node-grid">
+              <div class="node-metric">
+                <div class="node-metric-label">CMXS Earned Today</div>
+                <div class="node-metric-value" id="node-cmxs">0.000</div>
+              </div>
+              <div class="node-metric">
+                <div class="node-metric-label">SLA Pass Rate</div>
+                <div class="node-metric-value" id="node-sla">—</div>
+              </div>
+              <div class="node-metric">
+                <div class="node-metric-label">Deliveries Today</div>
+                <div class="node-metric-value blue-v" id="node-del">0</div>
+              </div>
+              <div class="node-metric">
+                <div class="node-metric-label">Est. Monthly CMXS</div>
+                <div class="node-metric-value blue-v">43.2</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:16px;background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.2);border-radius:12px;font-size:13px;color:var(--muted);line-height:1.7">
+              <strong style="color:var(--text)">DePIN Scale Projection:</strong><br>
+              60,000 EchoStar towers × 1,440 deliveries/day = <strong style="color:var(--green)">2.6M CMXS/month</strong> distributed automatically to tower operators. No invoicing. No manual reconciliation.
+            </div>
+            <div style="margin-top:12px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:600">CMXS Token Contract</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">0x9fEf4679BB07aa1B28a4e33330e1e38ADcfb7819</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Base Sepolia · <a href="https://sepolia.basescan.org/address/0x9fEf4679BB07aa1B28a4e33330e1e38ADcfb7819" target="_blank" style="color:var(--blue)">Verify on Basescan ↗</a></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Benchmark -->
+        <div id="tab-benchmark" class="product-tab">
+          <div class="product-inner">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:20px">100 consecutive ad switch trials · Recorded May 2026</div>
+            <div id="benchmark-chart">
+              ${[
+                {p:'P50 (Median)', moq:'243ms', hls:'3,200ms', mw:6, hw:80},
+                {p:'P95 (95th Pct)', moq:'312ms ✅', hls:'4,100ms', mw:8, hw:100},
+                {p:'P99 (99th Pct)', moq:'487ms', hls:'7,800ms', mw:12, hw:195}
+              ].map(r=>`
+                <div class="bench-row">
+                  <div class="bench-labels"><span class="bench-label-name">${r.p}</span></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div>
+                      <div style="font-size:10px;color:var(--green);margin-bottom:4px;font-weight:600">EchoAds MOQ/QUIC</div>
+                      <div class="bench-bar-wrap"><div class="bench-bar moq-bar" data-w="${Math.min(r.mw*4,100)}">${r.moq}</div></div>
+                    </div>
+                    <div>
+                      <div style="font-size:10px;color:var(--red);margin-bottom:4px;font-weight:600">Current Sling HLS</div>
+                      <div class="bench-bar-wrap"><div class="bench-bar hls-bar" data-w="${Math.min(r.hw*0.5,100)}">${r.hls}</div></div>
+                    </div>
+                  </div>
+                </div>`).join('')}
+            </div>
+            <div style="margin-top:20px;padding:18px;background:rgba(0,232,122,0.07);border:1px solid rgba(0,232,122,0.2);border-radius:12px;text-align:center">
+              <span style="font-size:24px;font-weight:900;color:var(--green)">13× faster</span>
+              <span style="color:var(--muted);font-size:14px"> at P95 · </span>
+              <span style="font-size:14px;color:var(--cyan);font-weight:600">Clears 500ms sports-betting regulatory threshold ✅</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /product-ui -->
+    </div><!-- /browser-chrome -->
+
+    <!-- Animated cursor -->
+    <div id="sim-cursor">
+      <svg width="20" height="24" viewBox="0 0 20 24">
+        <path d="M0 0 L0 20 L5 15 L9 24 L11 23 L7 14 L14 14 Z" fill="white" stroke="#000" stroke-width="1.2"/>
+      </svg>
+    </div>
+
+  </div><!-- /stage -->
+
+  <!-- ── Sidebar ── -->
+  <div id="sidebar">
+    <div>
+      <h3>Node Status</h3>
+      <div id="infra-status">
+        <div class="infra-row"><span class="infra-name">MOQ Relay</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span class="infra-name">Prometheus</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span class="infra-name">Grafana</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span class="infra-name">CMXS Contract</span><span class="infra-dot"></span></div>
+      </div>
+    </div>
+    <div>
+      <h3>Presenter Narration</h3>
+      <div id="voiceover-box">
+        <div id="voiceover-text">Narration will appear here...</div>
+      </div>
+    </div>
+    <div>
+      <h3>Demo Timeline</h3>
+      <div id="timeline-steps"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script src="demo.js"></script>
+
+<!-- Inline extra styles for product UI -->
+<style>
+#browser-chrome {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: var(--surface);
+}
+#browser-bar {
+  display: flex; align-items: center;
+  background: #111827; padding: 10px 16px;
+  gap: 16px; border-bottom: 1px solid var(--border);
+}
+#browser-dots { display: flex; gap: 6px; }
+#browser-dots span { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+#browser-url {
+  flex: 1; background: #1a2236; border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 12px;
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+}
+#product-ui { min-height: 480px; }
+#product-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+#product-logo { font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+#product-nav-links { display: flex; gap: 4px; }
+.nav-link {
+  padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+  cursor: pointer; color: var(--muted); transition: all 0.2s;
+}
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--text); background: rgba(0,170,255,0.12); border: 1px solid rgba(0,170,255,0.2); }
+#product-status { display: flex; align-items: center; gap: 6px; }
+.product-tab { display: none; }
+.active-tab { display: block; }
+.product-inner { padding: 20px; }
+#ad-stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px;
+}
+.ad-stat-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+}
+.ad-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.ad-stat-val { font-size: 22px; font-weight: 800; font-family: var(--mono); margin-top: 4px; color: var(--text); }
+#ad-main-grid { display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
+#player-section { }
+#impression-section { overflow-y: auto; max-height: 320px; }
+#imp-feed { display: flex; flex-direction: column; gap: 8px; }
+.small-btn {
+  padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05); color: var(--text); font-size: 11px;
+  font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+.small-btn:hover { background: rgba(0,170,255,0.15); border-color: var(--blue); color: var(--blue); }
+.small-btn.clicking { background: rgba(0,170,255,0.3); transform: scale(0.96); }
+#sim-cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  transition: top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: none;
+  top: 200px; left: 300px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+#stage { position: relative; }
+</style>
+</body>
+</html>
