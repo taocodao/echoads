@@ -337,7 +337,7 @@ function endPresentation(completed) {
   hideCursor();
   stopAudio();
   var btn = document.getElementById('pres-ctrl-btn');
-  if (btn) { btn.textContent = completed ? '\u21ba Replay'; btn.classList.remove('stop'); }
+  if (btn) { btn.textContent = completed ? '\u21ba Replay' : '\u25b6 Start Demo'; btn.classList.remove('stop'); }
   var label = document.getElementById('pres-step-label');
   if (label) label.textContent = completed ? 'Demo Complete' : 'Stopped';
   if (completed) {
