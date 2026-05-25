@@ -9,6 +9,7 @@ services:
       --listen [::]:4443
       --tls-cert /certs/cert.pem
       --tls-key  /certs/key.pem
+      --auth-public ""
     ports:
       - "4443:4443/udp"
       - "4443:4443/tcp"
