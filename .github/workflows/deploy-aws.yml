@@ -1,6 +1,7 @@
 name: Deploy — AWS EC2 Node
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
