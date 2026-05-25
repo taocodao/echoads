@@ -28,22 +28,22 @@ contract CMXSTest is Test {
     // Constructor
     // -------------------------------------------------------------------------
 
-    function test_Constructor_CorrectSupply() public view {
+    function test_Constructor_CorrectSupply() public {
         uint256 expectedMax = 1_000_000_000 * 10 ** 18;
         assertEq(cmxs.MAX_SUPPLY(), expectedMax);
     }
 
-    function test_Constructor_RewardsPool35Percent() public view {
+    function test_Constructor_RewardsPool35Percent() public {
         uint256 expected = (cmxs.MAX_SUPPLY() * 35) / 100;
         assertEq(cmxs.rewardsPoolBalance(), expected);
     }
 
-    function test_Constructor_Owner65Percent() public view {
+    function test_Constructor_Owner65Percent() public {
         uint256 expected = (cmxs.MAX_SUPPLY() * 65) / 100;
         assertEq(cmxs.balanceOf(owner), expected);
     }
 
-    function test_Constructor_OracleSet() public view {
+    function test_Constructor_OracleSet() public {
         assertEq(cmxs.oracleContract(), address(oracle));
     }
 
