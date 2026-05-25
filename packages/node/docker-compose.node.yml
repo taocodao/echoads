@@ -3,10 +3,9 @@ services:
   # Serves media tracks over QUIC/WebTransport (UDP 4443)
   # Built from kixelated/moq-rs during EC2 setup
   moq-relay:
-    image: ubuntu:24.04
+    image: ghcr.io/kixelated/moq-relay:latest
     container_name: clarity-moq-relay
     command: >
-      /usr/local/bin/moq-relay
       --listen [::]:4443
       --tls-cert /certs/cert.pem
       --tls-key  /certs/key.pem
@@ -14,7 +13,6 @@ services:
       - "4443:4443/udp"
       - "4443:4443/tcp"
     volumes:
-      - /usr/local/bin/moq-relay:/usr/local/bin/moq-relay:ro
       - /home/ubuntu/project-clarity/certs:/certs:ro
     restart: unless-stopped
     healthcheck:
