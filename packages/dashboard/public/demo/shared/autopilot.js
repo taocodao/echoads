@@ -1,24 +1,22 @@
 // autopilot.js — Cursor animation + audio + 15-step orchestration
 
 // ── Vercel Blob Audio URLs ─────────────────────────────────
-// After uploading to Vercel Blob, paste public URLs here.
-// Leave as null to use Web Speech API fallback.
 var AUDIO = {
-  s01: null,
-  s02: null,
-  s03: null,
-  s04: null,
-  s05: null,
-  s06: null,
-  s07: null,
-  s08: null,
-  s09: null,
-  s10: null,
-  s11: null,
-  s12: null,
-  s13: null,
-  s14: null,
-  s15: null
+  s01: "/demo/audio/s01.mp3",
+  s02: "/demo/audio/s02.mp3",
+  s03: "/demo/audio/s03.mp3",
+  s04: "/demo/audio/s04.mp3",
+  s05: "/demo/audio/s05.mp3",
+  s06: "/demo/audio/s06.mp3",
+  s07: "/demo/audio/s07.mp3",
+  s08: "/demo/audio/s08.mp3",
+  s09: "/demo/audio/s09.mp3",
+  s10: "/demo/audio/s10.mp3",
+  s11: "/demo/audio/s11.mp3",
+  s12: "/demo/audio/s12.mp3",
+  s13: "/demo/audio/s13.mp3",
+  s14: "/demo/audio/s14.mp3",
+  s15: "/demo/audio/s15.mp3"
 };
 
 // ── Voice transcripts ──────────────────────────────────────
