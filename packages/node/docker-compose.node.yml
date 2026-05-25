@@ -3,7 +3,7 @@ services:
   # Serves media tracks over QUIC/WebTransport (UDP 4443)
   # Built from kixelated/moq-rs during EC2 setup
   moq-relay:
-    image: kixelated/moq-relay:latest
+    image: kixelated/moq-relay:0.10.14
     container_name: clarity-moq-relay
     command: >
       --listen [::]:4443
