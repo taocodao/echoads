@@ -48,7 +48,7 @@
     if ($('stat-sla')) $('stat-sla').textContent = '100%';
 
     // Node tab
-    if ($('node-cmxs')) $('node-cmxs').textContent = (impressionCount * 0.001).toFixed(3);
+    if ($('node-cmxs')) $('node-cmxs').textContent = (impressionCount * 0.01).toFixed(3);
     if ($('node-sla')) $('node-sla').textContent = '100%';
     if ($('node-del')) $('node-del').textContent = impressionCount;
 
