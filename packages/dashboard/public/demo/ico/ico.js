@@ -267,21 +267,19 @@ function narrationSpeak(text) {
 function playNarration(key) {
   var url = NARRATION_AUDIO[key];
   var text = NARRATION_TRANSCRIPTS[key] || '';
-  var bar = document.getElementById('narration-bar');
   var barText = document.getElementById('narration-bar-text');
   if (barText) barText.textContent = text;
 
-  if (url) {
-    return new Promise(function (resolve) {
-      narrationAudio = new Audio(url);
-      narrationAudio.onended = function () { narrationAudio = null; resolve(); };
-      narrationAudio.onerror = function () { narrationAudio = null; narrationSpeak(text).then(resolve); };
-      narrationAudio.play().catch(function () { narrationSpeak(text).then(resolve); });
-    });
-  } else {
-    return narrationSpeak(text);
-  }
+  return new Promise(function (resolve) {
+    if (!url) { resolve(); return; }
+    narrationAudio = new Audio(url);
+    narrationAudio.onended = function () { narrationAudio = null; resolve(); };
+    // On error (404 or format issue), skip silently — do NOT fall back to TTS
+    narrationAudio.onerror = function () { narrationAudio = null; resolve(); };
+    narrationAudio.play().catch(function () { resolve(); });
+  });
 }
+
 
 function stopNarration() {
   narrationAbort = true;
