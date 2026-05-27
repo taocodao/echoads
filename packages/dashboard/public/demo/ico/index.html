@@ -4,61 +4,92 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CMXS Token — ICO Investor Demo | DePIN Verified Delivery Network</title>
-<meta name="description" content="CMXS DePIN token ICO — 5,800 pre-existing tower nodes, Burn-and-Mint tokenomics, $100M FDV, Base L2. The first DePIN with pre-built infrastructure.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="description" content="CMXS is the first DePIN to launch with pre-existing physical infrastructure. Initial FDV: $100M. Total raise target: $18M–$33M. Interactive investor presentation.">
 <link rel="stylesheet" href="/demo/styles.css">
 <link rel="stylesheet" href="/demo/ico/ico.css">
+<!-- Preconnect for performance -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="ico-dark">
 
 <canvas id="particle-canvas"></canvas>
 
-<header class="demo-header">
-  <div class="demo-logo">
-    <div class="demo-logo-icon" style="background:linear-gradient(135deg,#00e87a,#00aaff)">C</div>
-    <h1>CMXS<span>Token</span></h1>
+<!-- Top Navigation -->
+<nav class="ico-nav">
+  <div class="ico-nav-logo">
+    <div class="ico-nav-icon">C</div>
+    <div class="ico-nav-text">CMXSToken</div>
   </div>
-  <div class="demo-header-right" style="display:flex;align-items:center;gap:12px">
-    <span class="live-badge"><span class="infra-dot"></span>Base Sepolia Live</span>
-    <button id="narrate-btn" class="btn-ico narrate">&#9654; Narrated Tour</button>
-    <a href="/demo/" class="btn-ico secondary" style="font-size:12px;padding:8px 14px">← Demo Hub</a>
+  <div class="ico-nav-links">
+    <a href="#sec-blockchain">White Paper</a>
+    <a href="#sec-pod">Technology</a>
+    <a href="#sec-tokenomics">Token</a>
+    <a href="#sec-ico">ICO</a>
   </div>
-</header>
+  <div class="ico-nav-right">
+    <span class="live-badge"><span class="infra-dot" style="background:#00e87a;box-shadow:0 0 8px #00e87a"></span> Base Sepolia Live</span>
+    <a href="/demo/" class="btn-ico outline" style="margin-right:12px;padding:6px 14px;border-radius:20px;font-size:12px">← Demo Hub</a>
+    <button class="btn-ico primary" style="padding:6px 16px;border-radius:20px;font-size:12px">Connect Wallet</button>
+  </div>
+</nav>
 
-<div id="sec-hero"       class="ico-section hero-section"></div>
-<div id="sec-problem"    class="ico-section"></div>
-<div id="sec-arch"       class="ico-section"></div>
-<div id="sec-tokenomics" class="ico-section"></div>
-<div id="sec-bme"        class="ico-section"></div>
-<div id="sec-ico"        class="ico-section"></div>
-<div id="sec-proj"       class="ico-section"></div>
-<div id="sec-roadmap"    class="ico-section"></div>
-<div id="sec-contracts"  class="ico-section"></div>
-
+<!-- Narration Progress Bar -->
 <div class="narration-bar" id="narration-bar">
-  <div class="narration-bar-step" id="narration-bar-step">Scene 1 of 10</div>
-  <div class="narration-bar-text" id="narration-bar-text"></div>
-  <div class="narration-bar-progress">
-    <div class="narration-bar-fill" id="narration-bar-fill" style="width:0%"></div>
+  <div class="narration-bar-content">
+    <div class="narration-bar-icon">🔊</div>
+    <div class="narration-bar-text" id="narration-bar-text">Preparing narration...</div>
+    <div class="narration-bar-step" id="narration-bar-step">Scene 1 of 10</div>
   </div>
-  <button onclick="stopNarration()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px">Stop</button>
+  <div class="narration-bar-track"><div class="narration-bar-fill" id="narration-bar-fill"></div></div>
 </div>
 
-<div id="donut-tooltip" class="donut-tooltip" style="position:fixed"></div>
+<!-- Main Content Area with 9 Sections -->
+<main class="ico-main">
+  <!-- 1. Hero -->
+  <div id="sec-hero" class="ico-section hero-section"></div>
+  
+  <!-- 2. How the Blockchain Works -->
+  <div id="sec-blockchain" class="ico-section"></div>
+  
+  <!-- 3. Proof-of-Delivery -->
+  <div id="sec-pod" class="ico-section"></div>
+  
+  <!-- 4. Four-Stage Raise Funnel -->
+  <div id="sec-ico" class="ico-section"></div>
+  
+  <!-- 5. Token Allocation + Stats -->
+  <div id="sec-tokenomics" class="ico-section"></div>
+  
+  <!-- 6. Staking Architecture -->
+  <div id="sec-staking" class="ico-section"></div>
+  
+  <!-- 7. Vesting Timeline -->
+  <div id="sec-vesting" class="ico-section"></div>
+  
+  <!-- 8. Regulatory Compliance Badges -->
+  <div id="sec-regulatory" class="ico-section"></div>
+  
+  <!-- 9. Legal Disclaimer -->
+  <div id="sec-legal" class="ico-section"></div>
+</main>
 
-<!-- Section renderers — each file ~150-200 lines -->
+<!-- Tooltip for Donut Chart -->
+<div id="donut-tooltip" class="donut-tooltip"></div>
+
+<!-- Scripts - Loaded sequentially to prevent race conditions -->
 <script src="/demo/ico/s-hero.js"></script>
-<script src="/demo/ico/s-problem.js"></script>
-<script src="/demo/ico/s-arch.js"></script>
-<script src="/demo/ico/s-tokenomics.js"></script>
-<script src="/demo/ico/s-bme.js"></script>
+<script src="/demo/ico/s-blockchain.js"></script>
+<script src="/demo/ico/s-pod.js"></script>
 <script src="/demo/ico/s-ico.js"></script>
-<script src="/demo/ico/s-proj.js"></script>
-<script src="/demo/ico/s-roadmap.js"></script>
+<script src="/demo/ico/s-tokenomics.js"></script>
+<script src="/demo/ico/s-staking.js"></script>
+<script src="/demo/ico/s-vesting.js"></script>
+<script src="/demo/ico/s-regulatory.js"></script>
 <script src="/demo/ico/s-contracts.js"></script>
-
-<!-- Core logic -->
+<!-- Master animation controller -->
 <script src="/demo/ico/ico.js"></script>
+
 </body>
 </html>
