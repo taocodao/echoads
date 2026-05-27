@@ -210,7 +210,7 @@ function initBME() {
     if (arrows[idx]) arrows[idx].classList.add('active');
     idx = (idx + 1) % nodes.length;
   }, 1200);
-})();
+}
 
 // ── Narration Controller ────────────────────────────────
 var NARRATION_AUDIO = {
@@ -340,6 +340,18 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  // Init donut chart and BME flywheel (called here because ico.js loads after section scripts)
+  initDonut();
+  initBME();
+
+  // Force-show any sections already in viewport (IntersectionObserver fires async)
+  document.querySelectorAll('.ico-section').forEach(function(s) {
+    var rect = s.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      s.classList.add('visible');
+    }
+  });
 
   // TTS voices preload
   if (window.speechSynthesis) {
