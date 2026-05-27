@@ -1,5 +1,14 @@
 // ico.js — Animations, interactions, counters, donut chart, narration v2
 
+// ── Inject Sections ─────────────────────────────────────
+(function injectSections() {
+  if (!window.Sections) return;
+  Object.keys(window.Sections).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = window.Sections[id];
+  });
+})();
+
 // ── Particle Network Background ─────────────────────────
 (function initParticles() {
   var c = document.getElementById('particle-canvas');
