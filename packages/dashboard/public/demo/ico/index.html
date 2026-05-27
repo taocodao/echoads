@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CMXS Token — ICO Investor Demo | DePIN Verified Delivery Network</title>
+<meta name="description" content="CMXS DePIN token ICO — 5,800 pre-existing tower nodes, Burn-and-Mint tokenomics, $100M FDV, Base L2. The first DePIN with pre-built infrastructure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo/styles.css">
+<link rel="stylesheet" href="/demo/ico/ico.css">
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<header class="demo-header">
+  <div class="demo-logo">
+    <div class="demo-logo-icon" style="background:linear-gradient(135deg,#00e87a,#00aaff)">C</div>
+    <h1>CMXS<span>Token</span></h1>
+  </div>
+  <div class="demo-header-right" style="display:flex;align-items:center;gap:12px">
+    <span class="live-badge"><span class="infra-dot"></span>Base Sepolia Live</span>
+    <button id="narrate-btn" class="btn-ico narrate">&#9654; Narrated Tour</button>
+    <a href="/demo/" class="btn-ico secondary" style="font-size:12px;padding:8px 14px">← Demo Hub</a>
+  </div>
+</header>
+
+<div id="sec-hero"       class="ico-section hero-section"></div>
+<div id="sec-problem"    class="ico-section"></div>
+<div id="sec-arch"       class="ico-section"></div>
+<div id="sec-tokenomics" class="ico-section"></div>
+<div id="sec-bme"        class="ico-section"></div>
+<div id="sec-ico"        class="ico-section"></div>
+<div id="sec-proj"       class="ico-section"></div>
+<div id="sec-roadmap"    class="ico-section"></div>
+<div id="sec-contracts"  class="ico-section"></div>
+
+<div class="narration-bar" id="narration-bar">
+  <div class="narration-bar-step" id="narration-bar-step">Scene 1 of 10</div>
+  <div class="narration-bar-text" id="narration-bar-text"></div>
+  <div class="narration-bar-progress">
+    <div class="narration-bar-fill" id="narration-bar-fill" style="width:0%"></div>
+  </div>
+  <button onclick="stopNarration()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px">Stop</button>
+</div>
+
+<div id="donut-tooltip" class="donut-tooltip" style="position:fixed"></div>
+
+<!-- Section renderers — each file ~150-200 lines -->
+<script src="/demo/ico/s-hero.js"></script>
+<script src="/demo/ico/s-problem.js"></script>
+<script src="/demo/ico/s-arch.js"></script>
+<script src="/demo/ico/s-tokenomics.js"></script>
+<script src="/demo/ico/s-bme.js"></script>
+<script src="/demo/ico/s-ico.js"></script>
+<script src="/demo/ico/s-proj.js"></script>
+<script src="/demo/ico/s-roadmap.js"></script>
+<script src="/demo/ico/s-contracts.js"></script>
+
+<!-- Core logic -->
+<script src="/demo/ico/ico.js"></script>
+</body>
+</html>
