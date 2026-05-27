@@ -33,9 +33,9 @@ window.Sections.tokenomics = function() { return `
   </div>
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-tokenomics');
   if (el) { el.innerHTML = window.Sections.tokenomics(); }
   // Init donut after render (ico.js initDonut reads #donut-svg)
   if (typeof initDonut === 'function') initDonut();
-});
+})();

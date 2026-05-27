@@ -78,7 +78,7 @@ window.Sections.arch = function() { return `
   <span>🔗 <strong style="color:var(--text)">EIP-4337</strong> — AI agents transact autonomously</span>
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-arch');
   if (el) el.innerHTML = window.Sections.arch();
-});
+})();

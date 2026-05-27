@@ -83,7 +83,7 @@ window.Sections.proj = function() { return `
   ⚠ <strong style="color:var(--amber)">Forward-looking statements.</strong> Financial projections are estimates only. Past DePIN performance does not guarantee future results. Token value may decrease to zero. All participants must consult independent legal, financial, and tax counsel.
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-proj');
   if (el) el.innerHTML = window.Sections.proj();
-});
+})();

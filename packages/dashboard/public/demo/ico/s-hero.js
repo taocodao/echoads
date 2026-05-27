@@ -32,7 +32,7 @@ window.Sections.hero = function() { return `
   Phase 0 Complete · AWS Relay Live · Base Sepolia Deployed · Benchmark: 287ms P50, 312ms P95
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-hero');
   if (el) el.innerHTML = window.Sections.hero();
-});
+})();

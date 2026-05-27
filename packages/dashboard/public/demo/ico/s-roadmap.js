@@ -42,7 +42,7 @@ window.Sections.roadmap = function() { return `
   <strong style="color:var(--text)">ICO Timeline:</strong> Angel close M2 → Seed opens M3 → IEO M6 → TGE/Public IDO M7 → Phase 1 nodes M8 → Governance launch M12
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-roadmap');
   if (el) el.innerHTML = window.Sections.roadmap();
-});
+})();

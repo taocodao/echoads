@@ -69,7 +69,7 @@ window.Sections.ico = function() { return `
   </div>
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-ico');
   if (el) el.innerHTML = window.Sections.ico();
-});
+})();

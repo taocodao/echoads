@@ -54,10 +54,10 @@ window.Sections.bme = function() { return `
   </div>
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-bme');
   if (el) {
     el.innerHTML = window.Sections.bme();
     if (typeof initBME === 'function') initBME();
   }
-});
+})();

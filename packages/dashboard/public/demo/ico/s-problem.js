@@ -70,7 +70,7 @@ window.Sections.problem = function() { return `
   </div>
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-problem');
   if (el) el.innerHTML = window.Sections.problem();
-});
+})();

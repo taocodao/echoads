@@ -64,7 +64,7 @@ window.Sections.contracts = function() { return `
   White Paper Version 2.0 · May 2026 · Base Sepolia Chain ID 84532
 </div>
 `; };
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   var el = document.getElementById('sec-contracts');
   if (el) el.innerHTML = window.Sections.contracts();
-});
+})();
