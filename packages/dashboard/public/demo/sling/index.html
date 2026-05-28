@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EchoAds — Sling Freestream Pipeline</title>
+<meta name="description" content="End-to-end narrated walkthrough of the CMXS ad delivery pipeline.">
+<link rel="stylesheet" href="/demo/styles.css">
+<link rel="stylesheet" href="/demo/sling/sling.css">
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="demo-logo">
+    <div class="demo-logo-icon">E</div>
+    <h1>Echo<span>Ads</span> <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:8px">Sling Pipeline Demo</span></h1>
+  </div>
+  <div class="demo-header-right">
+    <a href="/demo/" class="btn-back">← Hub</a>
+    <span id="pres-step-label" class="demo-step-label">Ready</span>
+    <button id="pres-ctrl-btn" class="btn-primary">▶ Start Demo</button>
+  </div>
+</header>
+<div class="progress-wrap"><div class="progress-bar" id="pres-progress"></div></div>
+
+<!-- Two-column layout -->
+<div class="pres-layout">
+
+  <!-- Stage (left) -->
+  <div class="pres-stage" id="pres-stage">
+
+    <!-- Scene badge -->
+    <div class="scene-strip">
+      <span class="scene-badge" id="pres-scene-badge">Click Start Demo to begin</span>
+    </div>
+
+    <!-- Browser chrome wrapping scene content -->
+    <div class="browser-chrome">
+      <div class="browser-bar">
+        <div class="browser-dots">
+          <span style="background:#ff5f57"></span>
+          <span style="background:#febc2e"></span>
+          <span style="background:#28c840"></span>
+        </div>
+        <div class="browser-url">
+          <span id="browser-url-text">https://echoads.tv/sling</span>
+        </div>
+        <div style="width:55px"></div>
+      </div>
+
+      <!-- Scene injection area -->
+      <div id="slide-area" style="min-height: 480px;"></div>
+
+    </div><!-- /browser-chrome -->
+
+  </div><!-- /pres-stage -->
+
+  <!-- Sidebar (right) -->
+  <div class="pres-sidebar">
+
+    <div class="sidebar-section">
+      <h3>Node Status</h3>
+      <div class="infra-list">
+        <div class="infra-row"><span>MOQ Relay</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span>Base L2 Node</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span>PoD Oracle</span><span class="infra-dot"></span></div>
+        <div class="infra-row"><span>OpenRTB Exchange</span><span class="infra-dot"></span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1;display:flex;flex-direction:column">
+      <h3>Presenter Narration</h3>
+      <div class="narration-box" style="flex:1">
+        <div class="narration-text" id="narration-text">Click Start Demo to begin the 8-scene guided walkthrough with voice narration.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Timeline (8 Scenes)</h3>
+      <div class="timeline-list" id="timeline-list"></div>
+    </div>
+
+  </div><!-- /pres-sidebar -->
+
+</div><!-- /pres-layout -->
+
+<script src="/demo/shared/app.js"></script>
+<script src="/demo/sling/scenes/sc-problem.js"></script>
+<script src="/demo/sling/scenes/sc-pipeline.js"></script>
+<script src="/demo/sling/scenes/sc-scte35.js"></script>
+<script src="/demo/sling/scenes/sc-auction.js"></script>
+<script src="/demo/sling/scenes/sc-delivery.js"></script>
+<script src="/demo/sling/scenes/sc-proof.js"></script>
+<script src="/demo/sling/scenes/sc-dashboard.js"></script>
+<script src="/demo/sling/scenes/sc-scale.js"></script>
+<script src="/demo/sling/sling.js"></script>
+
+</body>
+</html>
