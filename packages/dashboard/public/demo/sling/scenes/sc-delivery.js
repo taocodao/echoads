@@ -3,8 +3,8 @@ window.SlingScenes['sc-delivery'] = function() {
   // Logic is triggered from sling.js runStep via EchoApp
   
   return `
-    <div class="sling-scene" style="padding:24px;">
-      <div class="scene-strip" style="margin-bottom:18px">
+    <div class="sling-scene">
+      <div class="scene-strip" style="margin-bottom:18px;display:flex;align-items:center;gap:10px;">
         <span class="scene-badge">Phase 5</span>
         <span class="scene-title">MoQ Delivery</span>
       </div>

@@ -24,8 +24,8 @@ window.SlingScenes['sc-proof'] = function() {
   }, 10);
   
   return `
-    <div class="sling-scene" style="padding:24px;">
-      <div class="scene-strip" style="margin-bottom:18px">
+    <div class="sling-scene">
+      <div class="scene-strip" style="margin-bottom:18px;display:flex;align-items:center;gap:10px;">
         <span class="scene-badge">Phase 6</span>
         <span class="scene-title">On-Chain Proof</span>
       </div>

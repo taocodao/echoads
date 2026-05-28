@@ -72,8 +72,8 @@ window.SlingScenes['sc-auction'] = function() {
   }, 10);
   
   return `
-    <div class="sling-scene" style="padding:24px;">
-      <div class="scene-strip" style="margin-bottom:18px">
+    <div class="sling-scene">
+      <div class="scene-strip" style="margin-bottom:18px;display:flex;align-items:center;gap:10px;">
         <span class="scene-badge">Phase 4</span>
         <span class="scene-title">Real-Time Auction</span>
       </div>

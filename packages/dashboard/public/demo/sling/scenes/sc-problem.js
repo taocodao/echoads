@@ -5,8 +5,8 @@ window.SlingScenes['sc-problem'] = function() {
   }, 10);
   
   return `
-    <div class="sling-scene" style="padding:24px;">
-      <div class="scene-strip" style="margin-bottom:18px">
+    <div class="sling-scene">
+      <div class="scene-strip" style="margin-bottom:18px;display:flex;align-items:center;gap:10px;">
         <span class="scene-badge">Phase 1</span>
         <span class="scene-title">The Problem</span>
       </div>
