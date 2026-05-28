@@ -149,18 +149,110 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// ── PoD Flow Auto-Cycle ─────────────────────────────────
+// ── PoD Flow — Audio-Cued + Auto-Cycle ─────────────────
+//
+// Cue times (seconds into n03.mp3) — measured from actual audio (75.8s total)
+//
+//  42.3 s  → step 1 REQUEST        "A viewer's device requests content"
+//  46.4 s  → step 2 DELIVERY       "The nearest CMXS node delivers it over QUIC"
+//  49.9 s  → step 3 RECEIPT        "The viewer's device automatically signs"
+//  55.2 s  → step 4 PAYMENT        "The service buyer's wallet sends a micro-payment"
+//  58.7 s  → step 5 VERIFICATION   "The Delivery Oracle smart contract verifies"
+//  64.2 s  → step 6 REWARD         "it automatically mints zero point zero zero one CMXS"
+//  71.9 s  → step 7 PERMANENT PROOF "An immutable proof record is written to Base"
+//
+var POD_CUES = [42.3, 46.4, 49.9, 55.2, 58.7, 64.2, 71.9];
+
 function initPodFlow() {
   var steps = document.querySelectorAll('.pod-step');
   if (steps.length === 0) return;
+
   var currentStep = 0;
-  
-  // Initial reveal based on scroll is handled by CSS mostly, but we can cycle active class
-  setInterval(function() {
+  var autoCycleTimer = null;
+  var audioCueActive = false;
+
+  // Activate a specific step index
+  function activateStep(idx) {
     steps.forEach(function(s) { s.classList.remove('active'); });
-    steps[currentStep].classList.add('active');
-    currentStep = (currentStep + 1) % steps.length;
-  }, 2000);
+    steps[idx].classList.add('active');
+
+    // Scroll the active step into view inside its container gently
+    var container = steps[idx].closest('.pod-flow-container');
+    if (container) {
+      var stepRect = steps[idx].getBoundingClientRect();
+      var containerRect = container.getBoundingClientRect();
+      // Only nudge if it is out of the visible container window
+      if (stepRect.top < containerRect.top || stepRect.bottom > containerRect.bottom) {
+        steps[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }
+
+  // Auto-cycle fallback: cycles through all steps, dwelling 3s each
+  function startAutoCycle() {
+    if (autoCycleTimer) return;
+    activateStep(currentStep);
+    autoCycleTimer = setInterval(function() {
+      currentStep = (currentStep + 1) % steps.length;
+      activateStep(currentStep);
+    }, 3000);
+  }
+
+  function stopAutoCycle() {
+    if (autoCycleTimer) { clearInterval(autoCycleTimer); autoCycleTimer = null; }
+  }
+
+  // Audio-cue handler: drives steps from n03 timeupdate events
+  function onAudioTimeUpdate() {
+    var audio = narrationAudio;
+    if (!audio) return;
+    var t = audio.currentTime;
+
+    // Work out which cue slot we are in
+    var activeIdx = -1;
+    for (var i = POD_CUES.length - 1; i >= 0; i--) {
+      if (t >= POD_CUES[i]) { activeIdx = i; break; }
+    }
+    if (activeIdx >= 0) {
+      steps.forEach(function(s) { s.classList.remove('active'); });
+      steps[activeIdx].classList.add('active');
+    }
+  }
+
+  // Hook into the narration system: whenever n03 starts playing,
+  // switch to audio-cue mode; when it ends/stops, resume auto-cycle.
+  var originalPlayNarration = window._origPlayNarration || playNarration;
+
+  // We patch the global narrationAudio pointer by polling —
+  // when an audio object exists and its src ends in 'n03', attach our listener.
+  var lastAudioSrc = null;
+  setInterval(function() {
+    var audio = narrationAudio;
+    if (audio && audio.src && audio.src.indexOf('n03') !== -1) {
+      if (lastAudioSrc !== audio.src) {
+        lastAudioSrc = audio.src;
+        audioCueActive = true;
+        stopAutoCycle();
+        audio.addEventListener('timeupdate', onAudioTimeUpdate);
+        audio.addEventListener('ended', function onEnd() {
+          audioCueActive = false;
+          lastAudioSrc = null;
+          audio.removeEventListener('timeupdate', onAudioTimeUpdate);
+          audio.removeEventListener('ended', onEnd);
+          // Reset all to inactive, then resume cycle
+          steps.forEach(function(s) { s.classList.remove('active'); });
+          currentStep = 0;
+          startAutoCycle();
+        });
+      }
+    } else if (!audioCueActive) {
+      // Narration not playing n03 — ensure auto-cycle is running
+      if (!autoCycleTimer) startAutoCycle();
+    }
+  }, 300);
+
+  // Kick off auto-cycle immediately
+  startAutoCycle();
 }
 
 // ── Legal Collapsible ───────────────────────────────────

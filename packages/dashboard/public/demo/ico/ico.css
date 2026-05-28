@@ -152,23 +152,46 @@ h2 { font-size: 36px; letter-spacing: -1px; }
 
 /* ── Proof-of-Delivery ── */
 .pod-flow-container { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; }
-.pod-flow { position: relative; padding-left: 30px; }
-.pod-line { position: absolute; left: 14px; top: 20px; bottom: 20px; width: 2px; background: var(--border); }
-.pod-step { position: relative; margin-bottom: 32px; opacity: 0.3; transition: all 0.4s; }
+.pod-flow { position: relative; padding-left: 52px; }
+.pod-line {
+  position: absolute; left: 18px; top: 36px; bottom: 20px; width: 2px;
+  background: linear-gradient(to bottom, var(--border), transparent);
+}
+.pod-step { position: relative; margin-bottom: 36px; opacity: 0.25; transition: all 0.4s ease; }
 .pod-step:last-child { margin-bottom: 0; }
-.pod-step.active { opacity: 1; transform: translateX(5px); }
+.pod-step.active { opacity: 1; }
 .pod-step-num {
-  position: absolute; left: -42px; top: 0; width: 28px; height: 28px; border-radius: 50%;
-  background: var(--surface); border: 2px solid var(--border); color: var(--muted);
-  display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--mono);
+  position: absolute; left: -52px; top: 0;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(15,23,42,0.9); border: 2px solid var(--border);
+  color: var(--muted); font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-family: var(--mono);
   z-index: 2; transition: all 0.4s;
 }
-.pod-step.active .pod-step-num { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 15px rgba(6,182,212,.4); }
-.pod-step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.pod-step-header h4 { font-size: 18px; color: var(--text); margin: 0; }
-.pod-badge { font-size: 11px; font-family: var(--mono); background: rgba(255,255,255,.05); padding: 2px 8px; border-radius: 4px; color: var(--muted); }
-.pod-step.active .pod-badge { background: rgba(6,182,212,.1); color: var(--cyan); }
-.pod-step-content p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 700px; }
+.pod-step.active .pod-step-num {
+  border-color: var(--cyan); color: var(--cyan);
+  background: rgba(6,182,212,.12);
+  box-shadow: 0 0 0 4px rgba(6,182,212,.08), 0 0 18px rgba(6,182,212,.35);
+}
+.pod-step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.pod-step-header h4 {
+  font-size: 13px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted); margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+.pod-step.active .pod-step-header h4 { color: var(--text); }
+.pod-badge {
+  font-size: 10px; font-family: var(--mono); font-weight: 600;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  padding: 2px 8px; border-radius: 20px; color: var(--muted);
+  letter-spacing: 0.3px; white-space: nowrap;
+}
+.pod-step.active .pod-badge {
+  background: rgba(20,184,166,.12); border-color: rgba(20,184,166,.3);
+  color: var(--teal);
+}
+.pod-step-content p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 680px; }
 
 .pod-table { width: 100%; border-collapse: collapse; text-align: left; }
 .pod-table th, .pod-table td { padding: 16px; border-bottom: 1px solid var(--border); }
