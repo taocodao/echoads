@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { auctionRouter } from "./auction/auction.route.js";
 import { slaRouter } from "./sla/sla.route.js";
 import { deliveryRouter } from "./delivery/delivery.route.js";
+import { commerceRouter } from "./commerce/commerce.route.js";
 
 const app = new Hono();
 
@@ -33,5 +34,6 @@ app.get("/health", (c) =>
 app.route("/api/auction", auctionRouter);
 app.route("/api/sla", slaRouter);
 app.route("/api/delivery", deliveryRouter);
+app.route("/api/commerce", commerceRouter);
 
 export default app;

@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: clarity
+      POSTGRES_PASSWORD: clarity
+      POSTGRES_DB: echoads
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clarity -d echoads"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  relay-node-1:
+    image: kixelated/moq-relay:latest
+    command: ["--listen", "[::]:4431", "--tls-cert", "/certs/cert.pem", "--tls-key", "/certs/key.pem", "--auth-public", ""]
+    ports:
+      - "4431:4431/udp"
+    volumes:
+      - ./certs:/certs:ro
+
+  relay-node-2:
+    image: kixelated/moq-relay:latest
+    command: ["--listen", "[::]:4432", "--tls-cert", "/certs/cert.pem", "--tls-key", "/certs/key.pem", "--auth-public", ""]
+    ports:
+      - "4432:4432/udp"
+    volumes:
+      - ./certs:/certs:ro
+
+  api:
+    build:
+      context: ../packages/api
+      dockerfile: Dockerfile.dev
+    environment:
+      - DATABASE_URL=postgresql://clarity:clarity@postgres:5432/echoads
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: ../packages/dashboard
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

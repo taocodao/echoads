@@ -5,6 +5,8 @@ import { wrapFetch } from "@x402/fetch";
 import { evm } from "@x402/evm";
 import { SLA_LATENCY_THRESHOLD_MS, MOQ_NAMESPACE, MOQ_CONTENT_TRACK } from "@clarity/shared";
 import type { AdReceipt } from "@clarity/shared";
+import { PoDClient } from "../pod/PoDClient.js";
+import { toHex, padHex } from "viem";
 
 const API_BASE = import.meta.env["VITE_API_URL"] ?? "http://localhost:3001";
 
@@ -16,26 +18,13 @@ interface AdManagerConfig {
   onLatencyMeasured?: (latencyMs: number, slaMet: boolean) => void;
 }
 
-/**
- * ProjectClarityAdManager
- *
- * Manages the full ad break lifecycle:
- *   1. Receive ad cue
- *   2. Pay for ad slot via x402 (HTTP layer)
- *   3. Switch MOQ track (QUIC layer) — subscribe-before-unsubscribe pattern
- *   4. Measure track-switch latency
- *   5. Beacon latency back to API for SLA recording
- *   6. Return to content track after ad duration
- *
- * Uses MoqTransport interface — swap OpenSourceMoqTransport for CatonC3Transport
- * when C3 SDK is available. Zero changes to this class needed.
- */
 export class ProjectClarityAdManager {
   private transport: MoqTransport;
   private x402Fetch: typeof fetch;
   private currentSub: MoqSubscription | null = null;
   private config: AdManagerConfig;
   private onSegment: ((segment: any) => void) | null = null;
+  private podClient: PoDClient;
 
   constructor(config: AdManagerConfig) {
     this.config = config;
@@ -44,9 +33,12 @@ export class ProjectClarityAdManager {
       evm,
       wallet: config.walletClient as any,
     });
+    this.podClient = new PoDClient(
+      config.walletClient,
+      import.meta.env["VITE_ORACLE_CONTRACT_ADDRESS"] ?? "0x"
+    );
   }
 
-  /** Connect to the MOQ relay and subscribe to the content track */
   async init(): Promise<void> {
     await this.transport.connect(this.config.relayUrl, {
       certFingerprint: this.config.certFingerprint as string | undefined,
@@ -56,7 +48,6 @@ export class ProjectClarityAdManager {
     console.log("[AdManager] Connected. Streaming content via MOQ/QUIC.");
   }
 
-  /** Register a callback to receive MOQ video segments for rendering */
   onVideoSegment(callback: (segment: any) => void): void {
     this.onSegment = callback;
     this._startSegmentLoop();
@@ -69,19 +60,11 @@ export class ProjectClarityAdManager {
     }
   }
 
-  /**
-   * Trigger an ad break:
-   * 1. Pay for the slot via x402 → get adTrackName
-   * 2. Switch MOQ track (measure latency)
-   * 3. Return to content after ad duration
-   */
   async triggerAdBreak(slotId: string): Promise<AdReceipt | null> {
     console.log(`[AdManager] Ad break triggered: ${slotId}`);
     const t0 = performance.now();
 
     try {
-      // Step 1: HTTP auction with automatic x402 payment
-      // @x402/fetch handles: initial GET → 402 response → sign → retry → 200
       const response = await this.x402Fetch(
         `${API_BASE}/api/auction/${slotId}?channel=${MOQ_NAMESPACE}`
       );
@@ -97,14 +80,13 @@ export class ProjectClarityAdManager {
         adTrackName: string;
         durationMs: number;
         txHash?: string;
+        clearPrice?: number;
       };
 
-      // Step 2: Switch to ad track (measure switch latency)
       const switchStart = performance.now();
 
       if (!this.currentSub) throw new Error("No active subscription");
 
-      // Subscribe-before-unsubscribe: overlap eliminates black frames
       const adSub = await this.transport.switchTrack(
         this.currentSub,
         data.adNamespace,
@@ -119,9 +101,22 @@ export class ProjectClarityAdManager {
         `[AdManager] Track switch: ${switchLatencyMs.toFixed(1)}ms (SLA: ${slaMet ? "✅ MET" : "❌ MISSED"})`
       );
 
-      // Step 3: Beacon latency back to API
       if (data.txHash) {
         void this._beaconLatency(data.txHash, switchLatencyMs);
+      }
+
+      // Submit PoD on-chain
+      if (data.txHash && data.clearPrice) {
+        try {
+          const cpmWei = BigInt(Math.floor(data.clearPrice * 100)); 
+          const impressionId = padHex(toHex(slotId), { size: 32 });
+          const nodeAddr = (import.meta.env["VITE_NODE_ADDRESS"] ?? "0x0000000000000000000000000000000000000000") as `0x${string}`;
+
+          const podResult = await this.podClient.submitProofOfDelivery(impressionId, nodeAddr, cpmWei);
+          console.log(`[AdManager] PoD submitted on-chain: ${podResult.basescanUrl}`);
+        } catch (err) {
+          console.error("[AdManager] PoD submission failed:", err);
+        }
       }
 
       const receipt: AdReceipt = {
@@ -137,7 +132,6 @@ export class ProjectClarityAdManager {
       this.config.onAdReceipt?.(receipt);
       this.config.onLatencyMeasured?.(switchLatencyMs, slaMet);
 
-      // Step 4: Return to content after ad duration
       setTimeout(() => void this._returnToContent(), data.durationMs);
 
       return receipt;

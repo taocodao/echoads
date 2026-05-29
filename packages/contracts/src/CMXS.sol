@@ -2,121 +2,67 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-/**
- * @title CMXS — CometX Streaming Token
- * @notice ERC-20 reward token for SlingDePIN node operators.
- *         Nodes earn CMXS for each verified ad delivery that meets the 500ms SLA.
- * @dev 35% of supply is held in this contract as the node rewards pool.
- *      Only the designated oracle contract can call rewardNode().
- */
-contract CMXS is ERC20, Ownable {
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
+contract CMXS is ERC20, AccessControl {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
-    /// @notice Maximum total supply: 1 billion CMXS
-    uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** 18;
+    uint256 public constant MAX_SUPPLY = 1_000_000_000 * 1e18;
+    uint256 public constant DAILY_MINT_CAP = 2_880_000 * 1e18;
+    uint256 public constant POD_REWARD = 0.001 * 1e18; // 1e15
 
-    /// @notice Reward per verified delivery: 0.001 CMXS
-    uint256 public constant REWARD_PER_VERIFIED_DELIVERY = 1 * 10 ** 15;
+    uint256 public dailyMinted;
+    uint256 public lastMintDay;
+    uint256 public totalBurned;
+    uint256 public totalMinted;
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
+    event TokensMinted(address indexed node, uint256 amount, bytes32 indexed podHash);
+    event TokensBurned(address indexed advertiser, uint256 amount, uint256 usdcSpent);
 
-    /// @notice The oracle contract authorized to call rewardNode()
-    address public oracleContract;
-
-    // -------------------------------------------------------------------------
-    // Events
-    // -------------------------------------------------------------------------
-
-    event OracleUpdated(address indexed oldOracle, address indexed newOracle);
-    event NodeRewarded(address indexed node, uint256 amount, bytes32 indexed deliveryId);
-    event TokensBurned(address indexed burner, uint256 amount);
-
-    // -------------------------------------------------------------------------
-    // Errors
-    // -------------------------------------------------------------------------
-
-    error OnlyOracle();
-    error RewardPoolEmpty();
-    error ZeroAddress();
-
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
-
-    /**
-     * @param _oracle The DeliveryOracle contract address
-     * @dev 35% of MAX_SUPPLY is minted to this contract as the rewards pool.
-     *      Remaining 65% held by owner for team/ecosystem allocation.
-     */
-    constructor(address _oracle) ERC20("CometX Streaming Token", "CMXS") Ownable(msg.sender) {
-        if (_oracle == address(0)) revert ZeroAddress();
-        oracleContract = _oracle;
-
-        // Mint 35% to this contract (rewards pool)
-        _mint(address(this), (MAX_SUPPLY * 35) / 100);
-
-        // Mint 65% to owner (team, ecosystem, ICO presale allocation)
-        _mint(msg.sender, (MAX_SUPPLY * 65) / 100);
+    constructor(address treasury) ERC20("CatonMX Settlement Token", "CMXS") {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        
+        uint256 initialMint = 200_000_000 * 1e18;
+        _mint(treasury, initialMint);
+        totalMinted += initialMint;
     }
 
-    // -------------------------------------------------------------------------
-    // Oracle-only functions
-    // -------------------------------------------------------------------------
-
-    /**
-     * @notice Transfer CMXS reward to a node operator for a verified delivery.
-     * @param nodeOperator  The node's wallet address
-     * @param deliveryId    Unique delivery identifier (for event indexing)
-     * @dev Only callable by the oracleContract. Amount is fixed at REWARD_PER_VERIFIED_DELIVERY.
-     */
-    function rewardNode(address nodeOperator, bytes32 deliveryId) external {
-        if (msg.sender != oracleContract) revert OnlyOracle();
-        if (nodeOperator == address(0)) revert ZeroAddress();
-
-        uint256 poolBalance = balanceOf(address(this));
-        if (poolBalance < REWARD_PER_VERIFIED_DELIVERY) revert RewardPoolEmpty();
-
-        _transfer(address(this), nodeOperator, REWARD_PER_VERIFIED_DELIVERY);
-        emit NodeRewarded(nodeOperator, REWARD_PER_VERIFIED_DELIVERY, deliveryId);
+    function mintReward(address node, bytes32 podHash) external onlyRole(MINTER_ROLE) {
+        _enforceDailyCap(POD_REWARD);
+        require(totalMinted + POD_REWARD <= MAX_SUPPLY, "Max supply reached");
+        
+        _mint(node, POD_REWARD);
+        totalMinted += POD_REWARD;
+        emit TokensMinted(node, POD_REWARD, podHash);
     }
 
-    // -------------------------------------------------------------------------
-    // Public functions
-    // -------------------------------------------------------------------------
-
-    /**
-     * @notice Burn CMXS tokens for premium ad slot access (burn-and-mint equilibrium).
-     * @param amount  Amount to burn (in wei)
-     */
-    function burnForPremiumSlot(uint256 amount) external {
-        _burn(msg.sender, amount);
-        emit TokensBurned(msg.sender, amount);
+    function burnFromAdSpend(address advertiser, uint256 usdcAmount) external onlyRole(BURNER_ROLE) {
+        // Burn rate: 1 CMXS per $0.10 USDC (USDC has 6 decimals, CMXS has 18)
+        uint256 burnAmount = (usdcAmount * 10 * 1e18) / 1e6;
+        require(balanceOf(advertiser) >= burnAmount, "Insufficient CMXS balance");
+        
+        _burn(advertiser, burnAmount);
+        totalBurned += burnAmount;
+        emit TokensBurned(advertiser, burnAmount, usdcAmount);
     }
 
-    // -------------------------------------------------------------------------
-    // Admin functions
-    // -------------------------------------------------------------------------
-
-    /**
-     * @notice Update the oracle contract address.
-     * @dev Used when upgrading from trusted-signer oracle to Chainlink CRE.
-     */
-    function setOracleContract(address newOracle) external onlyOwner {
-        if (newOracle == address(0)) revert ZeroAddress();
-        emit OracleUpdated(oracleContract, newOracle);
-        oracleContract = newOracle;
+    function _enforceDailyCap(uint256 amount) internal {
+        uint256 today = block.timestamp / 1 days;
+        if (today > lastMintDay) {
+            dailyMinted = 0;
+            lastMintDay = today;
+        }
+        require(dailyMinted + amount <= DAILY_MINT_CAP, "Daily mint cap exceeded");
+        dailyMinted += amount;
     }
 
-    /**
-     * @notice View the current node rewards pool balance.
-     */
-    function rewardsPoolBalance() external view returns (uint256) {
-        return balanceOf(address(this));
+    function circulatingSupply() external view returns (uint256) {
+        return totalSupply();
+    }
+
+    function burnRatio() external view returns (uint256) {
+        if (totalMinted == 0) return 0;
+        return (totalBurned * 10000) / totalMinted;
     }
 }

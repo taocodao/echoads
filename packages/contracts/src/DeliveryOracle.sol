@@ -5,44 +5,39 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-interface ICMXS {
-    function rewardNode(address nodeOperator, bytes32 deliveryId) external;
+interface ICMXSToken {
+    function mintReward(address node, bytes32 podHash) external;
 }
 
-/**
- * @title DeliveryOracle — Trusted-signer proof submission oracle
- * @notice Verifies ECDSA-signed delivery proofs from the Project Clarity backend
- *         and triggers CMXS token rewards for node operators.
- *
- * @dev Phase 0: A trusted backend signing key verifies delivery proofs.
- *      Phase 1 upgrade path: call updateTrustedSigner() with the Chainlink CRE
- *      workflow contract address — zero contract rewrite required.
- *
- *      Security: proofs include block.chainid to prevent cross-chain replay.
- *      Proofs include expiry timestamps to prevent delayed replay.
- *      deliveryIds are one-time-use (nonce-like) to prevent double submission.
- */
 contract DeliveryOracle is Ownable {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
-
-    /// @notice Backend signing key (or CRE contract in Phase 1)
     address public trustedSigner;
+    ICMXSToken public cmxs;
 
-    /// @notice CMXS token contract
-    ICMXS public cmxsToken;
+    struct PoDRecord {
+        bytes32 podHash;
+        address viewer;
+        address node;
+        uint256 timestamp;
+        uint256 cpmPaid;
+        bool rewarded;
+        string txHash;
+    }
 
-    /// @notice One-time-use delivery IDs (nonce protection against double-spend)
-    mapping(bytes32 => bool) public usedDeliveryIds;
+    mapping(bytes32 => PoDRecord) public records;
+    mapping(bytes32 => bool) public usedHashes;
+    bytes32[] public allPods;
 
-    // -------------------------------------------------------------------------
-    // Events
-    // -------------------------------------------------------------------------
-
+    event ProofOfDeliveryRecorded(
+        bytes32 indexed podHash,
+        address indexed viewer,
+        address indexed node,
+        uint256 cpmPaid,
+        uint256 timestamp
+    );
+    event NodeRewarded(address indexed node, bytes32 podHash, uint256 amount);
     event DeliveryProofAccepted(
         bytes32 indexed deliveryId,
         address indexed nodeOperator,
@@ -50,45 +45,54 @@ contract DeliveryOracle is Ownable {
         uint256 latencyMs,
         uint256 timestamp
     );
-
     event TrustedSignerUpdated(address indexed oldSigner, address indexed newSigner);
-
-    // -------------------------------------------------------------------------
-    // Errors
-    // -------------------------------------------------------------------------
 
     error ProofExpired();
     error ProofAlreadyUsed();
     error InvalidSignature();
     error ZeroAddress();
 
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
-
-    /**
-     * @param _trustedSigner  Backend oracle signing key address
-     * @param _cmxsToken      CMXS token contract address
-     */
     constructor(address _trustedSigner, address _cmxsToken) Ownable(msg.sender) {
         if (_trustedSigner == address(0) || _cmxsToken == address(0)) revert ZeroAddress();
         trustedSigner = _trustedSigner;
-        cmxsToken = ICMXS(_cmxsToken);
+        cmxs = ICMXSToken(_cmxsToken);
     }
 
-    // -------------------------------------------------------------------------
-    // Core: Submit a delivery proof
-    // -------------------------------------------------------------------------
+    // New Viewer-signed PoD
+    function recordDelivery(
+        bytes32 impressionId,
+        address node,
+        uint256 cpmPaid,
+        bytes calldata viewerSig
+    ) external returns (bytes32 podHash) {
+        podHash = keccak256(abi.encodePacked(impressionId, msg.sender, block.timestamp, node));
+        if (usedHashes[podHash]) revert ProofAlreadyUsed();
 
-    /**
-     * @notice Submit a signed delivery proof and trigger CMXS node reward.
-     * @param deliveryId    Unique ID: keccak256(txHash + nodeAddr + timestamp) — computed off-chain
-     * @param nodeOperator  Address of the node operator claiming the reward
-     * @param segmentCount  Number of MOQ segments delivered in this batch
-     * @param latencyMs     Measured delivery latency (must be < 500ms for SLA)
-     * @param expiry        Unix timestamp after which this proof is invalid
-     * @param signature     ECDSA signature from trustedSigner over the above params
-     */
+        bytes32 msgHash = keccak256(abi.encodePacked(impressionId, node, cpmPaid)).toEthSignedMessageHash();
+        address signer = msgHash.recover(viewerSig);
+        if (signer != msg.sender) revert InvalidSignature();
+
+        records[podHash] = PoDRecord({
+            podHash: podHash,
+            viewer: msg.sender,
+            node: node,
+            timestamp: block.timestamp,
+            cpmPaid: cpmPaid,
+            rewarded: true,
+            txHash: ""
+        });
+        usedHashes[podHash] = true;
+        allPods.push(podHash);
+
+        cmxs.mintReward(node, podHash);
+
+        emit ProofOfDeliveryRecorded(podHash, msg.sender, node, cpmPaid, block.timestamp);
+        emit NodeRewarded(node, podHash, 0.001 ether); // 0.001 CMXS
+
+        return podHash;
+    }
+
+    // Existing Trusted Signer PoD (Legacy / Phase 0 fallback)
     function submitDeliveryProof(
         bytes32 deliveryId,
         address nodeOperator,
@@ -97,13 +101,9 @@ contract DeliveryOracle is Ownable {
         uint256 expiry,
         bytes calldata signature
     ) external {
-        // Time-bound: reject stale proofs
         if (block.timestamp > expiry) revert ProofExpired();
+        if (usedHashes[deliveryId]) revert ProofAlreadyUsed();
 
-        // Nonce: reject replayed proofs
-        if (usedDeliveryIds[deliveryId]) revert ProofAlreadyUsed();
-
-        // Verify ECDSA signature
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 deliveryId,
@@ -111,45 +111,36 @@ contract DeliveryOracle is Ownable {
                 segmentCount,
                 latencyMs,
                 expiry,
-                block.chainid // cross-chain replay protection
+                block.chainid
             )
         );
 
         address recovered = messageHash.toEthSignedMessageHash().recover(signature);
         if (recovered != trustedSigner) revert InvalidSignature();
 
-        // Mark deliveryId as used
-        usedDeliveryIds[deliveryId] = true;
+        usedHashes[deliveryId] = true;
 
-        // Emit proof event (indexed for advertiser dashboard queries)
         emit DeliveryProofAccepted(deliveryId, nodeOperator, segmentCount, latencyMs, block.timestamp);
 
-        // Trigger CMXS reward (only if latency SLA met — oracle backend enforces this
-        // before signing, contract trusts the signature for gas efficiency in Phase 0)
-        cmxsToken.rewardNode(nodeOperator, deliveryId);
+        cmxs.mintReward(nodeOperator, deliveryId);
     }
 
-    // -------------------------------------------------------------------------
-    // Admin: Upgrade path
-    // -------------------------------------------------------------------------
-
-    /**
-     * @notice Update the trusted signer.
-     * @dev Phase 1 upgrade: set newSigner = Chainlink CRE workflow contract.
-     *      The CRE contract must implement the same signing scheme,
-     *      or this contract can be extended to support a CRE callback interface.
-     */
     function updateTrustedSigner(address newSigner) external onlyOwner {
         if (newSigner == address(0)) revert ZeroAddress();
         emit TrustedSignerUpdated(trustedSigner, newSigner);
         trustedSigner = newSigner;
     }
 
-    /**
-     * @notice Update the CMXS token contract (e.g., if token is upgraded)
-     */
     function setCmxsToken(address newToken) external onlyOwner {
         if (newToken == address(0)) revert ZeroAddress();
-        cmxsToken = ICMXS(newToken);
+        cmxs = ICMXSToken(newToken);
+    }
+
+    function getPoDCount() external view returns (uint256) {
+        return allPods.length;
+    }
+
+    function getRecord(bytes32 podHash) external view returns (PoDRecord memory) {
+        return records[podHash];
     }
 }

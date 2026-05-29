@@ -5,62 +5,51 @@ import "forge-std/Script.sol";
 import "../src/CMXS.sol";
 import "../src/DeliveryOracle.sol";
 import "../src/NodeRegistry.sol";
+import "../src/AdBurn.sol";
+import "../src/CPMAuction.sol";
 
-/**
- * @title Deploy — Project Clarity Phase 0 deployment script
- * @notice Deploys CMXS, DeliveryOracle, and NodeRegistry to Base Sepolia.
- *
- * Usage:
- *   forge script script/Deploy.s.sol:Deploy \
- *     --rpc-url base_sepolia \
- *     --broadcast \
- *     --private-key $DEPLOYER_PRIVATE_KEY \
- *     --verify \
- *     --etherscan-api-key $BASESCAN_API_KEY \
- *     -vvvv
- *
- * Required env vars:
- *   DEPLOYER_PRIVATE_KEY   — deployer wallet (fund from faucet, dev only)
- *   ORACLE_SIGNER_ADDRESS  — backend signing key address (cast wallet new)
- *   BASESCAN_API_KEY       — from basescan.org/register
- *   BASE_SEPOLIA_RPC_URL   — https://sepolia.base.org or Alchemy
- */
 contract Deploy is Script {
     function run() external {
-        // Load config from env
         uint256 deployerKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address oracleSigner = vm.envAddress("ORACLE_SIGNER_ADDRESS");
+        address treasury = vm.envAddress("TREASURY_ADDRESS");
+        address usdcAddress = vm.envAddress("USDC_ADDRESS");
+        uint256 platformFeeBps = vm.envOr("PLATFORM_FEE_BPS", uint256(1500));
 
         vm.startBroadcast(deployerKey);
 
-        // 1. Deploy DeliveryOracle with a placeholder CMXS address
-        //    We'll update it after deploying CMXS.
-        DeliveryOracle oracle = new DeliveryOracle(oracleSigner, address(1));
+        // 1. Deploy CMXS
+        CMXS cmxs = new CMXS(treasury);
 
-        // 2. Deploy CMXS — awards oracle contract as the authorized caller
-        CMXS cmxs = new CMXS(address(oracle));
+        // 2. Deploy DeliveryOracle
+        DeliveryOracle oracle = new DeliveryOracle(oracleSigner, address(cmxs));
 
-        // 3. Update oracle's CMXS reference to the real contract
-        oracle.setCmxsToken(address(cmxs));
+        // 3. Grant MINTER_ROLE to DeliveryOracle
+        cmxs.grantRole(cmxs.MINTER_ROLE(), address(oracle));
 
-        // 4. Deploy NodeRegistry
+        // 4. Deploy AdBurn
+        AdBurn adBurn = new AdBurn(usdcAddress, address(cmxs), treasury, platformFeeBps);
+
+        // 5. Grant BURNER_ROLE to AdBurn
+        cmxs.grantRole(cmxs.BURNER_ROLE(), address(adBurn));
+
+        // 6. Deploy CPMAuction
+        CPMAuction auction = new CPMAuction();
+
+        // 7. Deploy NodeRegistry
         NodeRegistry registry = new NodeRegistry();
 
         vm.stopBroadcast();
 
-        // Output deployed addresses
         console.log("======================================");
-        console.log("Project Clarity - Deployed Contracts");
+        console.log("Deployed Contracts");
         console.log("======================================");
-        console.log("DeliveryOracle:  ", address(oracle));
         console.log("CMXS Token:      ", address(cmxs));
+        console.log("DeliveryOracle:  ", address(oracle));
+        console.log("AdBurn:          ", address(adBurn));
+        console.log("CPMAuction:      ", address(auction));
         console.log("NodeRegistry:    ", address(registry));
         console.log("Oracle Signer:   ", oracleSigner);
-        console.log("Chain ID:        ", block.chainid);
-        console.log("======================================");
-        console.log("Add these to your .env:");
-        console.log("ORACLE_CONTRACT_ADDRESS=", address(oracle));
-        console.log("CMXS_CONTRACT_ADDRESS=", address(cmxs));
-        console.log("NODE_REGISTRY_ADDRESS=", address(registry));
+        console.log("Treasury:        ", treasury);
     }
 }

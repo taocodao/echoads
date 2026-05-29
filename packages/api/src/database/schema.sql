@@ -67,3 +67,24 @@ CREATE POLICY "service_role_all" ON latency_benchmarks FOR ALL USING (true);
 -- Realtime subscription (for dashboard live feed)
 -- ============================================================
 ALTER PUBLICATION supabase_realtime ADD TABLE deliveries;
+
+CREATE TABLE IF NOT EXISTS auctions (
+    id BIGSERIAL PRIMARY KEY,
+    slot_id TEXT NOT NULL UNIQUE,
+    floor_cpm NUMERIC NOT NULL,
+    winner_address TEXT NOT NULL,
+    winning_cpm NUMERIC NOT NULL,
+    ad_id TEXT,
+    pod_verified BOOLEAN DEFAULT FALSE,
+    pod_hash TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS engagements (
+    id BIGSERIAL PRIMARY KEY,
+    impression_id TEXT NOT NULL,
+    ctv_ad_id TEXT,
+    email TEXT,
+    purchase_url TEXT,
+    engaged_at TIMESTAMPTZ DEFAULT NOW()
+);
