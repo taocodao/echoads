@@ -177,14 +177,60 @@ body::before {
 .ag-stage { flex: 1; overflow: hidden; position: relative; }
 .ag-dashboard-area, .ag-slide-area {
   position: absolute; inset: 0;
-  padding: 20px;
   overflow-y: auto;
 }
 .ag-dashboard-area::-webkit-scrollbar,
 .ag-slide-area::-webkit-scrollbar { width: 4px; }
-.ag-slide-area { display: none; }
+.ag-slide-area { display: none; padding: 20px; }
 .ag-slide-area.visible { display: block; }
 .ag-dashboard-area.hidden { display: none; }
+
+/* ── Pipeline Bar (Always on top) ── */
+.ag-pipeline-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(5, 12, 22, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+}
+
+/* ── Scene Focus Panels ── */
+.ag-panel {
+  display: none;
+  animation: panelReveal 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ag-panel.active {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px;
+  font-size: 16px;
+  display: flex;
+}
+
+.ag-panel.ghost {
+  display: flex;
+  opacity: 0.15;
+  pointer-events: none;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+@keyframes panelReveal {
+  from { opacity: 0; transform: scale(0.96) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Panel Sizing Overrides for Active State ── */
+.ag-panel--bid.active .ag-bid-name  { font-size: 16px; }
+.ag-panel--bid.active .ag-bid-price { font-size: 20px; }
+.ag-panel--oracle.active .ag-mint-amount { font-size: 56px; }
+.ag-panel--latency.active .ag-lat-track { height: 24px; }
 
 /* ── Glass card ── */
 .ag-card {

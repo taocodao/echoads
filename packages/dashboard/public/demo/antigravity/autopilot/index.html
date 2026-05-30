@@ -68,28 +68,8 @@
       <!-- ── DASHBOARD AREA ── -->
       <div class="ag-dashboard-area" id="ag-dashboard-area">
 
-        <!-- Stats row -->
-        <div class="grid-2" style="margin-bottom:16px;grid-template-columns:repeat(4,1fr)">
-          <div class="ag-kpi-card" id="ag-stat-impressions-card">
-            <div class="ag-kpi-val" id="ag-stat-impressions">0</div>
-            <div class="ag-kpi-label">Total Impressions</div>
-          </div>
-          <div class="ag-kpi-card">
-            <div class="ag-kpi-val" id="ag-stat-usdc">$0.0000</div>
-            <div class="ag-kpi-label">USDC Settled</div>
-          </div>
-          <div class="ag-kpi-card">
-            <div class="ag-kpi-val" id="ag-stat-latency">—</div>
-            <div class="ag-kpi-label">Avg Latency</div>
-          </div>
-          <div class="ag-kpi-card">
-            <div class="ag-kpi-val" id="ag-stat-sla">—</div>
-            <div class="ag-kpi-label">SLA Pass Rate</div>
-          </div>
-        </div>
-
-        <!-- Pipeline steps -->
-        <div class="ag-card" style="margin-bottom:16px">
+        <!-- Pipeline steps (Always visible at top) -->
+        <div class="ag-pipeline-bar" id="ag-pipeline-bar">
           <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">CMXS Ad Lifecycle</div>
           <div class="ag-pipeline">
             <div class="ag-pipe-step" id="pipe-bid">
@@ -129,11 +109,30 @@
           </div>
         </div>
 
-        <!-- Main grid -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- Focus panels -->
+        <div class="ag-panel ag-panel--kpi" id="panel-kpi">
+          <div class="grid-2" style="grid-template-columns:repeat(2,1fr); width:100%">
+            <div class="ag-kpi-card" id="ag-stat-impressions-card">
+              <div class="ag-kpi-val" id="ag-stat-impressions">0</div>
+              <div class="ag-kpi-label">Total Impressions</div>
+            </div>
+            <div class="ag-kpi-card">
+              <div class="ag-kpi-val" id="ag-stat-usdc">$0.0000</div>
+              <div class="ag-kpi-label">USDC Settled</div>
+            </div>
+            <div class="ag-kpi-card">
+              <div class="ag-kpi-val" id="ag-stat-latency">—</div>
+              <div class="ag-kpi-label">Avg Latency</div>
+            </div>
+            <div class="ag-kpi-card">
+              <div class="ag-kpi-val" id="ag-stat-sla">—</div>
+              <div class="ag-kpi-label">SLA Pass Rate</div>
+            </div>
+          </div>
+        </div>
 
-          <!-- Bid board -->
-          <div class="ag-card">
+        <div class="ag-panel ag-panel--bid" id="panel-bid">
+          <div class="ag-card" style="width:100%">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">DSP Bids</div>
               <div style="font-size:10px">Floor: <span id="ag-floor-val" style="color:var(--cyan);font-family:var(--mono)">$15.00</span>
@@ -142,17 +141,21 @@
             <div class="ag-bid-board" id="ag-bid-board">
               <div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">Waiting for auction slot…</div>
             </div>
-            <div id="ag-auction-result" style="display:none;margin-top:10px;padding:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px">
-              <div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:4px">🏆 Auction Winner</div>
-              <div style="font-size:12px;font-weight:700" id="ag-winner-name">—</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">Clear price: <span id="ag-clear-price" style="color:var(--green);font-family:var(--mono)">—</span></div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px">Slot: <span id="ag-slot-id" style="font-family:var(--mono)">—</span></div>
-              <button id="ag-run-auction-btn" style="display:none">Run Auction</button>
-            </div>
           </div>
+        </div>
 
-          <!-- Latency comparison -->
-          <div class="ag-card">
+        <div class="ag-panel ag-panel--auction" id="panel-auction">
+          <div class="ag-card" id="ag-auction-result" style="width:100%; display:none; padding:30px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px">
+            <div style="font-size:14px;color:var(--amber);font-weight:700;margin-bottom:8px">🏆 Auction Winner</div>
+            <div style="font-size:18px;font-weight:700" id="ag-winner-name">—</div>
+            <div style="font-size:16px;color:var(--muted);margin-top:6px">Clear price: <span id="ag-clear-price" style="color:var(--green);font-family:var(--mono)">—</span></div>
+            <div style="font-size:14px;color:var(--muted);margin-top:4px">Slot: <span id="ag-slot-id" style="font-family:var(--mono)">—</span></div>
+            <button id="ag-run-auction-btn" style="display:none">Run Auction</button>
+          </div>
+        </div>
+
+        <div class="ag-panel ag-panel--latency" id="panel-latency">
+          <div class="ag-card" style="width:100%">
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Delivery Latency</div>
             <div class="ag-latency-wrap">
               <div class="ag-lat-row">
@@ -165,7 +168,7 @@
                   <div class="ag-lat-threshold"></div>
                 </div>
               </div>
-              <div class="ag-lat-row" style="margin-top:10px">
+              <div class="ag-lat-row" style="margin-top:20px">
                 <div class="ag-lat-label">
                   <span style="color:var(--muted)">Sling TV HLS/TCP</span>
                   <span id="ag-hls-ms" style="color:var(--red);font-family:var(--mono)">—</span>
@@ -175,73 +178,72 @@
                 </div>
               </div>
             </div>
-            <div style="margin-top:12px;font-size:10px;color:var(--muted)">Ad watch: <span id="ag-watch-timer" style="font-family:var(--mono)">—</span></div>
+            <div style="margin-top:20px;font-size:12px;color:var(--muted)">Ad watch: <span id="ag-watch-timer" style="font-family:var(--mono); color:var(--text); font-size:16px;">—</span></div>
           </div>
         </div>
 
-        <!-- PoD + Oracle + Burn row -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-
-          <!-- PoD Signing -->
-          <div class="ag-card">
-            <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px">🔐 PoD Signature</div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">Impression ID</div>
-            <div style="font-size:10px;font-family:var(--mono);color:var(--text);word-break:break-all;margin-bottom:6px" id="ag-pod-impression">—</div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">Node</div>
-            <div style="font-size:10px;font-family:var(--mono);color:var(--text);margin-bottom:6px" id="ag-pod-node">—</div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">CPM Paid</div>
-            <div style="font-size:11px;font-family:var(--mono);color:var(--green);margin-bottom:8px" id="ag-pod-cpm">—</div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">ECDSA Signature</div>
-            <div class="ag-pod-hash" id="ag-pod-signature"></div>
+        <div class="ag-panel ag-panel--pod" id="panel-pod">
+          <div class="ag-card" style="width:100%">
+            <div style="font-size:12px;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:16px">🔐 PoD Signature</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Impression ID</div>
+            <div style="font-size:14px;font-family:var(--mono);color:var(--text);word-break:break-all;margin-bottom:12px" id="ag-pod-impression">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Node</div>
+            <div style="font-size:14px;font-family:var(--mono);color:var(--text);margin-bottom:12px" id="ag-pod-node">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">CPM Paid</div>
+            <div style="font-size:16px;font-family:var(--mono);color:var(--green);margin-bottom:16px" id="ag-pod-cpm">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">ECDSA Signature</div>
+            <div class="ag-pod-hash" id="ag-pod-signature" style="font-size:14px;"></div>
           </div>
+        </div>
 
-          <!-- Oracle Checks -->
-          <div class="ag-card">
-            <div style="font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px">⛓ Oracle Verification</div>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
-              <div style="font-size:11px;font-family:var(--mono)" id="ag-oracle-check1">—</div>
-              <div style="font-size:11px;font-family:var(--mono)" id="ag-oracle-check2">—</div>
-              <div style="font-size:11px;font-family:var(--mono)" id="ag-oracle-check3">—</div>
+        <div class="ag-panel ag-panel--oracle" id="panel-oracle">
+          <div class="ag-card" style="width:100%">
+            <div style="font-size:12px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:16px">⛓ Oracle Verification</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+              <div style="font-size:14px;font-family:var(--mono)" id="ag-oracle-check1">—</div>
+              <div style="font-size:14px;font-family:var(--mono)" id="ag-oracle-check2">—</div>
+              <div style="font-size:14px;font-family:var(--mono)" id="ag-oracle-check3">—</div>
             </div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">PoD Hash</div>
-            <div style="font-size:10px;font-family:var(--mono);color:var(--purple);word-break:break-all;margin-bottom:6px" id="ag-pod-hash">—</div>
-            <div style="text-align:center;margin-top:6px">
-              <div class="ag-mint-amount" id="ag-mint-amount">0.000</div>
-              <div style="font-size:9px;color:var(--muted)">CMXS minted to node</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">PoD Hash</div>
+            <div style="font-size:14px;font-family:var(--mono);color:var(--purple);word-break:break-all;margin-bottom:12px" id="ag-pod-hash">—</div>
+            <div style="text-align:center;margin-top:16px;padding:20px;background:rgba(255,255,255,0.03);border-radius:12px;">
+              <div class="ag-mint-amount" id="ag-mint-amount" style="font-size:56px;">0.000</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;">CMXS minted to node</div>
               <a id="ag-basescan-link" href="#" target="_blank" rel="noopener"
-                 style="font-size:10px;color:var(--blue);text-decoration:none;display:block;margin-top:4px">—</a>
+                 style="font-size:12px;color:var(--blue);text-decoration:none;display:block;margin-top:8px">—</a>
             </div>
           </div>
+        </div>
 
-          <!-- BME Burn/Mint -->
-          <div class="ag-card">
-            <div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px">🔥 Burn / 🪙 Mint</div>
-            <div style="margin-bottom:8px">
-              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px">
+        <div class="ag-panel ag-panel--burn" id="panel-burn">
+          <div class="ag-card" style="width:100%">
+            <div style="font-size:12px;color:var(--red);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:16px">🔥 Burn / 🪙 Mint</div>
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px">
                 <span style="color:var(--green)">🪙 Mint</span>
                 <span id="ag-bme-mint-val" style="font-family:var(--mono);color:var(--muted)">0.000 CMXS</span>
               </div>
-              <div class="ag-bme-track">
+              <div class="ag-bme-track" style="height:16px;">
                 <div class="ag-bme-mint" id="ag-bme-mint" style="width:50%"></div>
               </div>
-              <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:3px">
+              <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:6px">
                 <span style="color:var(--red)">🔥 Burn</span>
                 <span id="ag-bme-burn-val" style="font-family:var(--mono);color:var(--muted)">0.0000 CMXS</span>
               </div>
             </div>
-            <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;text-align:center">
-              <div style="font-size:12px;font-weight:700" id="ag-bme-status">—</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px" id="ag-bme-ratio">—</div>
+            <div style="padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;text-align:center;margin-bottom:20px;">
+              <div style="font-size:16px;font-weight:700" id="ag-bme-status">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px" id="ag-bme-ratio">—</div>
             </div>
-            <div style="margin-top:10px">
-              <div style="font-size:9px;color:var(--muted);margin-bottom:2px">Ad spend this cycle</div>
-              <div style="font-size:11px;font-family:var(--mono)" id="ag-burn-usdc">—</div>
-              <div style="font-size:9px;color:var(--muted);margin-top:4px;margin-bottom:2px">CMXS burned</div>
-              <div style="font-size:13px;font-family:var(--mono);color:var(--red);font-weight:700" id="ag-burn-amount">—</div>
+            <div style="text-align:center;">
+              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Ad spend this cycle</div>
+              <div style="font-size:16px;font-family:var(--mono)" id="ag-burn-usdc">—</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:12px;margin-bottom:4px">CMXS burned</div>
+              <div style="font-size:24px;font-family:var(--mono);color:var(--red);font-weight:700" id="ag-burn-amount">—</div>
             </div>
           </div>
-
         </div>
+
       </div><!-- /dashboard-area -->
 
       <!-- ── SLIDE AREA ── -->

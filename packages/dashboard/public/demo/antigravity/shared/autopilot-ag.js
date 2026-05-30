@@ -287,8 +287,41 @@ function setProgress(idx) {
   if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
+// ── Scene Focus System ─────────────────────────────────────────
+var SCENE_PANELS = {
+  'overview':  { show: ['panel-kpi'],           ghost: [] },
+  'bid':       { show: ['panel-bid'],           ghost: [] },
+  'auction':   { show: ['panel-auction'],       ghost: ['panel-bid'] },
+  'deliver':   { show: ['panel-latency'],       ghost: [] },
+  'watch':     { show: ['panel-latency'],       ghost: [] },
+  'pod':       { show: ['panel-pod'],           ghost: [] },
+  'oracle':    { show: ['panel-oracle'],        ghost: ['panel-pod'] },
+  'burn':      { show: ['panel-burn'],          ghost: ['panel-oracle'] },
+  'transition':{ show: [],                      ghost: [] }
+};
+
+function setScene(name) {
+  var config = SCENE_PANELS[name] || { show: [], ghost: [] };
+  // Hide all panels
+  document.querySelectorAll('.ag-panel').forEach(function(el) {
+    el.classList.remove('active', 'ghost');
+    el.style.display = 'none';
+  });
+  // Show active panels
+  config.show.forEach(function(id) {
+    var el = $(id);
+    if (el) { el.style.display = 'flex'; el.classList.add('active'); }
+  });
+  // Show ghost panels
+  config.ghost.forEach(function(id) {
+    var el = $(id);
+    if (el) { el.style.display = 'flex'; el.classList.add('ghost'); }
+  });
+}
+
 // ── Individual scene functions ────────────────────────────────
 async function scene01() {
+  setScene('overview');
   showDashboard(); setPipeStep(-1); clearSpotlights();
   spotlight('ag-stat-impressions-card');
   await moveCursor('ag-stat-impressions');
@@ -296,6 +329,7 @@ async function scene01() {
 }
 
 async function scene02() {
+  setScene('bid');
   setPipeStep(0);
   var bidsResult = AgSim.generateBids({ floorCpm:15, channel:'sports/live' });
   lastAuction = bidsResult;
@@ -306,6 +340,7 @@ async function scene02() {
 }
 
 async function scene03() {
+  setScene('auction');
   setPipeStep(1);
   var result = AgSim.runAuction(lastAuction.bids, lastAuction.floorCpm);
   if (result) { lastAuction.result = result; renderAuction(result); }
@@ -315,6 +350,7 @@ async function scene03() {
 }
 
 async function scene04() {
+  setScene('deliver');
   setPipeStep(2);
   var delivery = AgSim.simulateDelivery();
   lastDelivery = delivery;
@@ -326,12 +362,14 @@ async function scene04() {
 }
 
 async function scene05() {
+  setScene('watch');
   setPipeStep(3); clearSpotlights();
   setText('ag-watch-timer', '30s');
   await playAudio('ag05');
 }
 
 async function scene06() {
+  setScene('pod');
   setPipeStep(4);
   var imp  = lastAuction.result ? lastAuction.result.impressionId : AgSim.genHash(64);
   var node = lastDelivery ? lastDelivery.nodeAddress : '0x' + 'node'.padEnd(40,'0');
@@ -347,6 +385,7 @@ async function scene06() {
 }
 
 async function scene07() {
+  setScene('oracle');
   setPipeStep(5);
   spotlight('ag-oracle-check1');
   setText('ag-oracle-check1', 'Verifying ECDSA signature…');
@@ -372,6 +411,7 @@ async function scene07() {
 }
 
 async function scene08() {
+  setScene('burn');
   setPipeStep(6);
   var cpm = lastAuction.result ? lastAuction.result.clearPrice : 15;
   var burnResult = AgSim.burnForAdSpend(cpm, simState);
@@ -384,6 +424,7 @@ async function scene08() {
 }
 
 async function scene09() {
+  setScene('transition');
   hideCursor(); clearSpotlights();
   await playAudio('ag09');
   await wait(500);
