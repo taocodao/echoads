@@ -117,13 +117,12 @@ function spotlight(id) {
   if (el) el.classList.add('spotlight');
 }
 
-// ── Dashboard / Slide toggle ──────────────────────────────────
+// ── Dashboard / Slide toggle ──────────────────────────────
 function showDashboard() {
   var db = $('ag-dashboard-area');
   var sl = $('ag-slide-area');
   if (db) db.classList.remove('hidden');
   if (sl) { sl.classList.remove('visible'); sl.innerHTML = ''; }
-  setText('ag-chrome-url', 'https://echoads.tv/antigravity');
 }
 
 function showSlide(key) {
@@ -135,7 +134,6 @@ function showSlide(key) {
     sl.innerHTML = window.SlidesAG[key]();
     sl.classList.add('visible');
   }
-  setText('ag-chrome-url', 'https://echoads.tv/antigravity/slides');
 }
 
 // ── Pipeline step highlight ───────────────────────────────────
@@ -264,13 +262,15 @@ var STEPS_META = [
 ];
 
 function buildTimeline() {
-  var tl = $('ag-timeline'); if (!tl) return;
+  var tl = $('ag-timeline-horiz'); if (!tl) return;
   tl.innerHTML = '';
   STEPS_META.forEach(function(label, i) {
-    var div = document.createElement('div');
-    div.className = 'tl-item'; div.id = 'tl-'+i;
-    div.innerHTML = '<div class="tl-dot">'+(i+1)+'</div><span class="tl-label">'+label+'</span>';
-    tl.appendChild(div);
+    var dot = document.createElement('div');
+    dot.className = 'tl-dot-h';
+    dot.id = 'tl-' + i;
+    dot.textContent = (i + 1);
+    dot.title = label;
+    tl.appendChild(dot);
   });
 }
 
@@ -278,13 +278,13 @@ function setProgress(idx) {
   var pct = Math.round(((idx+1)/18)*100);
   var bar = $('ag-progress-bar'); if (bar) bar.style.width = pct+'%';
   setText('ag-progress-label', 'Step '+(idx+1)+' of 18');
-  document.querySelectorAll('.tl-item').forEach(function(el, i) {
+  document.querySelectorAll('.tl-dot-h').forEach(function(el, i) {
     el.classList.remove('active','done');
     if (i < idx) el.classList.add('done');
     else if (i === idx) el.classList.add('active');
   });
   var active = $('tl-'+idx);
-  if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
 }
 
 // ── Scene Focus System ─────────────────────────────────────────
@@ -482,7 +482,7 @@ function endPresentation(completed) {
   setText('ag-progress-label', completed ? 'Demo Complete ✅' : 'Stopped');
   if (completed) {
     var bar = $('ag-progress-bar'); if (bar) bar.style.width = '100%';
-    document.querySelectorAll('.tl-item').forEach(function(el){ el.classList.remove('active'); el.classList.add('done'); });
+    document.querySelectorAll('.tl-dot-h').forEach(function(el){ el.classList.remove('active'); el.classList.add('done'); });
   }
 }
 
