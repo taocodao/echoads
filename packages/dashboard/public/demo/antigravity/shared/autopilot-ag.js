@@ -28,7 +28,13 @@ function removeClass(id, c) { var el=$(id); if(el) el.classList.remove(c); }
 // ── Audio ────────────────────────────────────────────────────
 function playAudio(key) {
   var text = window.AgTranscripts && window.AgTranscripts[key] || '';
-  setText('ag-narration-text', text);
+  // Show full transcript and reset scroll to top
+  var narEl = document.getElementById('ag-narration-text');
+  if (narEl) {
+    narEl.textContent = text;
+    var box = narEl.closest('.ag-narration');
+    if (box) box.scrollTop = 0;
+  }
   return new Promise(function(resolve) {
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     var audio = new Audio(AUDIO_BASE + key + '.mp3');
@@ -98,6 +104,18 @@ function clickEl(id) {
 }
 
 function hideCursor() { if (cursorEl) cursorEl.style.display = 'none'; }
+
+// ── Spotlight: highlight which panel to watch ───────────────────────
+function clearSpotlights() {
+  document.querySelectorAll('.spotlight').forEach(function(el) {
+    el.classList.remove('spotlight');
+  });
+}
+function spotlight(id) {
+  clearSpotlights();
+  var el = $(id);
+  if (el) el.classList.add('spotlight');
+}
 
 // ── Dashboard / Slide toggle ──────────────────────────────────
 function showDashboard() {
@@ -271,7 +289,8 @@ function setProgress(idx) {
 
 // ── Individual scene functions ────────────────────────────────
 async function scene01() {
-  showDashboard(); setPipeStep(-1);
+  showDashboard(); setPipeStep(-1); clearSpotlights();
+  spotlight('ag-stat-impressions-card');
   await moveCursor('ag-stat-impressions');
   await playAudio('ag01');
 }
@@ -281,6 +300,7 @@ async function scene02() {
   var bidsResult = AgSim.generateBids({ floorCpm:15, channel:'sports/live' });
   lastAuction = bidsResult;
   renderBids(bidsResult);
+  spotlight('ag-bid-board');
   await moveCursor('ag-bid-board');
   await playAudio('ag02');
 }
@@ -289,6 +309,7 @@ async function scene03() {
   setPipeStep(1);
   var result = AgSim.runAuction(lastAuction.bids, lastAuction.floorCpm);
   if (result) { lastAuction.result = result; renderAuction(result); }
+  spotlight('ag-auction-result');
   await clickEl('ag-run-auction-btn');
   await playAudio('ag03');
 }
@@ -300,11 +321,12 @@ async function scene04() {
   animateLatency(delivery);
   burst('ag-moq-ms', 'var(--cyan)', 10);
   setText('ag-chrome-url', 'https://echoads.tv/delivery-live');
+  spotlight('ag-lat-moq');
   await playAudio('ag04');
 }
 
 async function scene05() {
-  setPipeStep(3);
+  setPipeStep(3); clearSpotlights();
   setText('ag-watch-timer', '30s');
   await playAudio('ag05');
 }
@@ -319,12 +341,14 @@ async function scene06() {
   setText('ag-pod-node', node.slice(0,18)+'…');
   setText('ag-pod-cpm', '$'+cpm.toFixed(2));
   var sigPromise = typeHash('ag-pod-signature', pod.signature);
+  spotlight('ag-pod-signature');
   await playAudio('ag06');
   await sigPromise;
 }
 
 async function scene07() {
   setPipeStep(5);
+  spotlight('ag-oracle-check1');
   setText('ag-oracle-check1', 'Verifying ECDSA signature…');
   await wait(600);
   setText('ag-oracle-check1', '✅ ECDSA signature verified');
@@ -339,6 +363,7 @@ async function scene07() {
   simState.totalMinted += 0.001;
   setText('ag-mint-amount', '+0.001 CMXS');
   burst('ag-mint-amount', '#00ff88', 16);
+  spotlight('ag-mint-amount');
   setText('ag-pod-hash', mint.podHash.slice(0,18)+'…');
   setText('ag-basescan-link', 'View on Basescan ↗');
   var link = $('ag-basescan-link');
@@ -354,11 +379,12 @@ async function scene08() {
   setText('ag-burn-amount', burnResult.burnAmount.toFixed(4)+' CMXS');
   burst('ag-burn-amount', '#ff3b5c', 14);
   updateBME(burnResult);
+  spotlight('ag-burn-amount');
   await playAudio('ag08');
 }
 
 async function scene09() {
-  hideCursor();
+  hideCursor(); clearSpotlights();
   await playAudio('ag09');
   await wait(500);
 }

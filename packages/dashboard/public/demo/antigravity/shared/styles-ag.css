@@ -20,8 +20,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
   overflow: hidden;
   height: 100vh;
 }
@@ -101,14 +101,24 @@ body::before {
 /* ── Narration box ── */
 .ag-narration {
   flex: 1;
-  background: rgba(0,212,255,0.04);
-  border: 1px solid rgba(0,212,255,0.12);
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
   border-radius: 8px;
-  padding: 10px 12px;
-  overflow: hidden;
+  padding: 12px 14px;
+  overflow-y: auto;
+  min-height: 0;
 }
-.ag-narration-label { font-size: 9px; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-.ag-narration-text  { font-size: 11px; color: #94a3b8; line-height: 1.6; }
+.ag-narration::-webkit-scrollbar { width: 3px; }
+.ag-narration::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.3); border-radius: 2px; }
+.ag-narration-label {
+  font-size: 10px; color: var(--cyan); text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
+}
+.ag-narration-label::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: narBlink 1s infinite; }
+@keyframes narBlink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.ag-narration-text  { font-size: 13px; color: #b8d0e8; line-height: 1.75; }
+.ag-narration-text .nar-highlight { color: var(--cyan); font-weight: 600; }
 
 /* ── Timeline ── */
 .ag-timeline { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; max-height: 280px; }
@@ -137,8 +147,8 @@ body::before {
 .tl-item.done .tl-dot  { background: rgba(0,255,136,0.2); border-color: var(--green); color: var(--green); }
 .tl-item.active .tl-dot { background: var(--cyan); border-color: var(--cyan); color: #000; box-shadow: 0 0 8px var(--cyan); }
 
-.tl-label { font-size: 10px; color: var(--muted); }
-.tl-item.active .tl-label { color: var(--text); font-weight: 600; }
+.tl-label { font-size: 11px; color: var(--muted); }
+.tl-item.active .tl-label { color: var(--text); font-weight: 700; }
 
 /* ── Main stage ── */
 .ag-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -393,17 +403,62 @@ body::before {
 .text-center { text-align: center; }
 
 .ag-kpi-card {
-  padding: 14px; border-radius: 10px; text-align: center;
+  padding: 16px; border-radius: 10px; text-align: center;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
+  transition: all 0.4s;
 }
-.ag-kpi-val  { font-size: 22px; font-weight: 900; font-family: var(--mono); margin-bottom: 4px; animation: countUp 0.5s ease; }
-.ag-kpi-label { font-size: 10px; color: var(--muted); }
+.ag-kpi-card.spotlight {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.15), 0 0 30px rgba(0,212,255,0.1);
+  animation: spotlightPulse 2s infinite;
+}
+.ag-kpi-val  { font-size: 26px; font-weight: 900; font-family: var(--mono); margin-bottom: 6px; animation: countUp 0.5s ease; }
+.ag-kpi-label { font-size: 12px; color: var(--muted); font-weight: 500; }
 
 /* ── Animated border glow ── */
 .glow-cyan   { box-shadow: 0 0 0 1px rgba(0,212,255,0.3), 0 0 20px rgba(0,212,255,0.1); }
 .glow-purple { box-shadow: 0 0 0 1px rgba(168,85,247,0.3), 0 0 20px rgba(168,85,247,0.1); }
 .glow-green  { box-shadow: 0 0 0 1px rgba(0,255,136,0.3), 0 0 20px rgba(0,255,136,0.1); }
+
+/* ── Spotlight: directs viewer attention to the active panel ── */
+.spotlight {
+  animation: spotlightPulse 2s infinite;
+  position: relative;
+  z-index: 2;
+}
+.spotlight::after {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--cyan);
+  opacity: 0;
+  animation: spotlightRing 2s infinite;
+  pointer-events: none;
+}
+@keyframes spotlightPulse {
+  0%,100% { box-shadow: 0 0 0 1px rgba(0,212,255,0.4), 0 0 24px rgba(0,212,255,0.12); }
+  50%      { box-shadow: 0 0 0 2px rgba(0,212,255,0.6), 0 0 40px rgba(0,212,255,0.22); }
+}
+@keyframes spotlightRing {
+  0%   { opacity:0.6; transform: scale(1); }
+  100% { opacity:0;   transform: scale(1.04); }
+}
+
+/* ── Attention arrow ── */
+.ag-attention-arrow {
+  position: absolute; z-index: 200;
+  font-size: 22px; pointer-events: none;
+  animation: bounceArrow 0.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px var(--cyan));
+  color: var(--cyan);
+  display: none;
+}
+.ag-attention-arrow.visible { display: block; }
+@keyframes bounceArrow {
+  0%,100% { transform: translateX(0); }
+  50%      { transform: translateX(-8px); }
+}
 
 /* ── Sim cursor ── */
 #ag-cursor {
