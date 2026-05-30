@@ -10,15 +10,15 @@ window.SlingScenes['sc-pipeline'] = function() {
     var steps = document.querySelectorAll('.pipeline-step');
     var lineFill = document.querySelector('.pipeline-line-fill');
 
-    // Step timing in seconds — matched to s02 audio narration cues:
+    // Step timing in seconds — calibrated to sling-02.mp3 narration:
     var TIMESTAMPS = [
-      9.0,   // Step 1: "Step one: the proxy detects..."
-      13.5,  // Step 2: "Step two: it triggers..."
-      23.0,  // Step 3: "Step three: the winning..."
-      28.5,  // Step 4: "Step four: the ad segments..."
-      36.5,  // Step 5: "Step five: the viewer's device..."
-      40.5,  // Step 6: "Step six: the receipt is written..."
-      46.5   // Step 7: "Step seven: the node operator..."
+      9.6,   // Step 1: "Step one: the proxy detects..."
+      17.7,  // Step 2: "Step two: it triggers..."
+      28.2,  // Step 3: "Step three: the winning..."
+      35.2,  // Step 4: "Step four: the ad segments..."
+      46.3,  // Step 5: "Step five: the viewer's device..."
+      51.8,  // Step 6: "Step six: the receipt is written..."
+      58.3   // Step 7: "Step seven: the node operator..."
     ];
 
     var subtitles = [
@@ -63,7 +63,7 @@ window.SlingScenes['sc-pipeline'] = function() {
       }
       if (activeIdx >= 0) activateStep(activeIdx);
 
-      if (time >= 53) {
+      if (time >= 65) {
         steps.forEach(function(s) { s.classList.remove('active'); s.classList.add('done'); });
         if (lineFill) lineFill.style.width = '100%';
         if (subtitleEl) subtitleEl.textContent = 'Pipeline complete — cryptographic proof on-chain ✅';
