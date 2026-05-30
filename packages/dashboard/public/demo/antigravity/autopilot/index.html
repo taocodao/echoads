@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EchoAds — AntiGravity Auto Presentation</title>
+<meta name="description" content="Automated 18-scene narrated demo of the CMXS AntiGravity Proof-of-Delivery protocol.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="/demo/antigravity/shared/styles-ag.css">
+</head>
+<body>
+
+<div class="ag-layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="ag-sidebar">
+    <div class="ag-logo">
+      <div class="ag-logo-icon">A</div>
+      <div class="ag-logo-text">Anti<span>Gravity</span></div>
+    </div>
+
+    <button class="ag-ctrl-btn" id="ag-ctrl-btn">▶ Start Demo</button>
+
+    <div class="ag-progress-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="ag-progress-label" id="ag-progress-label">Ready</div>
+        <div style="font-size:9px;color:var(--muted)">18 scenes</div>
+      </div>
+      <div class="ag-progress-track">
+        <div class="ag-progress-bar" id="ag-progress-bar"></div>
+      </div>
+    </div>
+
+    <div class="ag-narration">
+      <div class="ag-narration-label">🎙 Narration</div>
+      <div class="ag-narration-text" id="ag-narration-text">Press Start Demo to begin the automated walkthrough.</div>
+    </div>
+
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Timeline</div>
+    <div class="ag-timeline" id="ag-timeline"></div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="ag-main">
+
+    <!-- Browser chrome -->
+    <div class="ag-chrome">
+      <div class="ag-chrome-dots">
+        <div class="ag-chrome-dot"></div>
+        <div class="ag-chrome-dot"></div>
+        <div class="ag-chrome-dot"></div>
+      </div>
+      <div class="ag-chrome-url" id="ag-chrome-url">https://echoads.tv/antigravity</div>
+      <a href="/demo/" style="font-size:10px;color:var(--muted);text-decoration:none;white-space:nowrap;margin-left:8px">← Hub</a>
+    </div>
+
+    <!-- Stage -->
+    <div class="ag-stage" id="ag-stage">
+
+      <!-- Simulated cursor -->
+      <div id="ag-cursor" style="position:absolute;pointer-events:none;z-index:100;display:none">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 2L16 10L10 11.5L7 18L4 2Z" fill="#00d4ff" stroke="#000" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- ── DASHBOARD AREA ── -->
+      <div class="ag-dashboard-area" id="ag-dashboard-area">
+
+        <!-- Stats row -->
+        <div class="grid-2" style="margin-bottom:16px;grid-template-columns:repeat(4,1fr)">
+          <div class="ag-kpi-card" id="ag-stat-impressions-card">
+            <div class="ag-kpi-val" id="ag-stat-impressions">0</div>
+            <div class="ag-kpi-label">Total Impressions</div>
+          </div>
+          <div class="ag-kpi-card">
+            <div class="ag-kpi-val" id="ag-stat-usdc">$0.0000</div>
+            <div class="ag-kpi-label">USDC Settled</div>
+          </div>
+          <div class="ag-kpi-card">
+            <div class="ag-kpi-val" id="ag-stat-latency">—</div>
+            <div class="ag-kpi-label">Avg Latency</div>
+          </div>
+          <div class="ag-kpi-card">
+            <div class="ag-kpi-val" id="ag-stat-sla">—</div>
+            <div class="ag-kpi-label">SLA Pass Rate</div>
+          </div>
+        </div>
+
+        <!-- Pipeline steps -->
+        <div class="ag-card" style="margin-bottom:16px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">CMXS Ad Lifecycle</div>
+          <div class="ag-pipeline">
+            <div class="ag-pipe-step" id="pipe-bid">
+              <div class="ag-pipe-icon">💸</div>
+              <div class="ag-pipe-name">1. Bid</div>
+            </div>
+            <div class="ag-pipe-arrow">›</div>
+            <div class="ag-pipe-step" id="pipe-auction">
+              <div class="ag-pipe-icon">⚖</div>
+              <div class="ag-pipe-name">2. Auction</div>
+            </div>
+            <div class="ag-pipe-arrow">›</div>
+            <div class="ag-pipe-step" id="pipe-deliver">
+              <div class="ag-pipe-icon">📡</div>
+              <div class="ag-pipe-name">3. Deliver</div>
+            </div>
+            <div class="ag-pipe-arrow">›</div>
+            <div class="ag-pipe-step" id="pipe-watch">
+              <div class="ag-pipe-icon">👁</div>
+              <div class="ag-pipe-name">4. Watch</div>
+            </div>
+            <div class="ag-pipe-arrow">›</div>
+            <div class="ag-pipe-step" id="pipe-pod">
+              <div class="ag-pipe-icon">✍</div>
+              <div class="ag-pipe-name">5. PoD Sign</div>
+            </div>
+            <div class="ag-pipe-arrow">›</div>
+            <div class="ag-pipe-step" id="pipe-mint">
+              <div class="ag-pipe-icon">🪙</div>
+              <div class="ag-pipe-name">6. Mint</div>
+            </div>
+            <div class="ag-pipe-arrow">›</div>
+            <div class="ag-pipe-step" id="pipe-burn">
+              <div class="ag-pipe-icon">🔥</div>
+              <div class="ag-pipe-name">7. Burn</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+          <!-- Bid board -->
+          <div class="ag-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">DSP Bids</div>
+              <div style="font-size:10px">Floor: <span id="ag-floor-val" style="color:var(--cyan);font-family:var(--mono)">$15.00</span>
+              &nbsp;·&nbsp; Auction: <span id="ag-auction-ms" style="color:var(--muted);font-family:var(--mono)">—</span></div>
+            </div>
+            <div class="ag-bid-board" id="ag-bid-board">
+              <div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">Waiting for auction slot…</div>
+            </div>
+            <div id="ag-auction-result" style="display:none;margin-top:10px;padding:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px">
+              <div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:4px">🏆 Auction Winner</div>
+              <div style="font-size:12px;font-weight:700" id="ag-winner-name">—</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Clear price: <span id="ag-clear-price" style="color:var(--green);font-family:var(--mono)">—</span></div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">Slot: <span id="ag-slot-id" style="font-family:var(--mono)">—</span></div>
+              <button id="ag-run-auction-btn" style="display:none">Run Auction</button>
+            </div>
+          </div>
+
+          <!-- Latency comparison -->
+          <div class="ag-card">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Delivery Latency</div>
+            <div class="ag-latency-wrap">
+              <div class="ag-lat-row">
+                <div class="ag-lat-label">
+                  <span style="color:var(--cyan)">EchoAds MOQ/QUIC</span>
+                  <span id="ag-moq-ms" style="color:var(--green);font-family:var(--mono)">—</span>
+                </div>
+                <div class="ag-lat-track">
+                  <div class="ag-lat-fill moq" id="ag-lat-moq" style="width:0%"></div>
+                  <div class="ag-lat-threshold"></div>
+                </div>
+              </div>
+              <div class="ag-lat-row" style="margin-top:10px">
+                <div class="ag-lat-label">
+                  <span style="color:var(--muted)">Sling TV HLS/TCP</span>
+                  <span id="ag-hls-ms" style="color:var(--red);font-family:var(--mono)">—</span>
+                </div>
+                <div class="ag-lat-track">
+                  <div class="ag-lat-fill hls" id="ag-lat-hls" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:12px;font-size:10px;color:var(--muted)">Ad watch: <span id="ag-watch-timer" style="font-family:var(--mono)">—</span></div>
+          </div>
+        </div>
+
+        <!-- PoD + Oracle + Burn row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+
+          <!-- PoD Signing -->
+          <div class="ag-card">
+            <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px">🔐 PoD Signature</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">Impression ID</div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--text);word-break:break-all;margin-bottom:6px" id="ag-pod-impression">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">Node</div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--text);margin-bottom:6px" id="ag-pod-node">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">CPM Paid</div>
+            <div style="font-size:11px;font-family:var(--mono);color:var(--green);margin-bottom:8px" id="ag-pod-cpm">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">ECDSA Signature</div>
+            <div class="ag-pod-hash" id="ag-pod-signature"></div>
+          </div>
+
+          <!-- Oracle Checks -->
+          <div class="ag-card">
+            <div style="font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px">⛓ Oracle Verification</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+              <div style="font-size:11px;font-family:var(--mono)" id="ag-oracle-check1">—</div>
+              <div style="font-size:11px;font-family:var(--mono)" id="ag-oracle-check2">—</div>
+              <div style="font-size:11px;font-family:var(--mono)" id="ag-oracle-check3">—</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">PoD Hash</div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--purple);word-break:break-all;margin-bottom:6px" id="ag-pod-hash">—</div>
+            <div style="text-align:center;margin-top:6px">
+              <div class="ag-mint-amount" id="ag-mint-amount">0.000</div>
+              <div style="font-size:9px;color:var(--muted)">CMXS minted to node</div>
+              <a id="ag-basescan-link" href="#" target="_blank" rel="noopener"
+                 style="font-size:10px;color:var(--blue);text-decoration:none;display:block;margin-top:4px">—</a>
+            </div>
+          </div>
+
+          <!-- BME Burn/Mint -->
+          <div class="ag-card">
+            <div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:10px">🔥 Burn / 🪙 Mint</div>
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px">
+                <span style="color:var(--green)">🪙 Mint</span>
+                <span id="ag-bme-mint-val" style="font-family:var(--mono);color:var(--muted)">0.000 CMXS</span>
+              </div>
+              <div class="ag-bme-track">
+                <div class="ag-bme-mint" id="ag-bme-mint" style="width:50%"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:3px">
+                <span style="color:var(--red)">🔥 Burn</span>
+                <span id="ag-bme-burn-val" style="font-family:var(--mono);color:var(--muted)">0.0000 CMXS</span>
+              </div>
+            </div>
+            <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:6px;text-align:center">
+              <div style="font-size:12px;font-weight:700" id="ag-bme-status">—</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px" id="ag-bme-ratio">—</div>
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-size:9px;color:var(--muted);margin-bottom:2px">Ad spend this cycle</div>
+              <div style="font-size:11px;font-family:var(--mono)" id="ag-burn-usdc">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:4px;margin-bottom:2px">CMXS burned</div>
+              <div style="font-size:13px;font-family:var(--mono);color:var(--red);font-weight:700" id="ag-burn-amount">—</div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /dashboard-area -->
+
+      <!-- ── SLIDE AREA ── -->
+      <div class="ag-slide-area" id="ag-slide-area"></div>
+
+    </div><!-- /stage -->
+  </main>
+</div>
+
+<script src="/demo/antigravity/shared/simulation.js"></script>
+<script src="/demo/antigravity/shared/slides-ag.js"></script>
+<script src="/demo/antigravity/shared/autopilot-ag.js"></script>
+<script>
+// Inline transcripts for TTS fallback (abbreviated)
+window.AgTranscripts = {
+  ag01:'What you are seeing is the AntiGravity prototype — the first working implementation of the CMXS Proof-of-Delivery system.',
+  ag02:'A live broadcast slot just opened. Five Demand-Side Platforms are submitting competing bids.',
+  ag03:'I am running the auction now. Watch the bids sort by price in real time.',
+  ag04:'Now watch the delivery. On the left is HLS. On the right is EchoAds over MoQ and QUIC.',
+  ag05:'The ad is now playing on the MoQ side. The viewer completed the full thirty seconds.',
+  ag06:'The viewer\'s browser just generated a cryptographic signature proving they watched this specific ad.',
+  ag07:'The signature just arrived at the DeliveryOracle smart contract. All three checks passed.',
+  ag08:'The final step: the CMXS burn. The Burn-and-Mint Equilibrium is now active.',
+  ag09:'Now let me walk through why this matters at the scale of a platform like Sling Freestream.',
+  ag10:'The core problem: there is no independent proof that any ad was actually watched.',
+  ag11:'Verified inventory commands forty-five to sixty-five dollars CPM. Unverified: eighteen to thirty.',
+  ag12:'The forty-five billion dollar sports betting market that EchoStar currently generates zero revenue from.',
+  ag13:'Our MoQ delivery records a P95 latency of three hundred and twelve milliseconds.',
+  ag14:'The Burn-and-Mint Equilibrium creates a self-regulating token economy.',
+  ag15:'PoD rewards nodes for delivering verified content — not for solving pointless puzzles.',
+  ag16:'EchoStar\'s five thousand eight hundred sites earn nothing from advertising — until now.',
+  ag17:'Four independent demand engines create a compounding flywheel effect.',
+  ag18:'Four problems. One protocol layer. Over one billion dollars in recoverable revenue.'
+};
+</script>
+</body>
+</html>
