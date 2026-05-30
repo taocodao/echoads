@@ -10,16 +10,15 @@ window.SlingScenes['sc-pipeline'] = function() {
     var steps = document.querySelectorAll('.pipeline-step');
     var lineFill = document.querySelector('.pipeline-line-fill');
 
-    // Step timing in seconds — matched to narration:
-    //   s02 narration is ~50s total, 7 steps distributed across it
-    var STEP_DELAYS_MS = [
-      800,   // Step 1: SCTE-35 Detection  (~0s)
-      7000,  // Step 2: OpenRTB Auction    (~7s into narration)
-      14000, // Step 3: VAST Fetch         (~14s)
-      20000, // Step 4: MoQ Delivery       (~20s)
-      28000, // Step 5: PoD Receipt        (~28s)
-      35000, // Step 6: On-Chain Proof     (~35s)
-      42000  // Step 7: CMXS Reward        (~42s)
+    // Step timing in seconds — matched to s02 audio narration cues:
+    var TIMESTAMPS = [
+      9.0,   // Step 1: "Step one: the proxy detects..."
+      13.5,  // Step 2: "Step two: it triggers..."
+      23.0,  // Step 3: "Step three: the winning..."
+      28.5,  // Step 4: "Step four: the ad segments..."
+      36.5,  // Step 5: "Step five: the viewer's device..."
+      40.5,  // Step 6: "Step six: the receipt is written..."
+      46.5   // Step 7: "Step seven: the node operator..."
     ];
 
     var subtitles = [
@@ -33,8 +32,11 @@ window.SlingScenes['sc-pipeline'] = function() {
     ];
 
     var subtitleEl = document.getElementById('pipeline-subtitle');
+    var lastActive = -1;
 
     function activateStep(i) {
+      if (i === lastActive) return;
+      lastActive = i;
       // Mark all previous as done
       for (var j = 0; j < i; j++) {
         if (steps[j]) { steps[j].classList.remove('active'); steps[j].classList.add('done'); }
@@ -52,17 +54,31 @@ window.SlingScenes['sc-pipeline'] = function() {
       if (subtitleEl && subtitles[i]) subtitleEl.textContent = subtitles[i];
     }
 
-    // Schedule each step
-    STEP_DELAYS_MS.forEach(function(delay, i) {
-      setTimeout(function() { activateStep(i); }, delay);
-    });
+    // Audio-driven sync
+    window.onSlingAudioTimeUpdate = function(time, stepKey) {
+      if (stepKey !== 's02') return;
+      var activeIdx = -1;
+      for (var i = 0; i < TIMESTAMPS.length; i++) {
+        if (time >= TIMESTAMPS[i]) activeIdx = i;
+      }
+      if (activeIdx >= 0) activateStep(activeIdx);
 
-    // After last step, mark all done and fill line fully
-    setTimeout(function() {
-      steps.forEach(function(s) { s.classList.remove('active'); s.classList.add('done'); });
-      if (lineFill) lineFill.style.width = '100%';
-      if (subtitleEl) subtitleEl.textContent = 'Pipeline complete — cryptographic proof on-chain ✅';
-    }, 47000);
+      if (time >= 53) {
+        steps.forEach(function(s) { s.classList.remove('active'); s.classList.add('done'); });
+        if (lineFill) lineFill.style.width = '100%';
+        if (subtitleEl) subtitleEl.textContent = 'Pipeline complete — cryptographic proof on-chain ✅';
+      }
+    };
+
+    // Fallback timer for TTS (where timeupdate isn't fired by audio element)
+    var startTime = Date.now();
+    window._pipelineTimer = setInterval(function() {
+      // If native audio is playing, narrationAudio exists, so skip manual fallback
+      if (window.narrationAudio) return; 
+      var time = (Date.now() - startTime) / 1000;
+      // TTS is usually faster, compress time slightly
+      window.onSlingAudioTimeUpdate(time * 1.15, 's02'); 
+    }, 200);
 
   }, 50);
 
