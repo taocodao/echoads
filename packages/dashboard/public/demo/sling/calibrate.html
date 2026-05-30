@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Timestamp Calibrator</title>
+<style>
+  body { background:#0a0e1a; color:#e2e8f0; font-family:monospace; padding:40px; max-width:700px; margin:0 auto; }
+  h1 { color:#00d4ff; margin-bottom:8px; font-size:20px; }
+  p  { color:#94a3b8; font-size:13px; margin-bottom:24px; line-height:1.7; }
+  .timer { font-size:64px; font-weight:900; color:#00ff88; text-align:center; margin:24px 0; letter-spacing:2px; }
+  .step-list { list-style:none; padding:0; }
+  .step-list li {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 16px; margin-bottom:8px; border-radius:8px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    font-size:14px; cursor:pointer; transition:background .2s;
+  }
+  .step-list li:hover { background:rgba(0,212,255,0.1); }
+  .step-list li.captured { border-color:#00ff88; background:rgba(0,255,136,0.07); }
+  .step-list li .stamp { font-weight:900; color:#00d4ff; min-width:80px; text-align:right; }
+  .btn { display:inline-block; padding:10px 24px; border:none; border-radius:8px;
+         background:#00d4ff; color:#000; font-weight:700; cursor:pointer; font-size:14px; }
+  .btn:hover { background:#00b8d9; }
+  .btn.stop  { background:#ff3b5c; color:#fff; }
+  #output { margin-top:32px; background:#0f1629; border:1px solid #1e2d4a; border-radius:8px;
+             padding:20px; font-size:12px; color:#94a3b8; white-space:pre; line-height:1.8; }
+  .kbd { display:inline-block; background:#1e2d4a; border:1px solid #334155;
+         border-radius:4px; padding:2px 8px; font-size:11px; color:#00d4ff; }
+  #progress-bar-outer { height:6px; background:#1e2d4a; border-radius:3px; margin:12px 0 24px; }
+  #progress-bar { height:6px; background:#00d4ff; border-radius:3px; width:0%; transition:width .1s linear; }
+</style>
+</head>
+<body>
+
+<h1>🎛 Pipeline Timestamp Calibrator — sling-02.mp3</h1>
+<p>
+  1. Click <strong>▶ Play Audio</strong>.<br>
+  2. When you hear the narration say <em>"Step one…"</em>, click that row.<br>
+  3. Repeat for each step as you hear it.<br>
+  4. Copy the output at the bottom into <code>sc-pipeline.js</code>.
+</p>
+
+<div style="display:flex;gap:12px;margin-bottom:16px;">
+  <button class="btn" id="playBtn">▶ Play Audio</button>
+  <button class="btn stop" id="stopBtn" style="display:none">⏹ Stop</button>
+</div>
+
+<div id="progress-bar-outer"><div id="progress-bar"></div></div>
+<div class="timer" id="timer">00.0</div>
+<p style="text-align:center;margin-top:-12px;font-size:12px;color:#475569">
+  Keyboard shortcut: press <span class="kbd">1</span>–<span class="kbd">7</span> to stamp each step
+</p>
+
+<ul class="step-list" id="steps">
+  <li data-idx="0">Step 1 — <em>SCTE-35 Detection</em> <span class="stamp">—</span></li>
+  <li data-idx="1">Step 2 — <em>OpenRTB Auction</em>   <span class="stamp">—</span></li>
+  <li data-idx="2">Step 3 — <em>VAST Fetch</em>         <span class="stamp">—</span></li>
+  <li data-idx="3">Step 4 — <em>MoQ Delivery</em>       <span class="stamp">—</span></li>
+  <li data-idx="4">Step 5 — <em>PoD Receipt</em>        <span class="stamp">—</span></li>
+  <li data-idx="5">Step 6 — <em>On-Chain Proof</em>     <span class="stamp">—</span></li>
+  <li data-idx="6">Step 7 — <em>CMXS Reward</em>        <span class="stamp">—</span></li>
+</ul>
+
+<div id="output">Press play and start clicking steps to generate output…</div>
+
+<script>
+  var audio = new Audio('/demo/audio/sling-02.mp3');
+  var stamps = [null,null,null,null,null,null,null];
+  var timerEl = document.getElementById('timer');
+  var progressBar = document.getElementById('progress-bar');
+  var outputEl = document.getElementById('output');
+  var playBtn = document.getElementById('playBtn');
+  var stopBtn = document.getElementById('stopBtn');
+
+  function fmt(t) { return t.toFixed(1); }
+
+  audio.addEventListener('timeupdate', function() {
+    timerEl.textContent = fmt(audio.currentTime);
+    if (audio.duration) {
+      progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    }
+  });
+
+  audio.addEventListener('ended', function() {
+    playBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+  });
+
+  playBtn.addEventListener('click', function() {
+    audio.currentTime = 0;
+    audio.play();
+    playBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-block';
+  });
+
+  stopBtn.addEventListener('click', function() {
+    audio.pause();
+    playBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+  });
+
+  function stampStep(idx) {
+    if (!audio || audio.paused) return;
+    stamps[idx] = parseFloat(audio.currentTime.toFixed(1));
+    var items = document.querySelectorAll('#steps li');
+    if (items[idx]) {
+      items[idx].querySelector('.stamp').textContent = stamps[idx] + 's';
+      items[idx].classList.add('captured');
+    }
+    updateOutput();
+  }
+
+  document.querySelectorAll('#steps li').forEach(function(li) {
+    li.addEventListener('click', function() {
+      stampStep(parseInt(li.getAttribute('data-idx')));
+    });
+  });
+
+  document.addEventListener('keydown', function(e) {
+    var n = parseInt(e.key);
+    if (n >= 1 && n <= 7) stampStep(n - 1);
+  });
+
+  function updateOutput() {
+    var lines = ['var TIMESTAMPS = ['];
+    var labels = ['SCTE-35','Auction','VAST','MoQ','PoD','On-Chain','Reward'];
+    stamps.forEach(function(s, i) {
+      var val = s !== null ? s : '??';
+      lines.push('  ' + val + ',  // Step ' + (i+1) + ': ' + labels[i]);
+    });
+    lines.push('];');
+    outputEl.textContent = lines.join('\n');
+  }
+</script>
+
+</body>
+</html>
