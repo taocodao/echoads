@@ -3,5 +3,12 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm --filter @clarity/dashboard build",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@api_url",
+    "NEXT_PUBLIC_CMXS_CONTRACT_ADDRESS": "@cmxs_contract_address",
+    "NEXT_PUBLIC_ORACLE_CONTRACT_ADDRESS": "@oracle_contract_address",
+    "NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL": "@base_sepolia_rpc_url",
+    "NEXT_PUBLIC_CHAIN_ID": "84532"
+  }
 }
