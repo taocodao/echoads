@@ -524,25 +524,7 @@ body::before {
   word-break: break-word;
 }
 
-/* ── Word-highlight narration ── */
-.nar-word {
-  display: inline;
-  color: rgba(160, 200, 230, 0.45);  /* dim but VISIBLE — not invisible */
-  transition: color 0.15s, text-shadow 0.15s;
-  border-radius: 3px;
-  padding: 0 1px;
-}
-.nar-word.spoken {
-  color: rgba(200, 225, 245, 0.65);
-}
-.nar-word.current {
-  color: var(--cyan);
-  text-shadow: 0 0 12px rgba(0,212,255,0.6);
-  font-weight: 700;
-  background: rgba(0,212,255,0.08);
-  border-radius: 3px;
-  padding: 0 2px;
-}
+
 
 /* ══════════════════════════════════════════
    SLIDE AREA

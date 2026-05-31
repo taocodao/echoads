@@ -71,25 +71,20 @@ function updateSidebarNarration(text) {
 
 function playAudio(key) {
   var text = window.AgTranscripts && window.AgTranscripts[key] || '';
-  updateSidebarNarration(text);
+  var el = document.getElementById('ag-narration-text');
+  if (el) el.textContent = text;
+  
   return new Promise(function(resolve) {
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    clearWordTimers();
+    
     var audio = new Audio(AUDIO_BASE + key + '.mp3');
     currentAudio = audio;
-    audio.addEventListener('loadedmetadata', function() {
-      animateWords(text, audio.duration * 1000);
-    });
     audio.onended = function() { currentAudio = null; resolve(); };
     audio.onerror = function() {
       currentAudio = null;
-      var fallbackMs = text.split(' ').length * 420 + 1000;
-      animateWords(text, fallbackMs);
       speakTTS(text).then(resolve);
     };
     audio.play().catch(function() {
-      var fallbackMs = text.split(' ').length * 420 + 1000;
-      animateWords(text, fallbackMs);
       speakTTS(text).then(resolve);
     });
   });
