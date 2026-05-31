@@ -26,25 +26,72 @@ function addClass(id, c) { var el=$(id); if(el) el.classList.add(c); }
 function removeClass(id, c) { var el=$(id); if(el) el.classList.remove(c); }
 
 // ── Audio ────────────────────────────────────────────────────
+// ── Audio + Narration ────────────────────────────────────────────
+var wordTimers = [];
+
+function clearWordTimers() {
+  wordTimers.forEach(function(t){ clearTimeout(t); });
+  wordTimers = [];
+}
+
+function buildWordHighlight(text) {
+  var el = document.getElementById('ag-narration-text');
+  if (!el) return;
+  var words = text.split(' ');
+  el.innerHTML = words.map(function(w, i) {
+    return '<span class="nar-word" id="nar-w-'+i+'">' + w + ' </span>';
+  }).join('');
+}
+
+function animateWords(text, durationMs) {
+  clearWordTimers();
+  buildWordHighlight(text);
+  var words = text.split(' ');
+  var msPerWord = Math.max(120, durationMs / words.length);
+  words.forEach(function(w, i) {
+    // Mark previous as spoken, current as current
+    wordTimers.push(setTimeout(function() {
+      var prev = document.getElementById('nar-w-' + (i - 1));
+      if (prev) { prev.classList.remove('current'); prev.classList.add('spoken'); }
+      var cur = document.getElementById('nar-w-' + i);
+      if (cur) { cur.classList.add('current'); }
+    }, i * msPerWord));
+  });
+  // Mark last word spoken at end
+  wordTimers.push(setTimeout(function() {
+    var last = document.getElementById('nar-w-' + (words.length - 1));
+    if (last) { last.classList.remove('current'); last.classList.add('spoken'); }
+  }, words.length * msPerWord));
+}
+
+function updateSidebarNarration(text) {
+  var el = document.querySelector('#ag-narration .nar-text');
+  if (el) el.textContent = text;
+}
+
 function playAudio(key) {
   var text = window.AgTranscripts && window.AgTranscripts[key] || '';
-  // Show full transcript and reset scroll to top
-  var narEl = document.getElementById('ag-narration-text');
-  if (narEl) {
-    narEl.textContent = text;
-    var box = narEl.closest('.ag-narration');
-    if (box) box.scrollTop = 0;
-  }
+  updateSidebarNarration(text);
   return new Promise(function(resolve) {
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    clearWordTimers();
     var audio = new Audio(AUDIO_BASE + key + '.mp3');
     currentAudio = audio;
+    audio.addEventListener('loadedmetadata', function() {
+      animateWords(text, audio.duration * 1000);
+    });
     audio.onended = function() { currentAudio = null; resolve(); };
     audio.onerror = function() {
       currentAudio = null;
+      var fallbackMs = text.split(' ').length * 420 + 1000;
+      animateWords(text, fallbackMs);
       speakTTS(text).then(resolve);
     };
-    audio.play().catch(function() { speakTTS(text).then(resolve); });
+    audio.play().catch(function() {
+      var fallbackMs = text.split(' ').length * 420 + 1000;
+      animateWords(text, fallbackMs);
+      speakTTS(text).then(resolve);
+    });
   });
 }
 
@@ -262,15 +309,21 @@ var STEPS_META = [
 ];
 
 function buildTimeline() {
-  var tl = $('ag-timeline-horiz'); if (!tl) return;
+  var tl = $('ag-timeline-vert'); if (!tl) return;
   tl.innerHTML = '';
   STEPS_META.forEach(function(label, i) {
-    var dot = document.createElement('div');
-    dot.className = 'tl-dot-h';
-    dot.id = 'tl-' + i;
-    dot.textContent = (i + 1);
-    dot.title = label;
-    tl.appendChild(dot);
+    var row = document.createElement('div');
+    row.className = 'tl-dot-v';
+    row.id = 'tl-' + i;
+    var num = document.createElement('div');
+    num.className = 'tl-dot-v-num';
+    num.textContent = (i + 1);
+    var lbl = document.createElement('div');
+    lbl.className = 'tl-dot-v-label';
+    lbl.textContent = label;
+    row.appendChild(num);
+    row.appendChild(lbl);
+    tl.appendChild(row);
   });
 }
 
@@ -278,13 +331,19 @@ function setProgress(idx) {
   var pct = Math.round(((idx+1)/18)*100);
   var bar = $('ag-progress-bar'); if (bar) bar.style.width = pct+'%';
   setText('ag-progress-label', 'Step '+(idx+1)+' of 18');
-  document.querySelectorAll('.tl-dot-h').forEach(function(el, i) {
+  // Update sidebar status
+  var dot = document.querySelector('.ag-status-dot');
+  var lbl = document.querySelector('.ag-status-label');
+  if (dot) { dot.className = 'ag-status-dot running'; }
+  if (lbl) lbl.textContent = 'Scene ' + (idx+1) + ' of 18';
+  // Update vertical timeline dots
+  document.querySelectorAll('.tl-dot-v').forEach(function(el, i) {
     el.classList.remove('active','done');
     if (i < idx) el.classList.add('done');
     else if (i === idx) el.classList.add('active');
   });
   var active = $('tl-'+idx);
-  if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+  if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
 // ── Scene Focus System ─────────────────────────────────────────
@@ -432,8 +491,78 @@ async function scene09() {
 
 async function makeSlideScene(key) {
   showSlide(key);
-  await playAudio(key);
-  await wait(600);
+  await wait(300);
+  animateSlideNumbers();
+
+  // Move cursor to the first big stat and "click" it
+  var firstStat = document.querySelector('#ag-slide-area .ag-stat-big');
+  if (firstStat && firstStat.id) await moveCursor(firstStat.id);
+
+  // Start narration immediately
+  var audioPromise = playAudio(key);
+
+  // --- Continuous in-slide animation loop ---
+  // 1. Flash table rows one by one
+  var rows = Array.from(document.querySelectorAll('#ag-slide-area .ag-table tbody tr'));
+  rows.forEach(function(row, i) {
+    setTimeout(function() {
+      row.classList.add('row-flash');
+      setTimeout(function() { row.classList.remove('row-flash'); }, 950);
+    }, 700 + i * 1100);
+  });
+
+  // 2. Pulse each KPI card sequentially
+  var cards = Array.from(document.querySelectorAll('#ag-slide-area .ag-kpi-card, #ag-slide-area .ag-kpi-card'));
+  cards.forEach(function(card, i) {
+    setTimeout(function() {
+      card.classList.add('card-pulse');
+      setTimeout(function() { card.classList.remove('card-pulse'); }, 1050);
+    }, 500 + i * 1400);
+  });
+
+  // 3. Pop each big stat value mid-narration
+  var stats = Array.from(document.querySelectorAll('#ag-slide-area .ag-stat-big, #ag-slide-area .ag-kpi-val'));
+  stats.forEach(function(el, i) {
+    setTimeout(function() {
+      el.classList.add('stat-pop');
+      if (el.id) moveCursor(el.id);
+      setTimeout(function() { el.classList.remove('stat-pop'); }, 550);
+    }, 1200 + i * 1600);
+  });
+
+  // 4. Click on info-boxes (visual only)
+  var boxes = Array.from(document.querySelectorAll('#ag-slide-area .ag-info-box'));
+  boxes.forEach(function(box, i) {
+    setTimeout(function() {
+      if (!box.id) box.id = 'slide-box-' + i;
+      clickEl(box.id);
+    }, 2000 + i * 2000);
+  });
+
+  await audioPromise;
+  await wait(400);
+}
+
+function animateSlideNumbers() {
+  var vals = document.querySelectorAll('#ag-slide-area .ag-kpi-val, #ag-slide-area .ag-stat-big, #ag-slide-area .ag-mint-amount');
+  vals.forEach(function(el) {
+    var orig = el.textContent.trim();
+    // Detect numeric prefix like $84B, 312ms, +$360M etc
+    var match = orig.match(/^([^\d]*)(\d+(?:\.\d+)?)(.*)$/);
+    if (!match) return;
+    var prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+    var start = 0, duration = 900, startTime = null;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.round(start + (num - start) * eased * 10) / 10;
+      el.textContent = prefix + (current % 1 === 0 ? Math.round(current) : current.toFixed(1)) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = orig;
+    }
+    requestAnimationFrame(step);
+  });
 }
 
 // ── Steps array ───────────────────────────────────────────────
@@ -476,13 +605,18 @@ async function runPresentation() {
 }
 
 function endPresentation(completed) {
-  isRunning = false; hideCursor(); stopAudio();
+  isRunning = false; hideCursor(); stopAudio(); clearWordTimers();
   var btn = $('ag-ctrl-btn');
   if (btn) { btn.textContent = completed ? '↺ Replay' : '▶ Start Demo'; btn.classList.remove('stop'); }
-  setText('ag-progress-label', completed ? 'Demo Complete ✅' : 'Stopped');
+  setText('ag-progress-label', completed ? 'Demo Complete' : 'Stopped');
+  // Update sidebar status
+  var dot = document.querySelector('.ag-status-dot');
+  var lbl = document.querySelector('.ag-status-label');
+  if (dot) { dot.className = 'ag-status-dot ' + (completed ? 'done' : ''); }
+  if (lbl) lbl.textContent = completed ? 'DEMO COMPLETE ✅' : 'STOPPED';
   if (completed) {
     var bar = $('ag-progress-bar'); if (bar) bar.style.width = '100%';
-    document.querySelectorAll('.tl-dot-h').forEach(function(el){ el.classList.remove('active'); el.classList.add('done'); });
+    document.querySelectorAll('.tl-dot-v').forEach(function(el){ el.classList.remove('active'); el.classList.add('done'); });
   }
 }
 

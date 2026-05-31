@@ -22,7 +22,7 @@
 
     <button class="ag-ctrl-btn" id="ag-ctrl-btn">▶ Start Demo</button>
 
-    <div class="ag-timeline-horiz" id="ag-timeline-horiz"></div>
+
 
     <div class="ag-progress-wrap">
       <div class="ag-progress-label" id="ag-progress-label">Ready</div>
@@ -32,8 +32,19 @@
     </div>
   </div>
 
-  <!-- ══ STAGE WRAP ══ -->
-  <div class="ag-stage-wrap">
+  <!-- ══ BODY (sidebar + stage) ══ -->
+  <div class="ag-body">
+
+    <!-- ══ LEFT SIDEBAR ══ -->
+    <div class="ag-sidebar">
+      <div class="ag-sidebar-header">Scene Timeline</div>
+      <div class="ag-sidebar-body">
+        <div id="ag-timeline-vert"></div>
+      </div>
+    </div>
+
+    <!-- ══ STAGE WRAP ══ -->
+    <div class="ag-stage-wrap">
 
     <div class="ag-stage" id="ag-stage">
 
@@ -229,6 +240,8 @@
 
     </div><!-- /stage -->
   </div><!-- /stage-wrap -->
+
+  </div><!-- /body -->
 
   <!-- ══ NARRATION BAR (bottom) ══ -->
   <div class="ag-narration-bar" id="ag-narration-bar">
