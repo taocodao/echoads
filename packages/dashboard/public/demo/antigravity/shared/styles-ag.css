@@ -488,43 +488,71 @@ body::before {
 }
 
 /* ══════════════════════════════════════════
-   NARRATION BAR (bottom)
+   NARRATION BAR (bottom) — scrolling ticker
    ══════════════════════════════════════════ */
 .ag-narration-bar {
   flex-shrink: 0;
   background: rgba(5, 12, 22, 0.97);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
-  padding: 12px 28px;
+  padding: 0 0 0 28px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 14px;
-  min-height: 60px;
-  max-height: 150px;
-  overflow-y: auto;
+  height: 52px;         /* fixed single-line height */
+  overflow: hidden;     /* clip scrolling text */
 }
-.ag-narration-bar::-webkit-scrollbar { width: 3px; }
-.ag-narration-bar::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.3); border-radius: 2px; }
 
 .nar-icon {
   font-size: 20px;
   flex-shrink: 0;
   animation: narBlink 1.2s infinite;
-  line-height: 1.8;
-  padding-top: 2px;
+  line-height: 1;
 }
 @keyframes narBlink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-.nar-text {
-  font-size: 16px;
-  color: #c4daf0;
-  line-height: 1.8;
+/* Clipping track for the ticker */
+.nar-track {
   flex: 1;
-  /* wrapping word spans need to flow naturally */
-  word-break: break-word;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
+/* Fade edges */
+.nar-track::before,
+.nar-track::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+}
+.nar-track::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(5,12,22,0.97), transparent);
+}
+.nar-track::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(5,12,22,0.97), transparent);
+}
 
+.nar-text {
+  font-size: 18px;
+  color: #c4daf0;
+  white-space: nowrap;   /* single line — no wrapping */
+  display: inline-block;
+  will-change: transform;
+  /* animation set by JS: nar-ticker */
+}
+
+@keyframes nar-ticker {
+  0%   { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
 
 /* ══════════════════════════════════════════
    SLIDE AREA

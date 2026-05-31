@@ -25,67 +25,56 @@ function hide(id) { var el=$(id); if(el) el.style.display='none'; }
 function addClass(id, c) { var el=$(id); if(el) el.classList.add(c); }
 function removeClass(id, c) { var el=$(id); if(el) el.classList.remove(c); }
 
-// ── Audio ────────────────────────────────────────────────────
-// ── Audio + Narration ────────────────────────────────────────────
-var wordTimers = [];
 
-function clearWordTimers() {
-  wordTimers.forEach(function(t){ clearTimeout(t); });
-  wordTimers = [];
-}
+var tickerTimer = null;
 
-function buildWordHighlight(text) {
+function startTicker(text, durationMs) {
   var el = document.getElementById('ag-narration-text');
   if (!el) return;
-  var words = text.split(' ');
-  el.innerHTML = words.map(function(w, i) {
-    return '<span class="nar-word" id="nar-w-'+i+'">' + w + ' </span>';
-  }).join('');
+  // Cancel any running ticker
+  el.style.animation = 'none';
+  el.textContent = text;
+  // Force reflow so the new animation starts fresh
+  void el.offsetWidth;
+  // Add ~1s lead-in + ~0.5s tail so text finishes just as audio ends
+  var totalMs = durationMs + 1000;
+  el.style.animation = 'nar-ticker ' + totalMs + 'ms linear forwards';
 }
 
-function animateWords(text, durationMs) {
-  clearWordTimers();
-  buildWordHighlight(text);
-  var words = text.split(' ');
-  var msPerWord = Math.max(120, durationMs / words.length);
-  words.forEach(function(w, i) {
-    // Mark previous as spoken, current as current
-    wordTimers.push(setTimeout(function() {
-      var prev = document.getElementById('nar-w-' + (i - 1));
-      if (prev) { prev.classList.remove('current'); prev.classList.add('spoken'); }
-      var cur = document.getElementById('nar-w-' + i);
-      if (cur) { cur.classList.add('current'); }
-    }, i * msPerWord));
-  });
-  // Mark last word spoken at end
-  wordTimers.push(setTimeout(function() {
-    var last = document.getElementById('nar-w-' + (words.length - 1));
-    if (last) { last.classList.remove('current'); last.classList.add('spoken'); }
-  }, words.length * msPerWord));
-}
-
-function updateSidebarNarration(text) {
-  var el = document.querySelector('#ag-narration .nar-text');
-  if (el) el.textContent = text;
+function stopTicker() {
+  var el = document.getElementById('ag-narration-text');
+  if (el) {
+    el.style.animation = 'none';
+    el.style.transform = '';
+  }
 }
 
 function playAudio(key) {
   var text = window.AgTranscripts && window.AgTranscripts[key] || '';
-  var el = document.getElementById('ag-narration-text');
-  if (el) el.textContent = text;
-  
+
   return new Promise(function(resolve) {
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    
+
     var audio = new Audio(AUDIO_BASE + key + '.mp3');
     currentAudio = audio;
-    audio.onended = function() { currentAudio = null; resolve(); };
+
+    // Start ticker once we know the real duration
+    audio.addEventListener('loadedmetadata', function() {
+      startTicker(text, audio.duration * 1000);
+    });
+
+    audio.onended = function() { currentAudio = null; stopTicker(); resolve(); };
     audio.onerror = function() {
       currentAudio = null;
-      speakTTS(text).then(resolve);
+      // Estimate ~13 chars/sec at rate=0.88 for TTS fallback
+      var estMs = Math.max(4000, (text.length / 13) * 1000);
+      startTicker(text, estMs);
+      speakTTS(text).then(function() { stopTicker(); resolve(); });
     };
     audio.play().catch(function() {
-      speakTTS(text).then(resolve);
+      var estMs = Math.max(4000, (text.length / 13) * 1000);
+      startTicker(text, estMs);
+      speakTTS(text).then(function() { stopTicker(); resolve(); });
     });
   });
 }
@@ -110,6 +99,7 @@ function speakTTS(text) {
 function stopAudio() {
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   if (window.speechSynthesis) window.speechSynthesis.cancel();
+  stopTicker();
 }
 
 // ── Cursor ───────────────────────────────────────────────────
