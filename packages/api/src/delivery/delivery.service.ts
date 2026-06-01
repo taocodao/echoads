@@ -98,3 +98,28 @@ export async function markDeliverySubmitted(
     [oracleTxHash, deliveryId]
   );
 }
+
+/** Write a failed receipt to the dead_letters table after all retries exhausted */
+export async function writeDeadLetter(params: {
+  impressionId: string;
+  nodeOperator: string;
+  campaignId:   string;
+  cpm:          string;
+  timestampMs:  number;
+  latencyMs:    number;
+}): Promise<void> {
+  await pool.query(
+    `INSERT INTO dead_letters
+       (impression_id, node_operator, campaign_id, cpm, timestamp_ms, latency_ms, failed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, NOW())
+     ON CONFLICT (impression_id) DO NOTHING`,
+    [
+      params.impressionId,
+      params.nodeOperator,
+      params.campaignId,
+      params.cpm,
+      params.timestampMs,
+      params.latencyMs,
+    ]
+  );
+}

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { runSlaBatch } from "./aggregator.service.js";
+import { getPodRelayStatus } from "../delivery/pod-relay.service.js";
 
 export const slaRouter = new Hono();
 
@@ -29,9 +30,19 @@ slaRouter.post("/trigger", async (c) => {
 
 /** GET /api/sla/status — current batch queue depth */
 slaRouter.get("/status", async (c) => {
+  const relay = getPodRelayStatus();
   return c.json({
     status: "ok",
-    oracleContract: process.env["ORACLE_CONTRACT_ADDRESS"] ?? "not deployed",
-    cmxsContract: process.env["CMXS_CONTRACT_ADDRESS"] ?? "not deployed",
+    legacyOracle: {
+      oracleContract: process.env["ORACLE_CONTRACT_ADDRESS"] ?? "not deployed",
+      cmxsContract:   process.env["CMXS_CONTRACT_ADDRESS"] ?? "not deployed",
+    },
+    podRelayV2: {
+      queueDepth:        relay.queueDepth,
+      isFlushing:        relay.isFlushing,
+      oracleV2Address:   relay.oracleV2Address,
+      chain:             relay.chain,
+      upstashConfigured: relay.upstashConfigured,
+    },
   });
 });

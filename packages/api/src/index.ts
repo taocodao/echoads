@@ -5,6 +5,8 @@ import { auctionRouter } from "./auction/auction.route.js";
 import { slaRouter } from "./sla/sla.route.js";
 import { deliveryRouter } from "./delivery/delivery.route.js";
 import { commerceRouter } from "./commerce/commerce.route.js";
+import { startPodRelayService } from "./delivery/pod-relay.service.js";
+import { startSlaBatchLoop } from "./sla/aggregator.service.js";
 
 const app = new Hono();
 
@@ -37,3 +39,9 @@ app.route("/api/delivery", deliveryRouter);
 app.route("/api/commerce", commerceRouter);
 
 export default app;
+
+// ── Background Services ──────────────────────────────────────────────────────
+// Start on module load (Node.js server context).
+// These are no-ops in Vercel serverless (Edge Runtime ignores them).
+startPodRelayService();
+startSlaBatchLoop(); // legacy oracle path — kept for Phase 0 fallback
