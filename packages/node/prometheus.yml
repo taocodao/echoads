@@ -3,11 +3,37 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
+  # ── x402 Gateway / PoD Relay ─────────────────────────────────────────────────
   - job_name: "x402-gateway"
-    metrics_path: "/metrics"
     static_configs:
-      - targets: ["clarity-x402-gateway:3001"]
+      - targets: ["x402-gateway:3001"]
+    metrics_path: "/metrics"
+    scrape_timeout: 10s
 
+  # ── Relay Status (custom endpoint) ───────────────────────────────────────────
+  # Uses json_exporter to scrape /api/delivery/relay-status
+  # Install: prom/json-exporter
+  - job_name: "pod-relay-status"
+    static_configs:
+      - targets: ["x402-gateway:3001"]
+    metrics_path: "/api/delivery/relay-status"
+    scrape_timeout: 10s
+
+  # ── Prometheus self-monitoring ────────────────────────────────────────────────
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ── MOQ Relay ─────────────────────────────────────────────────────────────────
   - job_name: "moq-relay"
     static_configs:
-      - targets: ["clarity-moq-relay:4443"]
+      - targets: ["moq-relay:9100"]
+    scrape_timeout: 10s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  - "alerts.yml"

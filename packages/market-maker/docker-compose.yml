@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # ── Hummingbot CEX Market Maker ───────────────────────────────────────────────
+  # Maintains CMXS/USDC liquidity on Coinbase Advanced Trade.
+  # Strategy: pure_market_making — inventory-neutral spread around mid price.
+  # Kill switch: -15% portfolio drawdown.
+  # Deploy on dedicated EC2: t3.small (2 vCPU, 2GB RAM) — separate from MOQ node.
+  hummingbot:
+    image: hummingbot/hummingbot:latest
+    container_name: cmxs-hummingbot
+    volumes:
+      - ./conf:/home/hummingbot/conf:ro       # strategy config
+      - ./logs:/home/hummingbot/logs           # trade logs
+      - ./data:/home/hummingbot/data           # order book / state
+      - ./scripts:/home/hummingbot/scripts:ro  # custom scripts
+    env_file:
+      - .env
+    environment:
+      - CONFIG_PASSWORD=${HUMMINGBOT_CONFIG_PASSWORD}
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ── Prometheus (market maker metrics) ────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cmxs-mm-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  # ── Grafana (P&L dashboard) ───────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cmxs-mm-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  default:
+    name: cmxs-market-maker

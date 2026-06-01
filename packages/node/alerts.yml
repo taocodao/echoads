@@ -1,0 +1,74 @@
+groups:
+  # ── PoD Relay Service ─────────────────────────────────────────────────────────
+  - name: pod_relay
+    rules:
+      - alert: PodRelayQueueHigh
+        expr: pod_relay_queue_depth > 200
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PoD relay queue depth > 200 ({{ $value }} receipts)"
+          description: "Batch submissions may be lagging. Check oracle signer key and RPC."
+
+      - alert: PodRelayQueueCritical
+        expr: pod_relay_queue_depth > 450
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PoD relay queue near capacity ({{ $value }}/500)"
+          description: "Receipts are being dropped. Investigate batch-submitter failures immediately."
+
+      - alert: PodRelayDeadLetters
+        expr: increase(pod_relay_dead_letters_total[1h]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} receipts dead-lettered in the last hour"
+          description: "DeliveryOracleV2 batch submissions failing. Check oracle key and contract."
+
+  # ── CMXSToken Supply ──────────────────────────────────────────────────────────
+  - name: token_supply
+    rules:
+      - alert: DailyMintCapApproaching
+        expr: cmxs_daily_minted_today / 500000 > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CMXS daily mint at {{ $value | humanizePercentage }} of cap"
+          description: "Daily mint cap (500,000 CMXS) 90% consumed. Node reward pool may stall."
+
+  # ── Gelato Treasury ───────────────────────────────────────────────────────────
+  - name: gelato
+    rules:
+      - alert: GelatoTreasuryLow
+        expr: gelato_treasury_eth_balance < 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Gelato treasury below 0.05 ETH — LP rebalancer may stall"
+
+  # ── EC2 Node Health ───────────────────────────────────────────────────────────
+  - name: node_health
+    rules:
+      - alert: MoqRelayDown
+        expr: up{job="moq-relay"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MOQ relay is down"
+          description: "Ad delivery will fail. Restart clarity-moq-relay container immediately."
+
+      - alert: ApiGatewayDown
+        expr: up{job="x402-gateway"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "x402 gateway is down"
+          description: "Ad auctions and PoD relay unavailable."

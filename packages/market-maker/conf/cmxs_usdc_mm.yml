@@ -1,0 +1,67 @@
+########################################################################
+# CMXS/USDC Market Making — Hummingbot pure_market_making Strategy
+# Connector: coinbase_advanced_trade
+########################################################################
+
+template_version: 3
+
+# ── Connector ─────────────────────────────────────────────────────────
+exchange: coinbase_advanced_trade
+market: CMXS-USDC
+
+# ── Spread Parameters ─────────────────────────────────────────────────
+# Maintain a 1.5% spread around mid price.
+# Tighter than Uniswap v3 LP to capture CEX flow.
+bid_spread: 0.75         # 0.75% below mid
+ask_spread: 0.75         # 0.75% above mid
+
+# ── Order Sizes ───────────────────────────────────────────────────────
+# Each order: $250 USDC equivalent, 3 levels per side
+order_amount: 250        # USDC notional per order
+order_levels: 3          # stagger 3 levels per side
+order_level_spread: 0.5  # 0.5% between levels
+order_level_amount: 0.7  # each deeper level = 70% of previous
+
+# ── Timing ────────────────────────────────────────────────────────────
+order_refresh_time: 30   # seconds between order refreshes
+max_order_age: 1800      # cancel and re-place after 30 minutes
+
+# ── Inventory Management (BME-aware) ─────────────────────────────────
+# Target 50/50 CMXS/USDC. Skew orders when imbalanced.
+# BME creates natural buy pressure — we lean slightly long CMXS.
+inventory_skew_enabled: true
+inventory_target_base_pct: 50
+inventory_range_multiplier: 1.5   # accept 25%-75% before heavy skew
+inventory_skew_factor: 3.0        # aggressiveness of rebalancing
+
+# ── Price Source (BME-aware) ──────────────────────────────────────────
+# Use Uniswap v3 TWAP as the mid-price reference (not just CEX quote)
+# to ensure our orders respect the on-chain fair value.
+price_source: custom_api
+price_source_url: ${PRICE_SOURCE_URL}  # endpoint returning {"price": "1.23"}
+price_type: mid
+price_ceiling: 5.0        # refuse to post asks above $5 (anti-dump)
+price_floor: 0.10         # refuse to post bids below $0.10 (anti-crash)
+
+# ── Risk / Kill Switch ────────────────────────────────────────────────
+# Kill switch fires at -15% portfolio loss. PagerDuty alert sent.
+kill_switch_enabled: true
+kill_switch_rate: -0.15
+
+# ── Filled Order Delay ────────────────────────────────────────────────
+# After a fill, wait 15s before re-posting the same side.
+# Prevents momentum chasing during price discovery.
+filled_order_delay: 15
+
+# ── Hanging Orders ────────────────────────────────────────────────────
+# Keep partially-filled orders active rather than cancelling.
+hanging_orders_enabled: true
+hanging_orders_cancel_pct: 10   # cancel hanging if spread > 10%
+
+# ── Minimum Spread Enforcement ────────────────────────────────────────
+# Never post orders with less than 0.4% total spread (covers Coinbase fee).
+minimum_spread: 0.4
+
+# ── Order Optimization ────────────────────────────────────────────────
+add_transaction_costs_to_orders: true
+order_optimization_enabled: true

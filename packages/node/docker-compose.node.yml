@@ -1,7 +1,6 @@
 services:
-  # ── MOQ Relay ────────────────────────────────────────────────────────────────
+  # ── MOQ Relay ─────────────────────────────────────────────────────────────────
   # Serves media tracks over QUIC/WebTransport (UDP 4443)
-  # Built from kixelated/moq-rs during EC2 setup
   moq-relay:
     image: kixelated/moq-relay:latest
     container_name: clarity-moq-relay
@@ -10,8 +9,6 @@ services:
       --tls-cert /certs/cert.pem
       --tls-key  /certs/key.pem
       --auth-public ""
-    environment:
-      - MALLOC_CONF=prof:true
     ports:
       - "4443:4443/udp"
       - "4443:4443/tcp"
@@ -29,9 +26,8 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # ── x402 Gateway ─────────────────────────────────────────────────────────────
-  # Handles payment verification and CMXS reward triggers
-  # Runs as a sidecar to the MOQ relay on EC2
+  # ── x402 / PoD Relay API ──────────────────────────────────────────────────────
+  # Handles: payment verification, PoD receipt batching, DeliveryOracleV2 submission
   x402-gateway:
     image: node:20-alpine
     container_name: clarity-x402-gateway
@@ -62,32 +58,57 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # ── Metrics (Grafana + Prometheus) ────────────────────────────────────────────
+  # ── Prometheus ────────────────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:latest
     container_name: clarity-prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
     restart: unless-stopped
 
+  # ── Grafana ───────────────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana:latest
     container_name: clarity-grafana
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://grafana.echoads.tv
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
     restart: unless-stopped
 
+  # ── Caddy (TLS reverse proxy) ─────────────────────────────────────────────────
+  # Terminates HTTPS for Grafana and the x402 API.
+  # Caddy auto-provisions Let's Encrypt certs.
+  caddy:
+    image: caddy:2-alpine
+    container_name: clarity-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
 volumes:
   grafana-data:
+  prometheus-data:
+  caddy-data:
+  caddy-config:
 
 networks:
   default:

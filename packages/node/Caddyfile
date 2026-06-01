@@ -1,0 +1,16 @@
+# Caddyfile — reverse proxy for Project Clarity node infrastructure
+# Provisions Let's Encrypt TLS automatically.
+
+# ── Grafana Dashboard ─────────────────────────────────────────────────────────
+grafana.echoads.tv {
+    reverse_proxy grafana:3000
+}
+
+# ── x402 API / PoD Relay ──────────────────────────────────────────────────────
+api.echoads.tv {
+    reverse_proxy x402-gateway:3001
+}
+
+# ── QUIC WebTransport (port 4443 — handled by moq-relay directly) ─────────────
+# Note: MoQ/QUIC runs on UDP 4443, not proxied through Caddy.
+# Client connects to wss://api.echoads.tv:4443 directly.
