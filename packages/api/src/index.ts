@@ -6,6 +6,7 @@ import { slaRouter } from "./sla/sla.route.js";
 import { deliveryRouter } from "./delivery/delivery.route.js";
 import { commerceRouter } from "./commerce/commerce.route.js";
 import { priceRouter } from "./price/price.route.js";
+import { ssaiRouter } from "./ssai/ssai.route.js";
 import { startPodRelayService } from "./delivery/pod-relay.service.js";
 import { startSlaBatchLoop } from "./sla/aggregator.service.js";
 
@@ -39,6 +40,7 @@ app.route("/api/sla", slaRouter);
 app.route("/api/delivery", deliveryRouter);
 app.route("/api/commerce", commerceRouter);
 app.route("/api/price", priceRouter);
+app.route("/api/ssai", ssaiRouter);
 
 export default app;
 
