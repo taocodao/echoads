@@ -41,7 +41,7 @@ export class ProjectClarityAdManager {
 
   async init(): Promise<void> {
     await this.transport.connect(this.config.relayUrl, {
-      certFingerprint: this.config.certFingerprint as string | undefined,
+      ...(this.config.certFingerprint ? { certFingerprint: this.config.certFingerprint } : {})
     });
 
     this.currentSub = await this.transport.subscribe(MOQ_NAMESPACE, MOQ_CONTENT_TRACK);

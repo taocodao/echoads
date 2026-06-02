@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "name": "cmxs-demo",
+  "builds": [
+    {
+      "src": "packages/dashboard/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "distDir": ".next"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/demo/flywheel/(.*)",
+      "dest": "/demo/flywheel/$1"
+    }
+  ]
+}
