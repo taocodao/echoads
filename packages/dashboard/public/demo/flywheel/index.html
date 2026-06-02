@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CMXS Sports FAST Channel — Live Flywheel Demo</title>
+<meta name="description" content="Interactive 9-act demo of the CMXS Sports FAST Channel platform: verified ad delivery, OpenRTB auction, DePIN nodes, and deflationary token economics — running live.">
+<link rel="stylesheet" href="flywheel.css">
+</head>
+<body>
+
+<div class="fw-layout" id="fw-layout">
+
+  <!-- ══ HEADER ══ -->
+  <header class="fw-header">
+    <div class="fw-logo">
+      <div class="fw-logo-icon">C</div>
+      <div>CMXS <span>Sports</span></div>
+    </div>
+
+    <div class="fw-progress">
+      <div class="fw-progress-dots" id="fw-dots">
+        <div class="fw-dot" data-act="1"></div>
+        <div class="fw-dot" data-act="2"></div>
+        <div class="fw-dot" data-act="3"></div>
+        <div class="fw-dot" data-act="4"></div>
+        <div class="fw-dot" data-act="5"></div>
+        <div class="fw-dot" data-act="6"></div>
+        <div class="fw-dot" data-act="7"></div>
+        <div class="fw-dot" data-act="8"></div>
+        <div class="fw-dot" data-act="9"></div>
+      </div>
+      <div class="fw-act-label" id="fw-act-label">Ready</div>
+    </div>
+
+    <div class="fw-controls">
+      <button class="fw-btn fw-btn-primary" id="fw-start-btn" title="Start Demo (Space)">▶ Start Demo</button>
+      <button class="fw-btn fw-btn-stop" id="fw-stop-btn" style="display:none" title="Stop (Escape)">⏹ Stop</button>
+      <button class="fw-btn-icon" id="fw-mute-btn" title="Mute (M)">🔊</button>
+      <button class="fw-btn-icon" id="fw-fs-btn" title="Fullscreen (F)">⛶</button>
+    </div>
+  </header>
+
+  <!-- ══ STAGE ══ -->
+  <div class="fw-stage-area">
+    <div class="fw-stage" id="fw-stage">
+      <!-- Idle state -->
+      <div class="fw-stage-inner active" id="stage-idle">
+        <div class="fw-idle">
+          <div class="big-icon">⚡</div>
+          <div class="title">CMXS Sports FAST Channel</div>
+          <div class="subtitle">One-click demo of the complete ad lifecycle: auction → delivery → proof → settlement → treasury</div>
+          <div class="keys">Space to start · Arrow keys to navigate · 1-9 to jump</div>
+        </div>
+      </div>
+
+      <!-- Act panels injected dynamically by stages.js -->
+      <div class="fw-stage-inner" id="stage-1"></div>
+      <div class="fw-stage-inner" id="stage-2"></div>
+      <div class="fw-stage-inner" id="stage-3"></div>
+      <div class="fw-stage-inner" id="stage-4"></div>
+      <div class="fw-stage-inner" id="stage-5"></div>
+      <div class="fw-stage-inner" id="stage-6"></div>
+      <div class="fw-stage-inner" id="stage-7"></div>
+      <div class="fw-stage-inner" id="stage-8"></div>
+      <div class="fw-stage-inner" id="stage-9"></div>
+    </div>
+
+    <!-- Metrics Row -->
+    <div class="fw-metrics" id="fw-metrics">
+      <div class="fw-metric" id="m-nodes">
+        <div class="fw-metric-label">Active Nodes</div>
+        <div class="fw-metric-val" style="color:var(--green)">—</div>
+      </div>
+      <div class="fw-metric" id="m-cpm">
+        <div class="fw-metric-label">Clearing CPM</div>
+        <div class="fw-metric-val" style="color:var(--blue)">—</div>
+      </div>
+      <div class="fw-metric" id="m-latency">
+        <div class="fw-metric-label">Auction Latency</div>
+        <div class="fw-metric-val" style="color:var(--purple)">—</div>
+      </div>
+      <div class="fw-metric" id="m-burned">
+        <div class="fw-metric-label">CMXS Burned</div>
+        <div class="fw-metric-val" style="color:var(--red)">—</div>
+      </div>
+      <div class="fw-metric" id="m-minted">
+        <div class="fw-metric-label">CMXS Minted</div>
+        <div class="fw-metric-val" style="color:var(--green)">—</div>
+      </div>
+      <div class="fw-metric" id="m-revenue">
+        <div class="fw-metric-label">USDC Revenue</div>
+        <div class="fw-metric-val" style="color:var(--cyan)">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CAPTION BAR ══ -->
+  <footer class="fw-caption" id="fw-caption">
+    <div class="fw-caption-icon" id="fw-mic">🎙</div>
+    <div class="fw-caption-text" id="fw-caption-text">Press ▶ Start Demo or press Space to begin.</div>
+    <div class="fw-wave" id="fw-wave">
+      <div class="fw-wave-bar" style="--wave-h:12px; animation-delay:0s"></div>
+      <div class="fw-wave-bar" style="--wave-h:18px; animation-delay:0.1s"></div>
+      <div class="fw-wave-bar" style="--wave-h:14px; animation-delay:0.2s"></div>
+      <div class="fw-wave-bar" style="--wave-h:20px; animation-delay:0.15s"></div>
+      <div class="fw-wave-bar" style="--wave-h:10px; animation-delay:0.25s"></div>
+    </div>
+  </footer>
+
+</div>
+
+<script src="narration.js"></script>
+<script src="stages.js"></script>
+<script src="flywheel.js"></script>
+</body>
+</html>
