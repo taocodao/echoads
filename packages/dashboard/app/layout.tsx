@@ -33,12 +33,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <nav style={{ display: 'flex', gap: '0.25rem' }}>
             {[
-              { href: '/',         label: '📊 Overview'   },
-              { href: '/player',   label: '📺 Live Player' },
-              { href: '/auction',  label: '⚡ Auction'     },
-              { href: '/nodes',    label: '🏗️ Nodes'       },
-              { href: '/treasury', label: '💰 Treasury'    },
-              { href: '/chain',    label: '🔗 On-Chain'    },
+              { href: '/',            label: '📊 Overview'    },
+              { href: '/player',      label: '📺 Live Player'  },
+              { href: '/simulation',  label: '🎬 Demo'         },
+              { href: '/auction',     label: '⚡ Auction'      },
+              { href: '/nodes',       label: '🏗️ Nodes'        },
+              { href: '/treasury',    label: '💰 Treasury'     },
+              { href: '/chain',       label: '🔗 On-Chain'     },
             ].map(({ href, label }) => (
               <Link key={href} href={href} style={{
                 padding: '0.4rem 0.85rem',
