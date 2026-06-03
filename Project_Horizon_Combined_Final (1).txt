@@ -1,0 +1,147 @@
+﻿----------------------- Page 1-----------------------
+
+  STRICTLY PRIVATE & CONFIDENTIAL 
+
+  PROJECT HORIZON 
+
+  Transforming Stranded Infrastructure and Audience Equity into a Next-Generation Real-Time Media and 
+  Commerce Network 
+
+    1. EXECUTIVE SUMMARY 
+
+  Following recent spectrum and business realignments, EchoStar/Boost 5G network ("TelCo") and tower companies ("TowerCos") have 
+  left thousands of newly built, premium edge computing shelters under-utilized or tied up in legal disputes over unfulfilled 10-year lease 
+  commitments. 
+
+  We identified two parallel opportunities that, taken together, form the foundation of a genuinely differentiated media and technology 
+  business. Converting distressed lease exposures into equity ownership in a next-generation MoQ CDN network aligns interests and 
+  preserves asset value for all parties. Simultaneously, the consumer shift to free ad-supported streaming represents the single largest 
+  untapped revenue opportunity available to EchoStar today, with live sports FAST channels doubling in H2 2025¹ and verified CPMs 
+  reaching $45–$65 versus $10–$20 on unverified stacks.² 
+
+  Our integrated platform converts stranded infrastructure and existing audience equity into a vertically integrated, real-time media and 
+  commerce network that no competitor can replicate from a standing start. A working prototype has been built and validated end to end, 
+  confirming broadcast-grade delivery and a full 35-second auction-to-settlement cycle. The step to a live branded EchoStar channel is 
+  operational, not technical. 
+
+    2. MARKET DISRUPTION & OPPORTUNITY OF CDN TRANSITION 
+
+  The CDN industry is undergoing its most fundamental transition since the shift from broadcast to IP. Traditional HTTP-based CDNs 
+  cannot support real-time sports interaction, synchronized multiview, live in-play betting, or sub-second commerce. Media over QUIC 
+  (MoQ), now under IETF standardization, achieves sub-second latency at broadcast scale. The world’s first real-time MoQ CDN was 
+  demonstrated  at  CES  2026,  confirming  commercial  readiness.³  This  timing  creates  a  unique  window  for  TowerCos  and  TelCo  to 
+  reposition their stranded edge capacity as the foundational footprint of a next-generation MoQ CDN, leapfrogging legacy models by 
+  going directly to a MoQ-based, edge-native platform. 
+
+  Free ad-supported streaming (FAST) now reaches 131 million US viewers, 54% of all connected TV households, growing at 43% year 
+  over year.¹ More than 70% of net new streaming subscriptions since 2023 chose ad-supported plans.¹ Sports is the fastest-growing, 
+  highest-value segment, and EchoStar’s content relationships and audience equity position it to lead. That infrastructure is ready now. 
+
+    3. MOQ+ CDN NETWORK, FAST CHANNEL STACK & FAST TIME-TO-MARKET 
+
+  Our platform delivers a ready-to-deploy MoQ-compatible CDN fabric instantiated across existing telecom shelters, combined with a fully 
+  managed Channel-as-a-Service revenue layer on top. EchoStar brings the brand and content rights. We deliver everything else. 
+
+  Infrastructure layer core capabilities: 
+
+     • Ultra reliability of 99.9999% SLA via AI-powered dynamic smart routing■ 
+
+     • Ultra-low latency of less than 150ms globally with 30% bandwidth efficiency gains■ 
+
+     • Broadcast-grade synchronization, multiview interactivity and multi-CDN interoperability 
+
+     • CapEx-light deployment using existing 3kW–5kW telecom power and cooling shells 
+
+  Revenue layer core capabilities: 
+
+     • Fully managed white-label channel distribution across Roku (97.3M viewers),■ Apple TV, Fire TV, Samsung TV 
+
+     • Full OpenRTB 2.6 real-time programmatic auction connected to all major DSPs 
+
+     • Cryptographic Proof-of-Delivery verification unlocking $45–$65 verified CPMs² 
+
+     • Interactive remote-control commerce layer with proven 3–8% viewer conversion rates■ 
+
+     • EchoStar retains 80–85% of all verified gross advertising revenue from day one, at zero upfront cost 
+
+    4. INTERACTIVE, MULTIVIEW AND ADVANCED FEATURES 
+
+  The MoQ+ platform is designed for next-generation experiences: synchronized multiview angles, low-latency real-time engagement for 
+  live sports and e-sports, and multi-CDN interoperability that allows broadcasters and OTT providers to layer innovative user experiences 
+  on top of a highly reliable, globally distributed delivery network. Our interactive viewer layer connects a viewer watching a live game 
+  directly to a betting action, merchandise transaction, or financial product in a single remote-control interaction, creating a proprietary 
+  commerce network built entirely on EchoStar’s own content and audience. 
+
+    5. TECHNICAL TRANSFORMATION & REVENUE ENGINES 
+
+  The platform is especially suitable for broadcasters, OTT platforms, sports leagues, sports betting operators, live viewing, interactive 
+  streaming platforms, and cloud gaming operators: 
+
+STRICTLY CONFIDENTIAL                                                                                                                            1 
+
+----------------------- Page 2-----------------------
+
+  PRODUCT / SERVICE                            TARGET CLIENTS                                           REVENUE MODEL 
+
+  MoQ+ CDN Delivery                            DISH/Sling TV Live Sports Broadcasters Sports            Real-time media transport Premium OTT delivery 
+                                               Betting, Interactive Gaming                              Live sports distribution 
+
+  Verified FAST Ad Platform                    Sports rights holders OTT platforms, Content              15-20% platform fee on verified gross CPM revenue 
+                                               partners 
+
+  Interactive Commerce & Sports                Sportsbook operators Retailers, Fantasy                   1.5% transaction fee on purchases; revenue share 
+  Betting Layer                                platforms                                                on in-play betting 
+
+    6. WINNING BACK AND GROWING THE AUDIENCE FOR DISH/SLING TV 
+
+  MoQ+ CDN, running beneath our verified ad and commerce stack, directly addresses the reliability and latency limitations that have 
+  driven audiences toward larger OTT competitors. Pairing broadcast-grade delivery with competitive cost economics and tailored edge 
+  footprints enables EchoStar and Sling TV to deliver a free sports streaming experience that is technically superior to incumbents. Every 
+  viewer  on  a  Sling-branded  FAST  channel  generates  premium  advertising  revenue  at  verified  CPMs  and  can  transact  through  the 
+  interactive commerce layer, with no subscription required. 
+
+  A single branded FAST sports channel at launch projects more than $1.8 million per year in EchoStar ad revenue from 500,000 monthly 
+  viewers, before interactive commerce fees.² Year 3 portfolio outlook (independently sourced■): 
+
+  SCENARIO                                 MONTHLY ACTIVE VIEWERS                                       PROJECTED ANNUAL REVENUE 
+
+  Conservative                             5 million                                                    $7.2 million 
+
+  Base Case                                12 million                                                   $23.1 million 
+
+  Optimistic                               25 million                                                   $68.9 million 
+
+  The US sports betting market reached $102 billion in 2026, projected to grow to $205 billion by 2032 at a 12%+ CAGR.■ In-play betting 
+  requires sub-second synchronization, the fastest-growing segment and the one our MoQ+ delivery infrastructure is uniquely positioned 
+  to power at scale. This positions EchoStar at the convergence of live sports, real-time advertising, and transactional commerce, forming 
+  a durable, high-margin financial activation network that compounds in value as the audience grows. 
+
+    7. FINANCIAL & OPERATIONAL VALUE PROPOSITION 
+
+  From Liabilities to High-Margin SaaS/IaaS: Converts distressed telecom lease exposure into equity ownership in a next-generation 
+  MoQ CDN network, transforming balance sheet liabilities into recurring, software-defined infrastructure revenue commanding superior 
+  valuation multiples. 
+
+  CapEx-Light and Fast Build-Out: Utilizing established power and cooling shells engineered for 5G telecom demands (typically 3kW to 
+  5kW  per  rack),  bypassing  multi-billion-dollar  capital  expenditure  bottlenecks  and  multi-year  construction  delays.  The  infrastructure  is 
+  already built. 
+
+  Early  Mover  in  Real-Time  Edge  Commerce:  While  traditional  cloud  hyperscalers  sell  centralized  Compute  Volume,  our  platform 
+  commercializes Compute Proximity and Network Velocity, paired with a full revenue stack. EchoStar’s existing edge footprint represents 
+  a structural head start measured in years, not months. 
+
+  Zero  Upfront  Cost  for  Revenue  Generation:  No  license  fee,  no  integration  cost,  no  capital  commitment  from  EchoStar.  Revenue 
+  share begins on the first verified impression. 
+
+  Proposed First Step: A 90-day pilot activating one branded EchoStar sports FAST channel on Roku using existing content rights, with 
+  the full ad stack running over a MoQ+ delivery node at a single existing telecom shelter. First verified impressions, first premium CPM 
+  data, and first revenue within the quarter. No long-term commitment required beyond the pilot. 
+
+  The infrastructure exists. The technology is proven. The audience is ready. The question is not whether this market will be built. It is who 
+  builds it first. 
+
+  ¹ eMarketer FAST Market Report, Apr 2026 ² CMXS Sports FAST Platform Market Analysis, May 2026 ³ Caton Technology & Whale TV CES 2026 Demonstration ■ Caton 
+  MoQ+ Platform Specifications, 2026 ■ Roku Q3 2025 Earnings Report ■ BrightLine Shoppable CTV Research, 2025 ■ CTV Ads Solutions Market Forecast, 2026 ■ 
+  SkyQuest / Yahoo Finance Sports Betting Report, Jan 2026 
+
+STRICTLY CONFIDENTIAL                                                                                                                                               2 

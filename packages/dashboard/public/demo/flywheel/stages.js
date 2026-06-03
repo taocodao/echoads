@@ -355,7 +355,7 @@ window.FW_buildStage9 = function(container){
 };
 
 // ═══════════════════════════════════════════════════════════════════════
-// PRESENTATION SLIDES — Acts 10–15 (EchoStar Strategic Proposal)
+// PRESENTATION SLIDES — Acts 10–15 (Project Horizon — STRICTLY CONFIDENTIAL)
 // ═══════════════════════════════════════════════════════════════════════
 
 function pSlide(container, actNum, kicker, headline, body){
@@ -374,121 +374,120 @@ function pSlide(container, actNum, kicker, headline, body){
   setTimeout(function(){wrap.classList.add('visible');},100);
 }
 
-// ── Act 10: The Market ─────────────────────────────────────────────────
+// ── Act 10: The Stranded Infrastructure Opportunity ────────────────────
 window.FW_buildStage10 = function(container){
   pSlide(container, 10,
-    'The audience has already voted.',
-    'The Market Has Already Moved',
+    'Stranded assets. Untapped audience. One integrated solution.',
+    'Project Horizon — Executive Summary',
     '<div class="pres-stats-row">'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">131M</div><div class="pres-stat-label">US FAST Viewers</div><div class="pres-stat-sub">More than half of all CTV households</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">43%</div><div class="pres-stat-label">Year-over-Year Growth</div><div class="pres-stat-sub">Fastest segment in streaming</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--purple)">70%</div><div class="pres-stat-label">New Subscriptions</div><div class="pres-stat-sub">Ad-supported over paid tiers since 2023</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--amber)">2×</div><div class="pres-stat-label">Sports Channels Doubled</div><div class="pres-stat-sub">In the second half of 2025 alone</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--red)">1,000s</div><div class="pres-stat-label">Stranded Edge Shelters</div><div class="pres-stat-sub">Premium edge compute, under-utilized or in legal dispute</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">131M</div><div class="pres-stat-label">US FAST Viewers</div><div class="pres-stat-sub">54% of all CTV households · growing 43% YoY</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">$45–65</div><div class="pres-stat-label">Verified CPM</div><div class="pres-stat-sub">vs $10–20 on unverified stacks</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--amber)">35s</div><div class="pres-stat-label">Full Cycle Proven</div><div class="pres-stat-sub">Auction-to-settlement · broadcast-grade delivery</div></div>'+
     '</div>'+
-    '<div class="pres-callout">Sports commands the highest CPMs in connected TV. EchoStar\'s content relationships, audience equity, and live sports depth make it one of the best-positioned media organizations to lead this category.</div>'
+    '<div class="pres-callout">EchoStar / Boost 5G and tower companies have left thousands of newly built, premium edge computing shelters under-utilized. Converting this distressed lease exposure into equity ownership in a next-generation MoQ CDN network aligns interests, preserves asset value — and unlocks the single largest untapped revenue opportunity available to EchoStar today.</div>'
   );
 };
 
-// ── Act 11: Channel-as-a-Service ───────────────────────────────────────
+// ── Act 11: MoQ+ CDN + FAST Stack ──────────────────────────────────────
 window.FW_buildStage11 = function(container){
   pSlide(container, 11,
-    'EchoStar brings the brand. CMXS delivers everything else.',
-    'Channel-as-a-Service',
+    'A ready-to-deploy platform. Infrastructure already in the ground.',
+    'MoQ+ CDN Network & FAST Channel Stack',
     '<div class="pres-layers">'+
-      '<div class="pres-layer" style="border-color:var(--blue)"><span class="pl-icon">📡</span><div><div class="pl-label">Distribution</div><div class="pl-detail">Roku · Apple TV · Amazon Fire TV · Samsung TV — Day 1</div></div></div>'+
-      '<div class="pres-layer" style="border-color:var(--purple)"><span class="pl-icon">⚡</span><div><div class="pl-label">Real-Time Auction</div><div class="pl-detail">OpenRTB 2.6 · Trade Desk, DV360, Amazon DSP, Magnite</div></div></div>'+
-      '<div class="pres-layer" style="border-color:var(--green)"><span class="pl-icon">⛓</span><div><div class="pl-label">Verified Delivery</div><div class="pl-detail">Cryptographic receipt per impression · Base blockchain</div></div></div>'+
-      '<div class="pres-layer" style="border-color:var(--amber)"><span class="pl-icon">🛒</span><div><div class="pl-label">Interactive Commerce</div><div class="pl-detail">x302 overlay · Remote-control purchase · 3–8% conversion</div></div></div>'+
-      '<div class="pres-layer" style="border-color:var(--cyan)"><span class="pl-icon">🏗️</span><div><div class="pl-label">Incentivized Infrastructure</div><div class="pl-detail">DePIN node rewards · Runs on EchoStar\'s existing towers</div></div></div>'+
-    '</div>'+
-    '<div class="pres-callout" style="margin-top:0.75rem">Runs on EchoStar\'s existing infrastructure. No new capital investment. No integration fee. EchoStar retains <strong>80–85%</strong> of all verified gross ad revenue from day one.</div>'
-  );
-};
-
-// ── Act 12: The Verified Premium ───────────────────────────────────────
-window.FW_buildStage12 = function(container){
-  pSlide(container, 12,
-    'Same audience. Same content. Different infrastructure.',
-    'The Verified Premium',
-    '<div class="pres-cpm-compare">'+
-      '<div class="pres-cpm-bar-wrap">'+
-        '<div class="pres-cpm-label">Unverified FAST Inventory</div>'+
-        '<div class="pres-cpm-bar-track"><div class="pres-cpm-bar unverified" data-w="35"></div></div>'+
-        '<div class="pres-cpm-val muted">$15 – $25 CPM</div>'+
-      '</div>'+
-      '<div class="pres-cpm-bar-wrap">'+
-        '<div class="pres-cpm-label">CMXS Verified Sports</div>'+
-        '<div class="pres-cpm-bar-track"><div class="pres-cpm-bar verified" data-w="100"></div></div>'+
-        '<div class="pres-cpm-val green">$45 – $65 CPM</div>'+
-      '</div>'+
-    '</div>'+
-    '<div class="pres-stats-row" style="margin-top:1rem">'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">2–3×</div><div class="pres-stat-label">CPM Premium</div><div class="pres-stat-sub">Verified vs. unverified</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">$360M</div><div class="pres-stat-label">Annual Uplift</div><div class="pres-stat-sub">At 1B impressions/month</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--purple)">80–85%</div><div class="pres-stat-label">Revenue Retained</div><div class="pres-stat-sub">Day one, no upfront cost</div></div>'+
-    '</div>'+
-    '<div class="pres-callout">No competitor combines all five layers in a single managed service. The premium is real, proven, and already being paid by P&G, Unilever, and General Motors for verified inventory.</div>'
-  );
-  setTimeout(function(){
-    document.querySelectorAll('.pres-cpm-bar').forEach(function(b){
-      b.style.width=b.dataset.w+'%';
-    });
-  },800);
-};
-
-// ── Act 13: The Revenue Model ──────────────────────────────────────────
-window.FW_buildStage13 = function(container){
-  pSlide(container, 13,
-    'Modeled from independently sourced market data.',
-    'The Revenue Model',
-    '<div class="pres-table">'+
-      '<div class="pres-table-hdr"><div>Scenario</div><div>Monthly Viewers</div><div>Projected Annual Revenue</div></div>'+
-      '<div class="pres-table-row conservative"><div>Conservative</div><div>5 million</div><div class="rev">$7.2M</div></div>'+
-      '<div class="pres-table-row base"><div>Base Case</div><div>12 million</div><div class="rev">$23.1M</div></div>'+
-      '<div class="pres-table-row optimistic"><div>Optimistic</div><div>25 million</div><div class="rev">$68.9M</div></div>'+
-    '</div>'+
-    '<div class="pres-stats-row" style="margin-top:1rem">'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">$1.8M</div><div class="pres-stat-label">Year 1 / Single Channel</div><div class="pres-stat-sub">500K monthly viewers · before commerce</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">&lt;0.1%</div><div class="pres-stat-label">Market Share Required</div><div class="pres-stat-sub">US CTV programmatic market (base case)</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--amber)">3–8%</div><div class="pres-stat-label">Commerce Conversion</div><div class="pres-stat-sub">Additional revenue beyond advertising</div></div>'+
+      '<div class="pres-layer" style="border-color:var(--cyan)"><span class="pl-icon">⚡</span><div><div class="pl-label">MoQ+ CDN Infrastructure</div><div class="pl-detail">Sub-150ms globally · 99.9999% SLA · 30% bandwidth efficiency · existing 3kW–5kW telecom power shells</div></div></div>'+
+      '<div class="pres-layer" style="border-color:var(--blue)"><span class="pl-icon">📡</span><div><div class="pl-label">White-Label Channel Distribution</div><div class="pl-detail">Roku (97.3M viewers) · Apple TV · Amazon Fire TV · Samsung TV — Day 1</div></div></div>'+
+      '<div class="pres-layer" style="border-color:var(--purple)"><span class="pl-icon">🏷</span><div><div class="pl-label">OpenRTB 2.6 Programmatic Auction</div><div class="pl-detail">Full real-time auction · all major DSPs connected · sub-500ms clearing</div></div></div>'+
+      '<div class="pres-layer" style="border-color:var(--green)"><span class="pl-icon">⛓</span><div><div class="pl-label">Cryptographic Proof-of-Delivery</div><div class="pl-detail">Unlocks $45–65 verified CPMs · on-chain receipt per impression</div></div></div>'+
+      '<div class="pres-layer" style="border-color:var(--amber)"><span class="pl-icon">🛒</span><div><div class="pl-label">Interactive Commerce Layer</div><div class="pl-detail">3–8% viewer conversion · single remote-control interaction · EchoStar retains 80–85% of revenue</div></div></div>'+
     '</div>'
   );
 };
 
-// ── Act 14: Beyond Advertising ─────────────────────────────────────────
+// ── Act 12: Revenue Engines ────────────────────────────────────────────
+window.FW_buildStage12 = function(container){
+  pSlide(container, 12,
+    'Three independent revenue engines on a single infrastructure investment.',
+    'Technical Transformation & Revenue Engines',
+    '<div class="pres-table">'+
+      '<div class="pres-table-hdr"><div>Product / Service</div><div>Target Clients</div><div>Revenue Model</div></div>'+
+      '<div class="pres-table-row" style="border-left:3px solid var(--cyan)">'+
+        '<div style="font-weight:700;color:var(--cyan)">MoQ+ CDN Delivery</div>'+
+        '<div style="font-size:0.75rem;color:var(--muted)">DISH/Sling TV · Sports Broadcasters · Sports Betting · Interactive Gaming</div>'+
+        '<div style="font-size:0.75rem;color:var(--text)">Real-time media transport · Premium OTT delivery · Live sports distribution</div>'+
+      '</div>'+
+      '<div class="pres-table-row" style="border-left:3px solid var(--green)">'+
+        '<div style="font-weight:700;color:var(--green)">Verified FAST Ad Platform</div>'+
+        '<div style="font-size:0.75rem;color:var(--muted)">Sports rights holders · OTT platforms · Content partners</div>'+
+        '<div style="font-size:0.75rem;color:var(--text)">15–20% platform fee on verified gross CPM revenue</div>'+
+      '</div>'+
+      '<div class="pres-table-row" style="border-left:3px solid var(--amber)">'+
+        '<div style="font-weight:700;color:var(--amber)">Interactive Commerce & Betting</div>'+
+        '<div style="font-size:0.75rem;color:var(--muted)">Sportsbook operators · Retailers · Fantasy platforms</div>'+
+        '<div style="font-size:0.75rem;color:var(--text)">1.5% transaction fee on purchases · Revenue share on in-play betting</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="pres-callout" style="margin-top:0.75rem">CapEx-light deployment using established telecom power and cooling shells already engineered for 5G demands. The infrastructure is already built. No new capital expenditure required.</div>'
+  );
+};
+
+// ── Act 13: Revenue Model ──────────────────────────────────────────────
+window.FW_buildStage13 = function(container){
+  pSlide(container, 13,
+    'Independently sourced. Conservative assumptions. A single channel pays back in Year 1.',
+    'Winning Back the Audience — Revenue Model',
+    '<div class="pres-stats-row" style="margin-bottom:0.85rem">'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">$1.8M</div><div class="pres-stat-label">Year 1 / Single Channel</div><div class="pres-stat-sub">500K monthly viewers · ad revenue before commerce</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">0%</div><div class="pres-stat-label">Upfront Cost to EchoStar</div><div class="pres-stat-sub">Revenue share begins on first verified impression</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--purple)">3–8%</div><div class="pres-stat-label">Commerce Conversion</div><div class="pres-stat-sub">Interactive overlay · proven viewer engagement rate</div></div>'+
+    '</div>'+
+    '<div class="pres-table">'+
+      '<div class="pres-table-hdr"><div>Scenario</div><div>Monthly Active Viewers</div><div>Projected Annual Revenue</div></div>'+
+      '<div class="pres-table-row conservative"><div>Conservative</div><div>5 million</div><div class="rev">$7.2M</div></div>'+
+      '<div class="pres-table-row base"><div>Base Case</div><div>12 million</div><div class="rev">$23.1M</div></div>'+
+      '<div class="pres-table-row optimistic"><div>Optimistic</div><div>25 million</div><div class="rev">$68.9M</div></div>'+
+    '</div>'
+  );
+};
+
+// ── Act 14: Financial & Operational Value Proposition ──────────────────
 window.FW_buildStage14 = function(container){
   pSlide(container, 14,
-    'The natural next stage of the platform.',
-    'Beyond Advertising',
-    '<div class="pres-stats-row">'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">$102B</div><div class="pres-stat-label">US Sports Betting (2026)</div><div class="pres-stat-sub">Projected $205B by 2032</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--purple)">12%</div><div class="pres-stat-label">Compound Annual Growth</div><div class="pres-stat-sub">In-play & mobile fastest segments</div></div>'+
-      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">20%</div><div class="pres-stat-label">US Adults Bet in 2025</div><div class="pres-stat-sub">Up from 12% two years prior</div></div>'+
+    'From liabilities to high-margin SaaS. Compute proximity beats compute volume.',
+    'Financial & Operational Value Proposition',
+    '<div class="pres-stats-row" style="margin-bottom:0.85rem">'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--blue)">$102B</div><div class="pres-stat-label">US Sports Betting (2026)</div><div class="pres-stat-sub">Projected $205B by 2032 · 12%+ CAGR</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--purple)">&lt;1s</div><div class="pres-stat-label">In-Play Sync Required</div><div class="pres-stat-sub">Only MoQ+ CDN delivers at broadcast scale</div></div>'+
+      '<div class="pres-stat"><div class="pres-stat-val" style="color:var(--green)">Years</div><div class="pres-stat-label">Structural Head Start</div><div class="pres-stat-sub">EchoStar edge footprint vs. competitors building from scratch</div></div>'+
     '</div>'+
-    '<div class="pres-callout" style="margin-top:1rem">The CMXS interactive layer positions EchoStar as the direct point of activation: a viewer watching a live game can be connected to a bet, a purchase, or a financial product in a single remote-control interaction. This is a proprietary commerce and financial services network built on EchoStar\'s own content — <strong>that no third-party platform can replicate</strong>. The data, relationships, and settlement infrastructure built in Phase 1 compound into a durable, high-margin business extending well beyond advertising.</div>'
+    '<div class="pres-layers" style="gap:0.4rem">'+
+      '<div class="pres-layer" style="border-color:var(--green)"><span class="pl-icon">📈</span><div><div class="pl-label">Liabilities to SaaS Revenue</div><div class="pl-detail">Distressed lease exposure → equity ownership in MoQ CDN → superior SaaS/IaaS valuation multiples</div></div></div>'+
+      '<div class="pres-layer" style="border-color:var(--blue)"><span class="pl-icon">🏗️</span><div><div class="pl-label">CapEx-Light, Fast Build-Out</div><div class="pl-detail">Existing 3kW–5kW power and cooling shells · bypasses multi-billion dollar construction bottlenecks</div></div></div>'+
+      '<div class="pres-layer" style="border-color:var(--amber)"><span class="pl-icon">⚡</span><div><div class="pl-label">Compute Proximity over Compute Volume</div><div class="pl-detail">Commercializes network velocity · early mover in real-time edge commerce while hyperscalers sell centralized compute</div></div></div>'+
+    '</div>'
   );
 };
 
 // ── Act 15: The Decision ───────────────────────────────────────────────
 window.FW_buildStage15 = function(container){
   pSlide(container, 15,
-    'The only remaining decision.',
-    'The Decision',
+    'The infrastructure exists. The technology is proven. The audience is ready.',
+    'Project Horizon — Proposed First Step',
     '<div class="pres-closing">'+
       '<div class="pres-closing-item">'+
         '<div class="pci-icon" style="color:var(--green)">✅</div>'+
-        '<div class="pci-text"><strong>90-Day Pilot</strong> — One branded EchoStar FAST channel on Roku. First impressions, first verified CPMs, first revenue within the quarter.</div>'+
+        '<div class="pci-text"><strong>90-Day Pilot on Roku</strong> — One branded EchoStar sports FAST channel using existing content rights. Full ad stack running over a MoQ+ delivery node at a single existing telecom shelter.</div>'+
       '</div>'+
       '<div class="pres-closing-item">'+
-        '<div class="pci-icon" style="color:var(--blue)">⛓</div>'+
-        '<div class="pci-text"><strong>No Long-Term Commitment</strong> — Technology proven and running on Base Sepolia right now. Infrastructure already in the ground. No upfront cost, no integration fee.</div>'+
+        '<div class="pci-icon" style="color:var(--blue)">💰</div>'+
+        '<div class="pci-text"><strong>First Revenue Within the Quarter</strong> — First verified impressions, first premium CPM data, and first revenue. No long-term commitment required beyond the pilot. Zero upfront cost.</div>'+
       '</div>'+
       '<div class="pres-closing-item">'+
-        '<div class="pci-icon" style="color:var(--amber)">📺</div>'+
-        '<div class="pci-text"><strong>Roku First</strong> — 97.3M viewers, largest free streaming platform in the US. Existing content rights. Operational milestone, not a technical one.</div>'+
+        '<div class="pci-icon" style="color:var(--cyan)">⚡</div>'+
+        '<div class="pci-text"><strong>Operational, Not Technical</strong> — A working prototype is built and validated end to end. The step from prototype to a live branded channel is an operational milestone, not a technical one.</div>'+
       '</div>'+
     '</div>'+
-    '<div class="pres-closing-cta">The market has moved. The technology is proven. The audience is waiting.<br><strong>The only question is whether EchoStar captures this revenue first.</strong></div>'
+    '<div class="pres-closing-cta">The infrastructure exists. The technology is proven. The audience is ready.<br><strong>The question is not whether this market will be built — it is who builds it first.</strong></div>'
   );
 };
 
