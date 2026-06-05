@@ -1,0 +1,46 @@
+{
+  "object": {
+    "targets": [
+      {
+        "name": "Arenza",
+        "productType": "com.apple.product-type.application",
+        "bundleId": "com.cmxs.arenza",
+        "deploymentTarget": "17.0",
+        "capabilities": [
+          "com.apple.BackgroundTasks",
+          "com.apple.Push",
+          "com.apple.security.device.bluetooth"
+        ],
+        "sources": [
+          "ArenzaApp.swift",
+          "AppEnvironment.swift",
+          "ContentView.swift",
+          "HomeView.swift",
+          "HomeViewModel.swift",
+          "PlayerView.swift",
+          "PlayerViewModel.swift",
+          "SCTE35Detector.swift",
+          "SecureEnclaveManager.swift",
+          "OracleSubmitter.swift",
+          "CMXSAPIClient.swift",
+          "WalletView.swift",
+          "NodeService.swift",
+          "Models.swift"
+        ],
+        "packageDependencies": [
+          {
+            "comment": "Caton MoQ/QUIC SDK — requires Caton API key (C3_API_KEY)",
+            "url": "https://github.com/caton-network/c3cvp-ios-sdk",
+            "version": "from: 3.0.0"
+          },
+          {
+            "comment": "web3swift for Base L2 JSON-RPC calls",
+            "url": "https://github.com/web3swift-team/web3swift",
+            "version": "from: 3.1.0"
+          }
+        ]
+      }
+    ]
+  },
+  "note": "This is a reference manifest. Open Xcode, create a new iOS App project named 'Arenza', set bundle ID to com.cmxs.arenza, copy all .swift files in, and add SPM packages listed above."
+}
