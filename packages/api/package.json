@@ -8,7 +8,9 @@
     "build": "tsc --noEmit",
     "start": "tsx src/index.local.ts",
     "test": "vitest run",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "demo:moq": "tsx src/simulation/moq-ad-pipeline.ts",
+    "demo:moq:live": "ORACLE_PRIVATE_KEY=${ORACLE_PRIVATE_KEY} tsx src/simulation/moq-ad-pipeline.ts"
   },
   "dependencies": {
     "@clarity/shared": "workspace:*",
