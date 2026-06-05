@@ -1,0 +1,111 @@
+name: Arenza
+options:
+  bundleIdPrefix: com.cmxs
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  defaultConfig: Debug
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    ENABLE_BITCODE: NO
+    ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_STRICT_CONCURRENCY: targeted
+
+targets:
+  Arenza:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Arenza
+        excludes:
+          - "**/.DS_Store"
+    info:
+      path: Arenza/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Arenza
+        CFBundleName: Arenza
+        CFBundleIdentifier: com.cmxs.arenza
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIRequiresFullScreen: false
+        NSFaceIDUsageDescription: "Arenza uses Face ID to protect your PoD signing key and verify ad impressions."
+        NSUserTrackingUsageDescription: "Arenza uses your advertising identifier to deliver relevant sports ads. You can deny this — a privacy-preserving anonymous ID will be used instead."
+        UIBackgroundModes:
+          - audio
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true   # Dev only — restrict to cmxs.io in production
+    entitlements:
+      path: Arenza/Arenza.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.cmxs.arenza
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cmxs.arenza
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_FILE: Arenza/Resources/Info.plist
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+          DEBUG_INFORMATION_FORMAT: dwarf
+          ONLY_ACTIVE_ARCH: YES
+        Release:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: ""
+          DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+          ONLY_ACTIVE_ARCH: NO
+    dependencies: []
+    scheme:
+      testTargets:
+        - ArenzaTests
+      environmentVariables:
+        CMXS_API_BASE: http://localhost:3001
+
+  ArenzaTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ArenzaTests
+    dependencies:
+      - target: Arenza
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cmxs.arenza.tests
+
+schemes:
+  Arenza:
+    build:
+      targets:
+        Arenza: all
+    run:
+      config: Debug
+      environmentVariables:
+        CMXS_API_BASE: http://localhost:3001
+    test:
+      config: Debug
+      targets:
+        - name: ArenzaTests
+          parallelizable: true
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
