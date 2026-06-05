@@ -20,7 +20,6 @@ import {
   createWalletClient,
   createPublicClient,
   http,
-  parseAbi,
   keccak256,
   encodePacked,
   type Hex,
@@ -31,16 +30,54 @@ import { markDeliverySubmitted } from "./delivery.service.js";
 
 // ── Contract ABI (DeliveryOracleV2) ──────────────────────────────────────────
 
-const ORACLE_V2_ABI = parseAbi([
-  `function verifyAndMintBatch(
-    (
-      (bytes32 impressionId, address nodeOperator, uint256 cpm, uint256 timestamp, uint256 latencyMs, bytes32 campaignId)[] receipts,
-      bytes[] signatures
-    ) batch
-  ) external`,
-  "event BatchProcessed(uint256 count, uint256 totalMinted)",
-  "event PoDVerified(bytes32 indexed impressionId, address indexed nodeOperator, uint256 cpm, uint256 latencyMs)",
-]);
+// abitype does not support multi-line tuple ABI strings — use explicit ABI object
+const ORACLE_V2_ABI = [
+  {
+    type: "function",
+    name: "verifyAndMintBatch",
+    stateMutability: "nonpayable",
+    inputs: [
+      {
+        name: "batch",
+        type: "tuple",
+        components: [
+          {
+            name: "receipts",
+            type: "tuple[]",
+            components: [
+              { name: "impressionId", type: "bytes32" },
+              { name: "nodeOperator",  type: "address" },
+              { name: "cpm",           type: "uint256" },
+              { name: "timestamp",     type: "uint256" },
+              { name: "latencyMs",     type: "uint256" },
+              { name: "campaignId",    type: "bytes32" },
+            ],
+          },
+          { name: "signatures", type: "bytes[]" },
+        ],
+      },
+    ],
+    outputs: [],
+  },
+  {
+    type: "event",
+    name: "BatchProcessed",
+    inputs: [
+      { name: "count",        type: "uint256", indexed: false },
+      { name: "totalMinted",  type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "PoDVerified",
+    inputs: [
+      { name: "impressionId",  type: "bytes32", indexed: true },
+      { name: "nodeOperator",  type: "address", indexed: true },
+      { name: "cpm",           type: "uint256", indexed: false },
+      { name: "latencyMs",     type: "uint256", indexed: false },
+    ],
+  },
+] as const;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -63,7 +100,7 @@ export interface BatchResult {
 
 // ── Signer setup ──────────────────────────────────────────────────────────────
 
-const ORACLE_PRIVATE_KEY = process.env["ORACLE_PRIVATE_KEY"] as Hex | undefined;
+const ORACLE_PRIVATE_KEY = (process.env["ORACLE_PRIVATE_KEY"] as Hex | undefined);
 const IS_MAINNET = process.env["CHAIN"] === "base-mainnet";
 const chain = IS_MAINNET ? base : baseSepolia;
 const RPC_URL = IS_MAINNET
@@ -76,11 +113,16 @@ const ORACLE_V2_ADDRESS = (
     : process.env["DELIVERY_ORACLE_V2_ADDRESS_SEPOLIA"]
 ) as Hex;
 
+// Use a safe zero-padded placeholder when key not set — crashes only on actual submission
+const SAFE_ORACLE_KEY: Hex = ORACLE_PRIVATE_KEY && ORACLE_PRIVATE_KEY !== "0x"
+  ? ORACLE_PRIVATE_KEY
+  : "0x0000000000000000000000000000000000000000000000000000000000000001";
+
 if (!ORACLE_PRIVATE_KEY || ORACLE_PRIVATE_KEY === "0x") {
   console.warn("[batch-submitter] ORACLE_PRIVATE_KEY not set — batch submission will fail.");
 }
 
-const signerAccount = privateKeyToAccount(ORACLE_PRIVATE_KEY ?? "0x0");
+const signerAccount = privateKeyToAccount(SAFE_ORACLE_KEY);
 
 const walletClient = createWalletClient({
   account: signerAccount,
