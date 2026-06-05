@@ -15,6 +15,15 @@ const nextConfig = {
     NEXT_PUBLIC_DEFAULT_NODE: process.env.NEXT_PUBLIC_DEFAULT_NODE ?? "0x0000000000000000000000000000000000000001",
     NEXT_PUBLIC_DEFAULT_CAMPAIGN: process.env.NEXT_PUBLIC_DEFAULT_CAMPAIGN ?? "0xdeadbeef00000000000000000000000000000000000000000000000000000000",
   },
+  async redirects() {
+    return [
+      {
+        source: '/simulation',
+        destination: '/demo/arenza/index.html',
+        permanent: false,
+      },
+    ]
+  },
 };
 
 module.exports = nextConfig;

@@ -1,0 +1,9 @@
+{
+  "name": "@clarity/arenza-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . --port 3456 --no-clipboard",
+    "start": "npx serve . --port 3456"
+  }
+}
