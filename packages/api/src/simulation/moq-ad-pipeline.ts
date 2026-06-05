@@ -34,7 +34,7 @@
  */
 
 import { randomBytes, createHash } from 'crypto';
-import { keccak256, encodePacked, createPublicClient, createWalletClient, http, parseAbi, type Hex } from 'viem';
+import { keccak256, encodePacked, type Hex } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
 import { runOpenRTBAuction } from '../auction/openrtb-engine.js';
@@ -151,7 +151,7 @@ async function* simulateMoqAdStream(
   for (let seq = 0; seq < durationSegments; seq++) {
     const quartile = Object.entries(quartileSegments).find(([, s]) => s === seq)?.[0];
 
-    yield {
+    const seg: MoqSegment & { quartile?: string } = {
       sequenceNumber: seq,
       timestampMs: Date.now(),
       trackPath: `${namespace}/${trackName}`,
@@ -160,8 +160,9 @@ async function* simulateMoqAdStream(
         Buffer.from(`AD-SEG-${seq.toString().padStart(3, '0')}--`),
         randomBytes(48)
       ]),
-      quartile,
     };
+    if (quartile !== undefined) seg.quartile = quartile;
+    yield seg;
 
     await delay(200);  // compressed from 2s
   }
@@ -275,11 +276,11 @@ export async function runMoqAdPipeline(): Promise<void> {
           log(c.green('[WINNER]'), c.bold(`🏆 ${winner.dspName} — $${winner.winningCpm.toFixed(2)} CPM`));
           log(c.green('[WINNER]'), `Clearing price: $${winner.clearingCpm?.toFixed(2)} CPM (second-price Vickrey)`);
           log(c.green('[WINNER]'), `Advertiser:     ${winner.advertiser}`);
-          log(c.green('[WINNER]'), `Creative:       ${winner.creativeUrl ?? 'cmxs/ads/callaway_30s'}`);
+          log(c.green('[WINNER]'), `Creative:       ${winner.creativeKey}`);
 
           adTrackNamespace = AD_NAMESPACE_BASE;
-          adTrackName = winner.creativeKey ?? 'callaway_30s';
-          impressionId = winner.impressionId as Hex ?? impressionId;
+          adTrackName = winner.creativeKey;
+          // impressionId is generated locally above — WonSlot has no impressionId field
         }
 
         switchLatencyMs = elapsed;
