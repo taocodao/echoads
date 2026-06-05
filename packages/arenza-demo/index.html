@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Arenza — Verified Live Sports Advertising Platform</title>
+<meta name="description" content="Arenza delivers cryptographically verified ad impressions on live sports streams, unlocking $45–65 CPM for local TV station partners."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- HERO NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <span class="logo-mark">▲</span>
+      <span class="logo-text">Arenza</span>
+    </div>
+    <div class="nav-pills">
+      <button class="pill active" data-slide="0">Overview</button>
+      <button class="pill" data-slide="1">Problem</button>
+      <button class="pill" data-slide="2">Solution</button>
+      <button class="pill" data-slide="3">Live Demo</button>
+      <button class="pill" data-slide="4">Economics</button>
+      <button class="pill" data-slide="5">Token</button>
+      <button class="pill" data-slide="6">Go-To-Market</button>
+      <button class="pill" data-slide="7">Ask</button>
+    </div>
+    <button id="playBtn" class="play-btn" onclick="toggleAutoplay()">▶ Auto-Play</button>
+  </div>
+</nav>
+
+<!-- SLIDE CONTAINER -->
+<main id="slides">
+
+  <!-- SLIDE 0: HERO -->
+  <section class="slide active" id="slide-0">
+    <div class="slide-bg slide-bg-hero"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">VERIFIED LIVE SPORTS ADVERTISING</div>
+      <h1 class="hero-title">
+        Every Ad.<br/>
+        <span class="grad">Every Proof.</span><br/>
+        Every Dollar.
+      </h1>
+      <p class="hero-sub">Arenza delivers cryptographically verified ad impressions on live sports streams — unlocking the $45–65 CPM verified tier for local TV station partners. Zero upfront cost. 85% revenue share. On-chain proof every 35 seconds.</p>
+      <div class="hero-stats">
+        <div class="stat-card"><span class="stat-num">$45–65</span><span class="stat-label">Verified CPM</span></div>
+        <div class="stat-card"><span class="stat-num">&lt;300ms</span><span class="stat-label">Glass-to-Glass Latency</span></div>
+        <div class="stat-card"><span class="stat-num">5,800</span><span class="stat-label">EchoStar Edge Nodes</span></div>
+        <div class="stat-card"><span class="stat-num">85%</span><span class="stat-label">Partner Revenue Share</span></div>
+      </div>
+      <div class="cta-row">
+        <button class="btn-primary" onclick="goSlide(1)">See The Problem →</button>
+        <button class="btn-ghost" onclick="goSlide(3)">Live Demo</button>
+      </div>
+    </div>
+    <div class="hero-viz">
+      <div class="orbit-ring ring-1"></div>
+      <div class="orbit-ring ring-2"></div>
+      <div class="orbit-ring ring-3"></div>
+      <div class="orbit-center">
+        <span class="orbit-icon">🔗</span>
+        <span class="orbit-label">Base L2</span>
+      </div>
+      <div class="orbit-node" style="--angle:0deg">📺</div>
+      <div class="orbit-node" style="--angle:72deg">📡</div>
+      <div class="orbit-node" style="--angle:144deg">💰</div>
+      <div class="orbit-node" style="--angle:216deg">🏗️</div>
+      <div class="orbit-node" style="--angle:288deg">⚡</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 1: PROBLEM -->
+  <section class="slide" id="slide-1">
+    <div class="slide-bg slide-bg-problem"></div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">THE PROBLEM</div>
+      <h2 class="slide-title">$84B in Ad Fraud.<br/><span class="grad">Local TV Is Left Behind.</span></h2>
+      <div class="problem-grid">
+        <div class="problem-card p-red">
+          <div class="pcard-icon">❌</div>
+          <h3>Unverified FAST Tier</h3>
+          <div class="pcard-cpm">$10–25 CPM</div>
+          <p>No cryptographic proof of delivery. Bot traffic undetected. Advertisers cap spend. Stations earn fraction of fair value.</p>
+        </div>
+        <div class="problem-card p-yellow">
+          <div class="pcard-icon">⚠️</div>
+          <h3>Nielsen Gap</h3>
+          <div class="pcard-cpm">137 Markets</div>
+          <p>Nielsen ceased monitoring in 137 US TV markets in March 2026. Local stations have no credible audience verification.</p>
+        </div>
+        <div class="problem-card p-orange">
+          <div class="pcard-icon">📉</div>
+          <h3>Platform Tax</h3>
+          <div class="pcard-cpm">30–50% Cut</div>
+          <p>Roku takes 30%. FAST aggregators keep 35–50%. Local stations retain pennies on dollars of generated ad value.</p>
+        </div>
+      </div>
+      <div class="compare-table">
+        <div class="ct-row ct-head">
+          <span>Method</span><span>CPM</span><span>Fraud Risk</span><span>Audit Trail</span>
+        </div>
+        <div class="ct-row">
+          <span>Standard FAST</span><span class="c-red">$10–25</span><span class="c-red">High</span><span class="c-red">None</span>
+        </div>
+        <div class="ct-row">
+          <span>DoubleVerify / IAS</span><span class="c-yellow">$20–35</span><span class="c-yellow">Medium</span><span class="c-yellow">Partial</span>
+        </div>
+        <div class="ct-row ct-highlight">
+          <span>Arenza PoD (on-chain)</span><span class="c-green">$45–65+</span><span class="c-green">Negligible</span><span class="c-green">Immutable</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: SOLUTION -->
+  <section class="slide" id="slide-2">
+    <div class="slide-bg slide-bg-solution"></div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">THE SOLUTION</div>
+      <h2 class="slide-title">Five Layers.<br/><span class="grad">One Contract. No Competitors.</span></h2>
+      <div class="layers-stack">
+        <div class="layer-row" style="--delay:0.0s">
+          <div class="layer-num">1</div>
+          <div class="layer-body">
+            <div class="layer-title">MoQ/QUIC Delivery — Caton Enhanced MoQ</div>
+            <div class="layer-desc">200–300ms glass-to-glass latency. 5,800 EchoStar tower edge nodes. Sub-second fan-out to millions concurrent.</div>
+          </div>
+          <div class="layer-badge">DePIN CDN</div>
+        </div>
+        <div class="layer-row" style="--delay:0.1s">
+          <div class="layer-num">2</div>
+          <div class="layer-body">
+            <div class="layer-title">OpenRTB 2.6 Auction Engine</div>
+            <div class="layer-desc">SCTE-35 triggered. 5–10 DSPs bid simultaneously. Second-price Vickrey auction closes in &lt;600ms. Floor: $35 CPM.</div>
+          </div>
+          <div class="layer-badge">Ad Auction</div>
+        </div>
+        <div class="layer-row" style="--delay:0.2s">
+          <div class="layer-num">3</div>
+          <div class="layer-body">
+            <div class="layer-title">Blockchain Proof-of-Delivery — DeliveryOracle.sol</div>
+            <div class="layer-desc">ECDSA signature from viewer's device. Oracle verifies. Base L2 mints immutable receipt within 35 seconds of ad completion.</div>
+          </div>
+          <div class="layer-badge">On-Chain PoD</div>
+        </div>
+        <div class="layer-row" style="--delay:0.3s">
+          <div class="layer-num">4</div>
+          <div class="layer-body">
+            <div class="layer-title">SGAI Interactive Commerce Overlay</div>
+            <div class="layer-desc">Server-guided ad insertion. Proven +76% eCPM lift. +132% fill rate improvement in real sports deployments.</div>
+          </div>
+          <div class="layer-badge">Commerce</div>
+        </div>
+        <div class="layer-row" style="--delay:0.4s">
+          <div class="layer-num">5</div>
+          <div class="layer-body">
+            <div class="layer-title">CMXS Token — Burn-Mint Equilibrium</div>
+            <div class="layer-desc">Every ad dollar burns tokens via AdBurn.sol. Node operators earn 0.001 CMXS/verified impression. Structural price floor.</div>
+          </div>
+          <div class="layer-badge">Tokenomics</div>
+        </div>
+      </div>
+      <div class="moat-note">
+        No competitor — Fubo, Magnite, DoubleVerify, StreamLayer — provides all five layers under a single contract.
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: LIVE DEMO (MoQ PIPELINE) -->
+  <section class="slide" id="slide-3">
+    <div class="slide-bg slide-bg-demo"></div>
+    <div class="slide-content wide">
+      <div class="slide-eyebrow">LIVE MOQ PIPELINE</div>
+      <h2 class="slide-title">The 35-Second<br/><span class="grad">Verified Ad Cycle</span></h2>
+      <div class="pipeline-container">
+        <div class="pipeline-track">
+          <!-- Nodes -->
+          <div class="pnode" id="pn0">
+            <div class="pnode-icon">📡</div>
+            <div class="pnode-label">Live Signal<br/>SRT Ingest</div>
+            <div class="pnode-time">T = 0ms</div>
+          </div>
+          <div class="pline" id="pl0"></div>
+          <div class="pnode" id="pn1">
+            <div class="pnode-icon">⚡</div>
+            <div class="pnode-label">MoQ Encoder<br/>QUIC Publish</div>
+            <div class="pnode-time">T = 50ms</div>
+          </div>
+          <div class="pline" id="pl1"></div>
+          <div class="pnode" id="pn2">
+            <div class="pnode-icon">🏗️</div>
+            <div class="pnode-label">Edge Node<br/>EchoStar Tower</div>
+            <div class="pnode-time">T = 150ms</div>
+          </div>
+          <div class="pline" id="pl2"></div>
+          <div class="pnode" id="pn3">
+            <div class="pnode-icon">📺</div>
+            <div class="pnode-label">Viewer Device<br/>WebTransport</div>
+            <div class="pnode-time">T = 287ms</div>
+          </div>
+        </div>
+        <div class="pipeline-track" style="margin-top:1.5rem">
+          <div class="pnode" id="pn4">
+            <div class="pnode-icon">🔔</div>
+            <div class="pnode-label">SCTE-35<br/>Break Signal</div>
+            <div class="pnode-time">T = 0ms</div>
+          </div>
+          <div class="pline" id="pl3"></div>
+          <div class="pnode" id="pn5">
+            <div class="pnode-icon">🏦</div>
+            <div class="pnode-label">OpenRTB<br/>Auction</div>
+            <div class="pnode-time">T = 550ms</div>
+          </div>
+          <div class="pline" id="pl4"></div>
+          <div class="pnode" id="pn6">
+            <div class="pnode-icon">🎬</div>
+            <div class="pnode-label">Ad Plays<br/>30 seconds</div>
+            <div class="pnode-time">T = 30s</div>
+          </div>
+          <div class="pline" id="pl5"></div>
+          <div class="pnode" id="pn7">
+            <div class="pnode-icon">🔗</div>
+            <div class="pnode-label">PoD Receipt<br/>Base L2 Mint</div>
+            <div class="pnode-time">T = 35s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live ticker -->
+      <div class="ticker-panel">
+        <div class="ticker-status" id="tickerStatus">● PIPELINE IDLE — Click Run to start</div>
+        <div class="ticker-log" id="tickerLog"></div>
+        <div class="ticker-controls">
+          <button class="btn-primary" id="runPipeline" onclick="runPipeline()">▶ Run Demo Cycle</button>
+          <div class="pod-receipt hidden" id="podReceipt">
+            <div class="receipt-title">✅ On-Chain Receipt Minted</div>
+            <div class="receipt-row"><span>Impression ID</span><span id="impId">0x…</span></div>
+            <div class="receipt-row"><span>Winning CPM</span><span id="cpmVal">—</span></div>
+            <div class="receipt-row"><span>Node Reward</span><span>0.001 CMXS</span></div>
+            <div class="receipt-row"><span>Basescan Tx</span><span id="txHash" class="mono">0x…</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DSP Bid Visualizer -->
+      <div class="dsp-panel">
+        <div class="dsp-title">DSP Bids — OpenRTB 2.6</div>
+        <div class="dsp-bars" id="dspBars"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: UNIT ECONOMICS -->
+  <section class="slide" id="slide-4">
+    <div class="slide-bg slide-bg-econ"></div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">UNIT ECONOMICS</div>
+      <h2 class="slide-title">$153K/Month.<br/><span class="grad">Zero Capex.</span></h2>
+      <div class="econ-grid">
+        <div class="econ-main">
+          <div class="econ-label">Single Channel — 500K Monthly Viewers</div>
+          <div class="econ-rows">
+            <div class="econ-row"><span>Monthly Impressions</span><strong>4,000,000</strong></div>
+            <div class="econ-row"><span>Verified CPM</span><strong class="c-green">$45</strong></div>
+            <div class="econ-row"><span>Gross Monthly Revenue</span><strong>$180,000</strong></div>
+            <div class="econ-row econ-split">
+              <span>Station Partner (85%)</span><strong class="c-green">$153,000/mo</strong>
+            </div>
+            <div class="econ-row">
+              <span>Arenza Protocol (15%)</span><strong>$27,000/mo</strong>
+            </div>
+            <div class="econ-row econ-annual">
+              <span>Annual Station Revenue</span><strong class="c-gold">$1,836,000</strong>
+            </div>
+          </div>
+        </div>
+        <div class="econ-scenarios">
+          <div class="scenario-label">Year 3 Scenarios</div>
+          <div class="scenario-card sc-cons">
+            <div class="sc-tag">Conservative</div>
+            <div class="sc-viewers">5M MAV</div>
+            <div class="sc-cpm">$42 CPM</div>
+            <div class="sc-rev">$7.2M/yr</div>
+          </div>
+          <div class="scenario-card sc-base">
+            <div class="sc-tag">Base Case</div>
+            <div class="sc-viewers">12M MAV</div>
+            <div class="sc-cpm">$50 CPM</div>
+            <div class="sc-rev">$23.1M/yr</div>
+          </div>
+          <div class="scenario-card sc-opt">
+            <div class="sc-tag">Optimistic</div>
+            <div class="sc-viewers">25M MAV</div>
+            <div class="sc-cpm">$58 CPM</div>
+            <div class="sc-rev">$68.9M/yr</div>
+          </div>
+        </div>
+      </div>
+      <div class="rev-bar-container">
+        <div class="rev-bar-label">Base Case requires only 0.08% of US CTV programmatic market</div>
+        <div class="rev-bar-track">
+          <div class="rev-bar-fill" id="revBarFill"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: TOKEN / BME -->
+  <section class="slide" id="slide-5">
+    <div class="slide-bg slide-bg-token"></div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">TOKENOMICS</div>
+      <h2 class="slide-title">Every Dollar Burns.<br/><span class="grad">Mechanical Price Floor.</span></h2>
+      <div class="bme-cycle">
+        <div class="bme-node" id="bme0"><div class="bme-icon">💵</div><div class="bme-text">Advertiser<br/>USDC Spend</div></div>
+        <div class="bme-arrow">→</div>
+        <div class="bme-node" id="bme1"><div class="bme-icon">🔥</div><div class="bme-text">AdBurn.sol<br/>Burns CMXS</div></div>
+        <div class="bme-arrow">→</div>
+        <div class="bme-node" id="bme2"><div class="bme-icon">📉</div><div class="bme-text">Supply<br/>Deflation</div></div>
+        <div class="bme-arrow">→</div>
+        <div class="bme-node" id="bme3"><div class="bme-icon">📈</div><div class="bme-text">Token Price<br/>Appreciation</div></div>
+        <div class="bme-arrow">→</div>
+        <div class="bme-node" id="bme4"><div class="bme-icon">🏗️</div><div class="bme-text">More Edge<br/>Nodes Join</div></div>
+        <div class="bme-arrow bme-wrap">↩ cycle repeats</div>
+      </div>
+      <div class="depin-comp">
+        <div class="dc-title">DePIN Protocol Comparables</div>
+        <div class="dc-row dc-head"><span>Protocol</span><span>Annual Revenue</span><span>FDV</span><span>Multiple</span></div>
+        <div class="dc-row"><span>Helium (HNT)</span><span>$24M</span><span>~$500M</span><span>21x</span></div>
+        <div class="dc-row"><span>Render (RENDER)</span><span>$15M</span><span>~$1.5B</span><span>100x</span></div>
+        <div class="dc-row"><span>Akash (AKT)</span><span>+428% YoY</span><span>~$350M</span><span>25x</span></div>
+        <div class="dc-row dc-us">
+          <span>Arenza (Target Y3)</span><span>$23.1M</span><span>$150–462M</span><span class="c-gold">20–35x</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: GO-TO-MARKET -->
+  <section class="slide" id="slide-6">
+    <div class="slide-bg slide-bg-gtm"></div>
+    <div class="slide-content">
+      <div class="slide-eyebrow">GO-TO-MARKET</div>
+      <h2 class="slide-title">Local TV Stations.<br/><span class="grad">90-Day Cold Start.</span></h2>
+      <div class="gtm-phases">
+        <div class="phase-card">
+          <div class="phase-num">Phase 0</div>
+          <div class="phase-title">Setup — Weeks 1–6</div>
+          <ul class="phase-list">
+            <li>Register 3–5 EchoStar tower nodes in pilot DMA</li>
+            <li>Deploy Roku BrightScript SDK preview channel</li>
+            <li>Connect CMXS SSP to 2–3 DSP demand partners</li>
+            <li>Deploy DeliveryOracle.sol on Base Sepolia testnet</li>
+            <li>Generate 10,000 synthetic PoD receipts as baseline</li>
+          </ul>
+        </div>
+        <div class="phase-card phase-active">
+          <div class="phase-num">Phase 1</div>
+          <div class="phase-title">Live Pilot — Weeks 6–12</div>
+          <ul class="phase-list">
+            <li>100,000 real on-chain verified impressions</li>
+            <li>First direct local advertiser campaign</li>
+            <li>$50K–$100K real USDC revenue on mainnet</li>
+            <li>LOI signed with station partner</li>
+          </ul>
+          <div class="phase-badge">TARGET NOW</div>
+        </div>
+        <div class="phase-card">
+          <div class="phase-num">Phase 2</div>
+          <div class="phase-title">Scale — Months 3–6</div>
+          <ul class="phase-list">
+            <li>Expand to Amazon Fire TV</li>
+            <li>Activate x402 shoppable overlay</li>
+            <li>Add second content partner (college sports)</li>
+            <li>CPM comparison report → next DMA pitch</li>
+          </ul>
+        </div>
+      </div>
+      <div class="advertiser-targets">
+        <div class="at-title">Target Local Advertisers by Category</div>
+        <div class="at-grid">
+          <div class="at-card"><span class="at-icon">🚗</span><span class="at-cat">Automotive</span><span class="at-cpm">$40–50 CPM</span></div>
+          <div class="at-card"><span class="at-icon">🏥</span><span class="at-cat">Healthcare</span><span class="at-cpm">$38–45 CPM</span></div>
+          <div class="at-card"><span class="at-icon">⚖️</span><span class="at-cat">Legal</span><span class="at-cpm">$35–42 CPM</span></div>
+          <div class="at-card"><span class="at-icon">🏦</span><span class="at-cat">Financial</span><span class="at-cpm">$38–48 CPM</span></div>
+          <div class="at-card"><span class="at-icon">🍔</span><span class="at-cat">Restaurants</span><span class="at-cpm">$30–35 CPM</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: ASK / CLOSE -->
+  <section class="slide" id="slide-7">
+    <div class="slide-bg slide-bg-ask"></div>
+    <div class="slide-content center-content">
+      <div class="slide-eyebrow">THE PROPOSITION</div>
+      <h2 class="slide-title">90-Day Pilot.<br/><span class="grad">Zero Technology Cost.</span></h2>
+      <div class="ask-box">
+        <p class="ask-quote">
+          "We want to run a 90-day pilot with your station. Zero technology cost to you. We need access to your content feed and your existing linear ad relationships. At the end of 90 days, you'll have a verified CPM report, an auditable on-chain impression record, and a revenue check. If the numbers don't beat your current FAST CPM, we'll part ways. If they do — and we're confident they will — we extend to a 12-month Channel-as-a-Service agreement."
+        </p>
+      </div>
+      <div class="network-projection">
+        <div class="np-title">Station Network Projection</div>
+        <div class="np-grid">
+          <div class="np-head"><span>Year</span><span>Partners</span><span>Avg CPM</span><span>Protocol Revenue</span></div>
+          <div class="np-row"><span>Year 1</span><span>5 stations</span><span>$36</span><span>$240K</span></div>
+          <div class="np-row"><span>Year 2</span><span>20 stations</span><span>$40</span><span>$1.73M</span></div>
+          <div class="np-row np-y3"><span>Year 3</span><span>50 stations</span><span>$45</span><span class="c-gold">$9.7M</span></div>
+        </div>
+      </div>
+      <div class="saft-note">
+        <span class="saft-badge">SAFT Funding</span>
+        Token gated on 4 milestones: ① Smart contract audit on Base mainnet ② Signed LOI from content partner ③ 100,000 verified on-chain impressions ④ $50,000 real USDC ad revenue
+      </div>
+      <button class="btn-primary btn-xl" onclick="goSlide(3)">Watch Live Pipeline Demo →</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- PROGRESS BAR -->
+<div id="progressBar">
+  <div id="progressFill"></div>
+</div>
+
+<!-- NARRATION BOX -->
+<div id="narrationBox">
+  <div id="narrationText">Arenza — Verified Live Sports Advertising. Ready.</div>
+</div>
+
+<!-- PREV / NEXT -->
+<button class="nav-arrow nav-prev" onclick="goSlide(currentSlide-1)">‹</button>
+<button class="nav-arrow nav-next" onclick="goSlide(currentSlide+1)">›</button>
+
+<script src="app.js"></script>
+</body>
+</html>
