@@ -11,7 +11,7 @@ default_platform(:ios)
 SCHEME      = "Arenza"
 PROJECT     = "Arenza.xcodeproj"
 BUNDLE_ID   = "com.cmxs.arenza"
-SIMULATOR   = "platform=iOS Simulator,name=iPhone 15"
+SIMULATOR   = "platform=iOS Simulator,name=iPhone 16"
 
 platform :ios do
 
