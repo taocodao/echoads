@@ -1,0 +1,133 @@
+# fastlane/Fastfile — Arenza iOS CI/CD
+# ─────────────────────────────────────────────────────────────────────────────
+# Lanes:
+#   fastlane test              → Compile + run unit tests on Simulator
+#   fastlane beta              → Build + sign + upload to TestFlight
+#   fastlane setup_signing     → (run ONCE locally) bootstrap match certificates
+# ─────────────────────────────────────────────────────────────────────────────
+
+default_platform(:ios)
+
+SCHEME      = "Arenza"
+PROJECT     = "Arenza.xcodeproj"
+BUNDLE_ID   = "com.cmxs.arenza"
+SIMULATOR   = "platform=iOS Simulator,name=iPhone 16,OS=latest"
+
+platform :ios do
+
+  # ── Before all lanes: ensure XcodeGen project exists ──────────────────────
+
+  before_all do
+    # Generate Xcode project from project.yml (no .xcodeproj committed to git)
+    sh("which xcodegen || brew install xcodegen")
+    sh("xcodegen generate --spec project.yml")
+    UI.success("✅ Arenza.xcodeproj generated from project.yml")
+  end
+
+  # ── Test: compile + unit test on Simulator ─────────────────────────────────
+
+  lane :test do
+    UI.header("🧪 Running Arenza Tests on iOS Simulator")
+
+    run_tests(
+      project: PROJECT,
+      scheme: SCHEME,
+      devices: [SIMULATOR],
+      configuration: "Debug",
+      code_coverage: true,
+      result_bundle: true,
+      output_directory: "./test-results",
+      xcargs: "CODE_SIGNING_ALLOWED=NO"
+    )
+
+    UI.success("✅ All tests passed!")
+  end
+
+  # ── Beta: build signed Release IPA + upload to TestFlight ─────────────────
+
+  lane :beta do
+    UI.header("🚀 Building Arenza for TestFlight")
+
+    # 1. Bump build number using current CI run number (or date-based)
+    build_number = ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
+    increment_build_number(build_number: build_number, xcodeproj: PROJECT)
+    UI.message("Build number: #{build_number}")
+
+    # 2. Install App Store certificates + provisioning profiles via match
+    setup_ci if ENV["CI"]
+    match(
+      type: "appstore",
+      app_identifier: BUNDLE_ID,
+      readonly: true,
+      git_url: ENV["MATCH_GIT_URL"],
+      git_basic_authorization: Base64.strict_encode64("#{ENV['GITHUB_ACTOR']}:#{ENV['MATCH_GIT_BASIC_AUTH']}"),
+      keychain_name: "fastlane_tmp",
+      keychain_password: ENV["MATCH_PASSWORD"] || "fastlane_tmp_password"
+    )
+
+    # 3. Archive
+    gym(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "Arenza",
+      clean: true,
+      include_symbols: true,
+      include_bitcode: false,     # Bitcode deprecated in Xcode 14+
+      xcargs: [
+        "SWIFT_STRICT_CONCURRENCY=targeted",
+        "MARKETING_VERSION=0.1.0"
+      ].join(" ")
+    )
+
+    # 4. Upload to TestFlight
+    pilot(
+      ipa: "./build/Arenza.ipa",
+      api_key_path: "./fastlane/AuthKey.json",  # App Store Connect API key
+      skip_waiting_for_build_processing: true,   # Don't block CI — upload and continue
+      distribute_external: false,                 # Internal testers only for now
+      notify_external_testers: false,
+      changelog: "Build #{build_number} — Auto-deployed from GitHub Actions"
+    )
+
+    UI.success("✅ Arenza #{build_number} uploaded to TestFlight!")
+
+    # 5. Notification summary for GitHub Actions
+    if ENV["GITHUB_STEP_SUMMARY"]
+      File.open(ENV["GITHUB_STEP_SUMMARY"], "a") do |f|
+        f.puts "## ✅ TestFlight Upload Complete"
+        f.puts "| | |"
+        f.puts "|---|---|"
+        f.puts "| Build | #{build_number} |"
+        f.puts "| Scheme | #{SCHEME} |"
+        f.puts "| Distribution | TestFlight (Internal) |"
+        f.puts "| Check | [App Store Connect](https://appstoreconnect.apple.com) |"
+      end
+    end
+  end
+
+  # ── Setup Signing: run ONCE locally with your Apple credentials ────────────
+  # This generates certs and uploads them encrypted to your private certs repo.
+  # You NEVER need to run this on CI.
+
+  lane :setup_signing do
+    UI.header("🔐 Bootstrap Code Signing via Fastlane Match")
+    match(
+      type: "appstore",
+      app_identifier: BUNDLE_ID,
+      force_for_new_devices: true,
+      readonly: false
+    )
+    UI.success("✅ Certificates generated and stored in your certs repo!")
+  end
+
+  # ── Error handler ──────────────────────────────────────────────────────────
+
+  error do |lane, exception|
+    UI.error("Lane '#{lane}' failed: #{exception.message}")
+    # In production, send a Slack/Teams notification here
+  end
+
+end

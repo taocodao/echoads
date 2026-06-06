@@ -76,6 +76,10 @@ targets:
         - ArenzaTests
       environmentVariables:
         CMXS_API_BASE: http://localhost:3001
+        CMXS_TOKEN_ADDRESS: "0xbD8A3FDd326C08F260f5ef77A7c79ec4B5091AeC"
+        ORACLE_ADDRESS: "0x9a45Ea9b31eF2E2c36f9478874d0805446804cC1"
+        AD_BURN_ADDRESS: "0xFF5c1cF5f22689517aB2950101B0a623d5c6884D"
+        BASE_SEPOLIA_CHAIN_ID: "84532"
 
   ArenzaTests:
     type: bundle.unit-test
