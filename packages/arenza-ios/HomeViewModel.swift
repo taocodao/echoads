@@ -41,7 +41,7 @@ enum Constants {
     static let apiBase = "https://api.cmxs.io/v1"
 
     // Base Sepolia testnet – populated after contract deploy
-    static let cmxsTokenAddress    = "0x0000000000000000000000000000000000000000" // TBD
-    static let oracleAddress       = "0x0000000000000000000000000000000000000000" // TBD
+    static let cmxsTokenAddress    = "0xbD8A3FDd326C08F260f5ef77A7c79ec4B5091AeC"
+    static let oracleAddress       = "0x9a45Ea9b31eF2E2c36f9478874d0805446804cC1"
     static let baseSepolia         = 84532
 }

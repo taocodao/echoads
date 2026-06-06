@@ -1,0 +1,12 @@
+{
+  "status": "DEPLOYED",
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "deployer": "0xFB356510db57BfBfba56BcBe40300bbceC0f2Cd5",
+  "deployedAt": "2026-06-06T00:37:18.976Z",
+  "contracts": {
+    "CMXS": "0xbD8A3FDd326C08F260f5ef77A7c79ec4B5091AeC",
+    "DeliveryOracle": "0x9a45Ea9b31eF2E2c36f9478874d0805446804cC1",
+    "AdBurn": "0xFF5c1cF5f22689517aB2950101B0a623d5c6884D"
+  }
+}
