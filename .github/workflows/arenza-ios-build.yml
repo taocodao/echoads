@@ -74,8 +74,13 @@ jobs:
             -scheme Arenza \
             2>&1 | grep -E "(Resolved|error:|warning:|Fetch)" || true
 
-      - name: List Simulators (Debug)
-        run: xcrun simctl list devices
+      - name: Boot iPhone 16 Simulator
+        run: |
+          # Pick the first iPhone 16 UDID and boot it
+          UDID=$(xcrun simctl list devices | grep 'iPhone 16 (' | grep -v 'Plus\|Pro\|e (' | head -1 | grep -oE '[A-F0-9-]{36}')
+          echo "Booting simulator UDID: $UDID"
+          xcrun simctl boot "$UDID" || true
+          echo "SIMULATOR_UDID=$UDID" >> $GITHUB_ENV
 
       - name: Build for iOS Simulator
         run: |
@@ -83,7 +88,7 @@ jobs:
           xcodebuild build-for-testing \
             -project Arenza.xcodeproj \
             -scheme Arenza \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -destination "id=$SIMULATOR_UDID" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             SWIFT_STRICT_CONCURRENCY=targeted \
@@ -95,7 +100,7 @@ jobs:
           xcodebuild test-without-building \
             -project Arenza.xcodeproj \
             -scheme Arenza \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -destination "id=$SIMULATOR_UDID" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             -resultBundlePath TestResults.xcresult \
