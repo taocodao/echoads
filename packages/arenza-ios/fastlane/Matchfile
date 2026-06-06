@@ -1,6 +1,7 @@
-git_url ENV["MATCH_GIT_URL"] || "https://github.com/taocodao/ios-certificates.git"
-storage_mode "git"
-type "appstore"                  # use "adhoc" for Ad Hoc, "appstore" for TestFlight/App Store
+git_url        ENV["MATCH_GIT_URL"] || "https://github.com/taocodao/ios-certificates.git"
+storage_mode   "git"
+type           "appstore"          # use "adhoc" for Ad Hoc, "appstore" for TestFlight/App Store
 app_identifier ["com.cmxs.arenza"]
-username ENV["APPLE_ID"]
-readonly ENV["CI"] == "true"     # on CI: read-only (don't create new certs)
+username       ENV["APPLE_ID"]
+team_id        ENV["APPLE_TEAM_ID"] || "5R8WY2Q734"
+readonly       ENV["CI"] == "true" # on CI: read-only (don't create new certs)

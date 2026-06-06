@@ -1,4 +1,4 @@
 app_identifier "com.cmxs.arenza"
-apple_id ENV["APPLE_ID"]
-itc_team_name "CMXS"    # Update with your Apple Developer team name
-team_id ENV["APPLE_TEAM_ID"]
+apple_id        ENV["APPLE_ID"]
+itc_team_name   "CMXS"
+team_id         ENV["APPLE_TEAM_ID"] || "5R8WY2Q734"

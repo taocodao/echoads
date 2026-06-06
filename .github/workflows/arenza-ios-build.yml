@@ -16,6 +16,7 @@ on:
 env:
   RUBY_VERSION: '3.2'
   XCODE_VERSION: '16'
+  APPLE_TEAM_ID: '5R8WY2Q734'   # Apple Developer Team ID
 
 jobs:
 
@@ -203,7 +204,7 @@ jobs:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTH: ${{ secrets.MATCH_GIT_BASIC_AUTH }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '5R8WY2Q734' }}
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: bundle exec fastlane beta
 
