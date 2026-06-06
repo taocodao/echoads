@@ -84,6 +84,7 @@ platform :ios do
 
     # 4. Upload to TestFlight
     pilot(
+      apple_id: ENV["ASC_APP_ID"] || "6777539402",
       ipa: "./build/Arenza.ipa",
       api_key_path: "./fastlane/AuthKey.json",  # App Store Connect API key
       skip_waiting_for_build_processing: true,   # Don't block CI — upload and continue
