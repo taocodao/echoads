@@ -54,8 +54,6 @@ platform :ios do
       readonly: true,
       git_url: "https://github.com/taocodao/ios-certificates.git",
       git_basic_authorization: Base64.strict_encode64(ENV["MATCH_GIT_BASIC_AUTH"] || ""),
-      keychain_name: "fastlane_tmp",
-      keychain_password: ENV["MATCH_PASSWORD"] || "fastlane_tmp_password",
       api_key_path: "./fastlane/AuthKey.json"
     )
 
