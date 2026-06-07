@@ -48,14 +48,21 @@ platform :ios do
 
     # 2. Install App Store certificates + provisioning profiles via match
     # setup_ci creates fastlane_tmp_keychain — match installs cert+profile into it
-    setup_ci if ENV["CI"]
+    keychain_pass = ENV["MATCH_PASSWORD"] || ""
+    setup_ci(
+      force: true,
+      timeout: 3600,
+      keychain_password: keychain_pass
+    ) if ENV["CI"]
     match(
       type: "appstore",
       app_identifier: BUNDLE_ID,
       readonly: false,   # generate/install cert into setup_ci keychain
       git_url: "https://github.com/taocodao/ios-certificates.git",
       git_basic_authorization: Base64.strict_encode64(ENV["MATCH_GIT_BASIC_AUTH"] || ""),
-      api_key_path: "./fastlane/AuthKey.json"
+      api_key_path: "./fastlane/AuthKey.json",
+      keychain_name: "fastlane_tmp_keychain",
+      keychain_password: keychain_pass
     )
 
     # 3. Archive (need to install iOS 18 device support or skip the runtime check)
