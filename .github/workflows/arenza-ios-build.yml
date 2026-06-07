@@ -313,7 +313,7 @@ jobs:
             --app-arn "${{ steps.upload_ipa.outputs.upload_arn }}" \
             --device-pool-arn "${{ secrets.AWS_DEVICE_FARM_IPHONE_POOL_ARN }}" \
             --name "Arenza-CI-${{ github.run_number }}" \
-            --test '{"type":"EXPLORER","test":{"type":"EXPLORER"}}' \
+            --test '{"type":"BUILTIN_EXPLORER"}' \
             --query 'run.arn' \
             --output text)
           echo "run_arn=$RUN" >> $GITHUB_OUTPUT
