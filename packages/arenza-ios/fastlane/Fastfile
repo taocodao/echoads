@@ -83,7 +83,7 @@ platform :ios do
       output_name: "Arenza",
       clean: false,   # Skip clean to use incremental build — saves 40+ min on CI
       derived_data_path: "./.derived-data",  # Cacheable path for incremental builds
-      include_symbols: true,
+      include_symbols: false,  # Disable dSYM generation — dsymutil hangs for 30-60 min on CI!
       include_bitcode: false,
       skip_package_pkg: false,
       sdk: "iphoneos",   # Use bundled device SDK directly — avoids generic/platform=iOS runtime check
@@ -103,7 +103,8 @@ platform :ios do
         "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID'] || '5R8WY2Q734'}",
         "CODE_SIGN_IDENTITY=Apple\\ Distribution",
         "PROVISIONING_PROFILE_SPECIFIER=match\\ AppStore\\ #{BUNDLE_ID}",
-        "CODE_SIGNING_REQUIRED=YES"
+        "CODE_SIGNING_REQUIRED=YES",
+        "DEBUG_INFORMATION_FORMAT=dwarf"  # Suppress dsymutil — prevents 30-60 min hang on CI
       ].join(" ")
     )
 
