@@ -203,18 +203,20 @@ jobs:
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTH: ${{ secrets.MATCH_GIT_BASIC_AUTH }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '5R8WY2Q734' }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APP_STORE_CONNECT_API_KEY_IN_HOUSE: false
         run: |
-          # Embed credentials in git URL so no terminal prompts are needed
-          # MATCH_GIT_BASIC_AUTH format: "username:ghp_token"
           ENCODED=$(echo -n "$MATCH_GIT_BASIC_AUTH" | base64)
           bundle exec fastlane run match \
             type:appstore \
             readonly:false \
             git_url:"https://github.com/taocodao/ios-certificates.git" \
             git_basic_authorization:"$ENCODED" \
-            team_id:"${APPLE_TEAM_ID:-5R8WY2Q734}"
+            team_id:"${APPLE_TEAM_ID:-5R8WY2Q734}" \
+            api_key_path:"fastlane/AuthKey.json"
 
       - name: Build & Upload to TestFlight via Fastlane
         env:
