@@ -2,7 +2,7 @@ name: Arenza
 options:
   bundleIdPrefix: com.cmxs
   deploymentTarget:
-    iOS: "17.0"
+    iOS: "18.0"
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
   defaultConfig: Debug
@@ -14,7 +14,7 @@ configs:
 settings:
   base:
     SWIFT_VERSION: "5.10"
-    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "18.0"
     ENABLE_BITCODE: NO
     ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
     CODE_SIGN_STYLE: Automatic
@@ -24,7 +24,7 @@ targets:
   Arenza:
     type: application
     platform: iOS
-    deploymentTarget: "17.0"
+    deploymentTarget: "18.0"
     sources:
       - path: Arenza
         excludes:
@@ -84,7 +84,7 @@ targets:
   ArenzaTests:
     type: bundle.unit-test
     platform: iOS
-    deploymentTarget: "17.0"
+    deploymentTarget: "18.0"
     sources:
       - path: ArenzaTests
     dependencies:

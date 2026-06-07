@@ -37,9 +37,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode ${{ env.XCODE_VERSION }}
+      - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          # Use the default Xcode on the runner (avoids version mismatch)
+          XCODE_PATH=$(ls /Applications/ | grep Xcode | sort -r | head -1)
+          sudo xcode-select -s "/Applications/$XCODE_PATH"
           xcodebuild -version
 
       - name: Setup Ruby for Fastlane
@@ -76,16 +78,15 @@ jobs:
 
       - name: Boot iPhone 16 Simulator
         run: |
-          # Pick the first iPhone 16 UDID and boot it
           UDID=$(xcrun simctl list devices | grep 'iPhone 16 (' | grep -v 'Plus\|Pro\|e (' | head -1 | grep -oE '[A-F0-9-]{36}')
-          echo "Booting simulator UDID: $UDID"
-          xcrun simctl boot "$UDID" || true
+          echo "Using simulator UDID: $UDID"
+          xcrun simctl boot "$UDID" 2>/dev/null || true
           echo "SIMULATOR_UDID=$UDID" >> $GITHUB_ENV
 
       - name: Build for iOS Simulator
         run: |
           set -o pipefail
-          xcodebuild build-for-testing \
+          xcodebuild build \
             -project Arenza.xcodeproj \
             -scheme Arenza \
             -destination "id=$SIMULATOR_UDID" \
@@ -97,7 +98,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           set -o pipefail
-          xcodebuild test-without-building \
+          xcodebuild test \
             -project Arenza.xcodeproj \
             -scheme Arenza \
             -destination "id=$SIMULATOR_UDID" \
