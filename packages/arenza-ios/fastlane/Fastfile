@@ -90,6 +90,22 @@ platform :ios do
 
       # Verify the signing identity is available
       sh("security find-identity -v -p codesigning '#{keychain_db}'")
+
+      # Xcode 16 changed the provisioning profile install location.
+      # match installs to ~/Library/MobileDevice/Provisioning Profiles/ (old path).
+      # xcodebuild -exportArchive reads from ~/Library/Developer/Xcode/UserData/Provisioning Profiles/ (new path).
+      # We symlink old → new so both tools see the same profiles.
+      # MUST run AFTER match (match may mkdir the UserData dir itself).
+      # See: https://github.com/fastlane/fastlane/issues/29231
+      new_profile_dir = File.expand_path("~/Library/Developer/Xcode/UserData/Provisioning Profiles")
+      old_profile_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
+      unless File.symlink?(new_profile_dir)
+        sh("mkdir -p '#{File.dirname(new_profile_dir)}'")
+        sh("ln -sfn '#{old_profile_dir}' '#{new_profile_dir}'")
+        UI.message("✅ Xcode 16 profile path symlink created")
+      else
+        UI.message("✅ Xcode 16 profile path symlink already exists")
+      end
     end
 
     # Read the provisioning profile name that match just installed.
