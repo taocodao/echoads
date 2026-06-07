@@ -102,7 +102,7 @@ jobs:
 
       - name: Check coverage
         working-directory: packages/contracts
-        run: forge coverage --report summary
+        run: forge coverage --ir-minimum --report summary
 
   # ── Dashboard build check ────────────────────────────────────────────────────
   build-dashboard:
