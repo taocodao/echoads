@@ -69,16 +69,22 @@ platform :ios do
       include_symbols: true,
       include_bitcode: false,
       skip_package_pkg: false,
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        teamID: ENV["APPLE_TEAM_ID"] || "5R8WY2Q734",
+        provisioningProfiles: {
+          BUNDLE_ID => "match AppStore #{BUNDLE_ID}"
+        }
+      },
       xcargs: [
         "SWIFT_STRICT_CONCURRENCY=targeted",
         "MARKETING_VERSION=0.1.0",
         "IPHONEOS_DEPLOYMENT_TARGET=18.0",
         "CODE_SIGN_STYLE=Manual",
         "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID'] || '5R8WY2Q734'}",
-        "CODE_SIGN_IDENTITY=Apple Distribution",
-        "PROVISIONING_PROFILE_SPECIFIER=match AppStore com.cmxs.arenza",
-        "CODE_SIGNING_REQUIRED=YES",
-        "AD_HOC_CODE_SIGNING_ALLOWED=NO"
+        "CODE_SIGN_IDENTITY='Apple Distribution'",
+        "CODE_SIGNING_REQUIRED=YES"
       ].join(" ")
     )
 
