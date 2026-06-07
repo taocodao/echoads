@@ -80,7 +80,7 @@ actor CMXSAPIClient {
     }
 
     /// Returns the full manifest URL (absolute) for AVPlayer
-    func manifestURL(for sessionId: String) -> URL? {
+    nonisolated func manifestURL(for sessionId: String) -> URL? {
         URL(string: "\(CMXSConfig.apiBase)/api/ssai/manifest/\(sessionId)")
     }
 
