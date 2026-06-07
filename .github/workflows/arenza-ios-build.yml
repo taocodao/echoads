@@ -211,7 +211,7 @@ jobs:
           ENCODED=$(echo -n "$MATCH_GIT_BASIC_AUTH" | base64)
           bundle exec fastlane run match \
             type:appstore \
-            readonly:true \
+            readonly:false \
             git_url:"https://github.com/taocodao/ios-certificates.git" \
             git_basic_authorization:"$ENCODED" \
             team_id:"${APPLE_TEAM_ID:-5R8WY2Q734}"
