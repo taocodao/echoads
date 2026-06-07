@@ -213,8 +213,8 @@ jobs:
           print("✅ AuthKey.json written successfully")
           PYEOF
 
-
       - name: Build & Upload to TestFlight via Fastlane
+        timeout-minutes: 30
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
