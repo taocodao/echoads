@@ -313,7 +313,7 @@ jobs:
             --app-arn "${{ steps.upload_ipa.outputs.upload_arn }}" \
             --device-pool-arn "${{ secrets.AWS_DEVICE_FARM_IPHONE_POOL_ARN }}" \
             --name "Arenza-CI-${{ github.run_number }}" \
-            --test '{"type":"BUILTIN_EXPLORER"}' \
+            --test '{"type":"BUILTIN_FUZZ"}' \
             --query 'run.arn' \
             --output text)
           echo "run_arn=$RUN" >> $GITHUB_OUTPUT
@@ -327,7 +327,7 @@ jobs:
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| Build | ${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Device | iPhone 15, iOS 17 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test Type | Explorer (UI crawl) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Type | Fuzz (Random UI testing) |" >> $GITHUB_STEP_SUMMARY
           echo "| Results | [AWS Console](https://us-west-2.console.aws.amazon.com/devicefarm) |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> The Device Farm run tests the Secure Enclave PoD signing on real iPhone hardware." >> $GITHUB_STEP_SUMMARY
