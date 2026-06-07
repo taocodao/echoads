@@ -52,10 +52,11 @@ platform :ios do
       type: "appstore",
       app_identifier: BUNDLE_ID,
       readonly: true,
-      git_url: ENV["MATCH_GIT_URL"],
-      git_basic_authorization: Base64.strict_encode64("#{ENV['GITHUB_ACTOR']}:#{ENV['MATCH_GIT_BASIC_AUTH']}"),
+      git_url: "https://github.com/taocodao/ios-certificates.git",
+      git_basic_authorization: Base64.strict_encode64(ENV["MATCH_GIT_BASIC_AUTH"] || ""),
       keychain_name: "fastlane_tmp",
-      keychain_password: ENV["MATCH_PASSWORD"] || "fastlane_tmp_password"
+      keychain_password: ENV["MATCH_PASSWORD"] || "fastlane_tmp_password",
+      api_key_path: "./fastlane/AuthKey.json"
     )
 
     # 3. Archive
