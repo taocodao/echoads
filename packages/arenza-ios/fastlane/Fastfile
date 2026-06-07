@@ -68,9 +68,11 @@ platform :ios do
       clean: true,
       include_symbols: true,
       include_bitcode: false,     # Bitcode deprecated in Xcode 14+
+      sdk: "iphoneos",            # Use installed device SDK, don't pin to iOS 18.0
       xcargs: [
         "SWIFT_STRICT_CONCURRENCY=targeted",
-        "MARKETING_VERSION=0.1.0"
+        "MARKETING_VERSION=0.1.0",
+        "IPHONEOS_DEPLOYMENT_TARGET=18.0"
       ].join(" ")
     )
 
