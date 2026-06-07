@@ -44,10 +44,12 @@ targets:
         CFBundleIdentifier: com.cmxs.arenza
         CFBundleVersion: "1"
         CFBundleShortVersionString: "0.1.0"
+        CFBundleIconName: AppIcon   # Required for iOS 11+ App Store submissions
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown   # Required for iPad multitasking
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UIRequiresFullScreen: false
