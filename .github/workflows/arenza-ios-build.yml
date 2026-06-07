@@ -186,24 +186,28 @@ jobs:
 
       - name: Install iOS 18 Device Support
         run: |
-          # Register iOS platform with Xcode
-          # The SDK is bundled with Xcode 16 at the platform path below
-          PLATFORM_DIR="/Applications/Xcode_16.app/Contents/Developer/Platforms/iPhoneOS.platform"
-          SDK_DIR="${PLATFORM_DIR}/Developer/SDKs/iPhoneOS.sdk"
+          # Accept Xcode license (required on fresh runners)
+          sudo xcodebuild -license accept 2>/dev/null || true
 
-          if [ -d "$SDK_DIR" ]; then
-            echo "✅ iPhoneOS SDK found at $SDK_DIR"
+          # Force Xcode to register platforms by running showsdks
+          echo "--- Available SDKs (this also registers platforms) ---"
+          xcodebuild -showsdks 2>&1 | grep -E 'iphoneos|SDK' || true
+
+          # Register the bundled iOS 18 device support with the runtime database
+          # macos-15 runners have Xcode 16 with iOS 18 SDK bundled but runtime not always registered
+          xcrun simctl list runtimes 2>&1 | grep -i ios || true
+
+          # The bundled device SDK should be here:
+          DEVICE_SDK="/Applications/Xcode_16.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
+          if [ -d "$DEVICE_SDK" ]; then
+            echo "✅ iPhoneOS SDK found: $DEVICE_SDK"
+            ls "$DEVICE_SDK" | head -5
           else
-            echo "⚠️ SDK not found, attempting platform download..."
-            xcrun xcodebuild -downloadPlatform iOS 2>&1 || true
+            echo "⚠️ iPhoneOS SDK NOT found at expected path"
           fi
 
-          # List available SDKs
-          echo "--- Available SDKs ---"
-          xcodebuild -showsdks 2>/dev/null | grep -E 'iphoneos|macosx' || true
-
-          # Ensure destination platform is available — set SDKROOT directly
-          echo "SDKROOT=${PLATFORM_DIR}/Developer/SDKs/iPhoneOS.sdk" >> "$GITHUB_ENV"
+          # Trigger platform loading by listing destinations
+          xcodebuild -project Arenza.xcodeproj -scheme Arenza -showdestinations 2>&1 | grep -i "ios device\|Any iOS\|generic" | head -5 || true
 
 
       - name: Write App Store Connect API Key
