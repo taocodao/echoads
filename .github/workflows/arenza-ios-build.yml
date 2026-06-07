@@ -240,6 +240,13 @@ jobs:
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: bundle exec fastlane beta
 
+      - name: Print Fastlane Gym logs on failure
+        if: failure()
+        run: |
+          echo "=== Fastlane Gym Logs ==="
+          cat ~/Library/Logs/gym/*.log || echo "No gym log found"
+          echo "=== End Gym Logs ==="
+
       - name: Upload .ipa as build artifact
         uses: actions/upload-artifact@v4
         with:
