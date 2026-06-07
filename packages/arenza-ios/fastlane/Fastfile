@@ -114,7 +114,7 @@ platform :ios do
         "MARKETING_VERSION=0.1.0",
         "IPHONEOS_DEPLOYMENT_TARGET=18.0",
         "CODE_SIGN_STYLE=Manual",
-        "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID'] || '5R8WY2Q734'}",
+        "DEVELOPMENT_TEAM=#{(ENV['APPLE_TEAM_ID'] || '5R8WY2Q734').to_s.strip}",
         "CODE_SIGN_IDENTITY=\"Apple Distribution\"",
         "PROVISIONING_PROFILE_SPECIFIER=\"match AppStore #{BUNDLE_ID}\"",
         "CODE_SIGNING_REQUIRED=YES",
