@@ -47,17 +47,20 @@ platform :ios do
     UI.message("Build number: #{build_number}")
 
     # 2. Install App Store certificates + provisioning profiles via match
-    # setup_ci creates fastlane_tmp_keychain — match installs cert+profile into it
+    # setup_ci creates fastlane_tmp_keychain — unlock it so match can import the cert
     keychain_pass = ENV["MATCH_PASSWORD"] || ""
-    setup_ci(
-      force: true,
-      timeout: 3600,
-      keychain_password: keychain_pass
-    ) if ENV["CI"]
+    if ENV["CI"]
+      setup_ci(force: true)
+      unlock_keychain(
+        path: "fastlane_tmp_keychain",
+        password: keychain_pass,
+        set_default: true
+      )
+    end
     match(
       type: "appstore",
       app_identifier: BUNDLE_ID,
-      readonly: false,   # generate/install cert into setup_ci keychain
+      readonly: false,
       git_url: "https://github.com/taocodao/ios-certificates.git",
       git_basic_authorization: Base64.strict_encode64(ENV["MATCH_GIT_BASIC_AUTH"] || ""),
       api_key_path: "./fastlane/AuthKey.json",
