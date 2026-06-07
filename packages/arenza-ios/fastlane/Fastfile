@@ -69,8 +69,13 @@ platform :ios do
     )
 
     # Allow codesign to use the certificate without UI prompts
+    # Critical: ~ resolves incorrectly in sh(), use explicit $HOME path
     if ENV["CI"]
-      sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_pass}' ~/Library/Keychains/fastlane_tmp_keychain-db 2>/dev/null || true")
+      keychain_db = "#{ENV['HOME']}/Library/Keychains/fastlane_tmp_keychain-db"
+      sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_pass}' '#{keychain_db}' && echo 'set-key-partition-list succeeded' || echo 'set-key-partition-list FAILED'")
+      # Add to keychain search list so codesign finds it without UI popup
+      sh("security list-keychains -d user -s '#{keychain_db}' login.keychain && echo 'keychain search list updated'")
+      sh("security find-identity -v -p codesigning '#{keychain_db}' || echo 'No identities found'")
     end
 
     # 3. Archive
