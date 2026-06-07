@@ -90,7 +90,7 @@ jobs:
 
       - name: Install OpenZeppelin
         working-directory: packages/contracts
-        run: forge install OpenZeppelin/openzeppelin-contracts@v5.1.0 --no-commit
+        run: forge install OpenZeppelin/openzeppelin-contracts@v5.6.1 --no-commit
 
       - name: Run contract tests
         working-directory: packages/contracts

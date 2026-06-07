@@ -47,16 +47,29 @@ platform :ios do
     UI.message("Build number: #{build_number}")
 
     # 2. Install App Store certificates + provisioning profiles via match
-    # setup_ci creates fastlane_tmp_keychain — unlock it so match can import the cert
     keychain_pass = ENV["MATCH_PASSWORD"] || ""
+    keychain_name = "fastlane_tmp_keychain"
+
     if ENV["CI"]
+      # Create and configure the CI keychain
       setup_ci(force: true)
-      unlock_keychain(
-        path: "fastlane_tmp_keychain",
-        password: keychain_pass,
-        set_default: true
-      )
+
+      keychain_db = "#{ENV['HOME']}/Library/Keychains/#{keychain_name}-db"
+
+      # Unlock the keychain
+      unlock_keychain(path: keychain_name, password: keychain_pass, set_default: true)
+
+      # CRITICAL: Prevent keychain auto-lock (default is 5 min!)
+      # The iOS platform download can take 7+ min, causing the keychain to lock
+      # before codesign runs — which makes codesign hang waiting for a UI prompt.
+      sh("security set-keychain-settings -t 7200 -u '#{keychain_db}'")
+
+      # Set as the default keychain so xcodebuild/codesign find it
+      sh("security default-keychain -s '#{keychain_db}'")
+
+      UI.message("Keychain configured: #{keychain_db}")
     end
+
     match(
       type: "appstore",
       app_identifier: BUNDLE_ID,
@@ -64,18 +77,21 @@ platform :ios do
       git_url: "https://github.com/taocodao/ios-certificates.git",
       git_basic_authorization: Base64.strict_encode64(ENV["MATCH_GIT_BASIC_AUTH"] || ""),
       api_key_path: "./fastlane/AuthKey.json",
-      keychain_name: "fastlane_tmp_keychain",
+      keychain_name: keychain_name,
       keychain_password: keychain_pass
     )
 
-    # Allow codesign to use the certificate without UI prompts
-    # Critical: ~ resolves incorrectly in sh(), use explicit $HOME path
     if ENV["CI"]
-      keychain_db = "#{ENV['HOME']}/Library/Keychains/fastlane_tmp_keychain-db"
-      sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_pass}' '#{keychain_db}' && echo 'set-key-partition-list succeeded' || echo 'set-key-partition-list FAILED'")
-      # Add to keychain search list so codesign finds it without UI popup
-      sh("security list-keychains -d user -s '#{keychain_db}' login.keychain && echo 'keychain search list updated'")
-      sh("security find-identity -v -p codesigning '#{keychain_db}' || echo 'No identities found'")
+      keychain_db = "#{ENV['HOME']}/Library/Keychains/#{keychain_name}-db"
+
+      # Grant codesign access to the imported certificate's private key
+      sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_pass}' '#{keychain_db}'")
+
+      # Verify the signing identity is available
+      sh("security find-identity -v -p codesigning '#{keychain_db}'")
+
+      # Ensure the keychain is still unlocked after all the setup
+      sh("security unlock-keychain -p '#{keychain_pass}' '#{keychain_db}'")
     end
 
     # 3. Archive
