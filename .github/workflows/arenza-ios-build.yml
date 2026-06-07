@@ -152,7 +152,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Select Xcode ${{ env.XCODE_VERSION }}
-        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '${{ env.XCODE_VERSION }}'
 
       - name: Setup Ruby for Fastlane
         uses: ruby/setup-ruby@v1
@@ -189,26 +191,17 @@ jobs:
           # Accept Xcode license (required on fresh runners)
           sudo xcodebuild -license accept 2>/dev/null || true
 
-          # Force Xcode to register platforms by running showsdks
-          echo "--- Available SDKs (this also registers platforms) ---"
-          xcodebuild -showsdks 2>&1 | grep -E 'iphoneos|SDK' || true
+          # Wake up platform registration (known fix for fresh macos-15 runners)
+          xcrun simctl list 2>&1 | head -5 || true
 
-          # Register the bundled iOS 18 device support with the runtime database
-          # macos-15 runners have Xcode 16 with iOS 18 SDK bundled but runtime not always registered
-          xcrun simctl list runtimes 2>&1 | grep -i ios || true
+          # Force download and install iOS 18 device platform support
+          # This is required for generic/platform=iOS destination to work
+          echo "Downloading iOS platform support (required for device archive)..."
+          sudo xcodebuild -downloadPlatform iOS 2>&1 | tail -3 || true
 
-          # The bundled device SDK should be here:
-          DEVICE_SDK="/Applications/Xcode_16.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
-          if [ -d "$DEVICE_SDK" ]; then
-            echo "✅ iPhoneOS SDK found: $DEVICE_SDK"
-            ls "$DEVICE_SDK" | head -5
-          else
-            echo "⚠️ iPhoneOS SDK NOT found at expected path"
-          fi
-
-          # Trigger platform loading by listing destinations
-          xcodebuild -project Arenza.xcodeproj -scheme Arenza -showdestinations 2>&1 | grep -i "ios device\|Any iOS\|generic" | head -5 || true
-
+          # Verify SDK is available
+          echo "--- Available device SDKs ---"
+          xcodebuild -showsdks 2>&1 | grep iphoneos || true
 
       - name: Write App Store Connect API Key
         env:
