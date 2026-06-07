@@ -4,6 +4,7 @@
 
 import Foundation
 
+@MainActor
 final class PoDSubmitter {
 
     private let apiClient: CMXSAPIClient

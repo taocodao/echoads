@@ -4,6 +4,7 @@
 import Foundation
 import AVFoundation
 import Combine
+import SwiftUI
 
 @MainActor
 final class PlayerViewModel: ObservableObject {
@@ -146,7 +147,9 @@ final class PlayerViewModel: ObservableObject {
             )
             // Auto-hide toast after 4s
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
-                withAnimation { self?.podToast = nil }
+                Task { @MainActor [weak self] in
+                    withAnimation { self?.podToast = nil }
+                }
             }
         }
     }
