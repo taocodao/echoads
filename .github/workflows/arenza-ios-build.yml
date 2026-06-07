@@ -228,7 +228,7 @@ jobs:
           PYEOF
 
       - name: Build & Upload to TestFlight via Fastlane
-        timeout-minutes: 30
+        timeout-minutes: 60
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
