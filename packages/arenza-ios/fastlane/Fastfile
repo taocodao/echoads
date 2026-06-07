@@ -46,6 +46,11 @@ platform :ios do
     increment_build_number(build_number: build_number, xcodeproj: PROJECT)
     UI.message("Build number: #{build_number}")
 
+    # Strip team ID once here — used by both xcargs and export_options.
+    # The APPLE_TEAM_ID secret may have a trailing newline; .strip eliminates it everywhere.
+    team_id = (ENV["APPLE_TEAM_ID"] || "5R8WY2Q734").to_s.strip
+    UI.message("Team ID: #{team_id}")
+
     # 2. Install App Store certificates + provisioning profiles via match
     keychain_pass = ENV["MATCH_PASSWORD"] || ""
     keychain_name = "fastlane_tmp_keychain"
@@ -87,6 +92,12 @@ platform :ios do
       sh("security find-identity -v -p codesigning '#{keychain_db}'")
     end
 
+    # Read the provisioning profile name that match just installed.
+    # match sets sigh_* env vars after a successful install — use them to avoid
+    # hardcoding and to eliminate any naming mismatch with the portal.
+    profile_name = ENV.fetch("sigh_#{BUNDLE_ID}_appstore_profile-name", "match AppStore #{BUNDLE_ID}")
+    UI.message("Using provisioning profile: #{profile_name}")
+
     # 3. Archive
     gym(
       project: PROJECT,
@@ -104,9 +115,9 @@ platform :ios do
       export_options: {
         method: "app-store",
         signingStyle: "manual",
-        teamID: ENV["APPLE_TEAM_ID"] || "5R8WY2Q734",
+        teamID: team_id,
         provisioningProfiles: {
-          BUNDLE_ID => "match AppStore #{BUNDLE_ID}"
+          BUNDLE_ID => profile_name
         }
       },
       xcargs: [
@@ -114,13 +125,12 @@ platform :ios do
         "MARKETING_VERSION=0.1.0",
         "IPHONEOS_DEPLOYMENT_TARGET=18.0",
         "CODE_SIGN_STYLE=Manual",
-        "DEVELOPMENT_TEAM=#{(ENV['APPLE_TEAM_ID'] || '5R8WY2Q734').to_s.strip}",
-        "CODE_SIGN_IDENTITY=\"Apple Distribution\"",
-        "PROVISIONING_PROFILE_SPECIFIER=\"match AppStore #{BUNDLE_ID}\"",
+        "DEVELOPMENT_TEAM=#{team_id}",
         "CODE_SIGNING_REQUIRED=YES",
-        "DEBUG_INFORMATION_FORMAT=dwarf"  # Suppress dsymutil — prevents 30-60 min hang on CI
+        "DEBUG_INFORMATION_FORMAT=dwarf"
       ].join(" "),
-      xcodebuild_formatter: "" # Disable xcbeautify to ensure raw compiler errors are captured by GitHub Actions
+      skip_profile_detection: true,
+      xcodebuild_formatter: ""
     )
 
     # 4. Upload to TestFlight

@@ -228,6 +228,17 @@ jobs:
           print("✅ AuthKey.json written successfully")
           PYEOF
 
+      - name: Fix provisioning profile path for Xcode 16
+        run: |
+          # Xcode 16 moved the canonical profile location.
+          # Fastlane match installs to the OLD path; xcodebuild -exportArchive
+          # reads from the NEW path. Symlink bridges both.
+          # See: https://github.com/fastlane/fastlane/issues/29231
+          mkdir -p ~/Library/Developer/Xcode/UserData/
+          ln -sfn ~/Library/MobileDevice/Provisioning\ Profiles \
+                  ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles
+          echo "✅ Provisioning profile symlink created"
+
       - name: Build & Upload to TestFlight via Fastlane
         timeout-minutes: 60
         env:
@@ -235,7 +246,7 @@ jobs:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTH: ${{ secrets.MATCH_GIT_BASIC_AUTH }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '5R8WY2Q734' }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID != '' && secrets.APPLE_TEAM_ID || '5R8WY2Q734' }}
           ASC_APP_ID: ${{ secrets.ASC_APP_ID || '6777539402' }}
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: bundle exec fastlane beta
