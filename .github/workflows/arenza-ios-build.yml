@@ -185,11 +185,25 @@ jobs:
 
       - name: Install iOS 18 Device Support
         run: |
-          # Download and install iOS 18 device support so gym can archive for physical devices
-          # This is needed on macos-15 runners where the device SDK is not pre-installed
-          xcrun xcodebuild -downloadPlatform iOS 2>&1 | tail -5 || true
-          # Verify available SDKs
-          xcodebuild -showsdks 2>/dev/null | grep iphoneos || true
+          # Register iOS platform with Xcode
+          # The SDK is bundled with Xcode 16 at the platform path below
+          PLATFORM_DIR="/Applications/Xcode_16.app/Contents/Developer/Platforms/iPhoneOS.platform"
+          SDK_DIR="${PLATFORM_DIR}/Developer/SDKs/iPhoneOS.sdk"
+
+          if [ -d "$SDK_DIR" ]; then
+            echo "✅ iPhoneOS SDK found at $SDK_DIR"
+          else
+            echo "⚠️ SDK not found, attempting platform download..."
+            xcrun xcodebuild -downloadPlatform iOS 2>&1 || true
+          fi
+
+          # List available SDKs
+          echo "--- Available SDKs ---"
+          xcodebuild -showsdks 2>/dev/null | grep -E 'iphoneos|macosx' || true
+
+          # Ensure destination platform is available — set SDKROOT directly
+          echo "SDKROOT=${PLATFORM_DIR}/Developer/SDKs/iPhoneOS.sdk" >> "$GITHUB_ENV"
+
 
       - name: Write App Store Connect API Key
         env:

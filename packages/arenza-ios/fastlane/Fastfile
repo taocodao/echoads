@@ -85,6 +85,7 @@ platform :ios do
       include_symbols: true,
       include_bitcode: false,
       skip_package_pkg: false,
+      sdk: "iphoneos",   # Use bundled device SDK directly — avoids generic/platform=iOS runtime check
       export_options: {
         method: "app-store",
         signingStyle: "manual",
