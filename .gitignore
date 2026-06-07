@@ -44,3 +44,10 @@ lcov.info
 
 # Benchmark results (keep generated reports, ignore raw data)
 packages/player/src/benchmark/data/
+
+*.log
+fastlane_*.txt
+testflight_*.txt
+*.zip
+Arenza-AI-*
+Arenza ad. app/
