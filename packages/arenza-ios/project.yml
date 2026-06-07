@@ -76,6 +76,10 @@ targets:
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: ""
           DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
           ONLY_ACTIVE_ARCH: NO
+          CODE_SIGN_STYLE: Manual
+          DEVELOPMENT_TEAM: "5R8WY2Q734"
+          CODE_SIGN_IDENTITY: "Apple Distribution"
+          PROVISIONING_PROFILE_SPECIFIER: "match AppStore com.cmxs.arenza"
     dependencies: []
     scheme:
       testTargets:
