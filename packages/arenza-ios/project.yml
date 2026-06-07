@@ -19,6 +19,12 @@ settings:
     ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
     CODE_SIGN_STYLE: Automatic
     SWIFT_STRICT_CONCURRENCY: targeted
+  configs:
+    Release:
+      CODE_SIGN_STYLE: Manual
+      DEVELOPMENT_TEAM: "5R8WY2Q734"
+      CODE_SIGN_IDENTITY: "Apple Distribution"
+      PROVISIONING_PROFILE_SPECIFIER: "match AppStore com.cmxs.arenza"
 
 targets:
   Arenza:
