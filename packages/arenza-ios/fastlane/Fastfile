@@ -68,7 +68,12 @@ platform :ios do
       keychain_password: keychain_pass
     )
 
-    # 3. Archive (need to install iOS 18 device support or skip the runtime check)
+    # Allow codesign to use the certificate without UI prompts
+    if ENV["CI"]
+      sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_pass}' ~/Library/Keychains/fastlane_tmp_keychain-db 2>/dev/null || true")
+    end
+
+    # 3. Archive
     gym(
       project: PROJECT,
       scheme: SCHEME,
@@ -94,7 +99,8 @@ platform :ios do
         "IPHONEOS_DEPLOYMENT_TARGET=18.0",
         "CODE_SIGN_STYLE=Manual",
         "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID'] || '5R8WY2Q734'}",
-        "CODE_SIGN_IDENTITY='Apple Distribution'",
+        "CODE_SIGN_IDENTITY=Apple\\ Distribution",
+        "PROVISIONING_PROFILE_SPECIFIER=match\\ AppStore\\ #{BUNDLE_ID}",
         "CODE_SIGNING_REQUIRED=YES"
       ].join(" ")
     )
