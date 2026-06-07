@@ -190,14 +190,20 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
           mkdir -p fastlane
-          cat > fastlane/AuthKey.json << EOF
-          {
-            "key_id": "$ASC_API_KEY_ID",
-            "issuer_id": "$ASC_ISSUER_ID",
-            "key": "$ASC_API_KEY_CONTENT",
-            "in_house": false
+          # Use Python to safely serialize the .p8 key (which contains newlines) into valid JSON
+          python3 - <<'PYEOF'
+          import os, json
+          key_content = os.environ["ASC_API_KEY_CONTENT"]
+          payload = {
+            "key_id":     os.environ["ASC_API_KEY_ID"],
+            "issuer_id":  os.environ["ASC_ISSUER_ID"],
+            "key":        key_content,
+            "in_house":   False
           }
-          EOF
+          with open("fastlane/AuthKey.json", "w") as f:
+            json.dump(payload, f)
+          print("✅ AuthKey.json written successfully")
+          PYEOF
 
       - name: Install Certificates via Fastlane Match
         env:
