@@ -166,9 +166,10 @@ jobs:
         with:
           path: |
             packages/arenza-ios/.build
-            ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-spm-release-${{ hashFiles('packages/arenza-ios/project.yml') }}
+            packages/arenza-ios/.derived-data
+          key: ${{ runner.os }}-xcode-release-${{ hashFiles('packages/arenza-ios/project.yml', 'packages/arenza-ios/**/*.swift') }}
           restore-keys: |
+            ${{ runner.os }}-xcode-release-
             ${{ runner.os }}-spm-
 
       - name: Install XcodeGen

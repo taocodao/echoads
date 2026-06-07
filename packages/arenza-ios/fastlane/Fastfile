@@ -81,7 +81,8 @@ platform :ios do
       export_method: "app-store",
       output_directory: "./build",
       output_name: "Arenza",
-      clean: true,
+      clean: false,   # Skip clean to use incremental build — saves 40+ min on CI
+      derived_data_path: "./.derived-data",  # Cacheable path for incremental builds
       include_symbols: true,
       include_bitcode: false,
       skip_package_pkg: false,
