@@ -19,7 +19,7 @@ platform :ios do
 
   lane :test do
     UI.header("🧪 Running Arenza Tests on iOS Simulator")
-    sh("xcodegen generate --spec project.yml")
+    sh("xcodegen generate --spec ../project.yml")
 
     run_tests(
       project: PROJECT,
@@ -39,7 +39,7 @@ platform :ios do
 
   lane :beta do
     UI.header("🚀 Building Arenza for TestFlight")
-    sh("xcodegen generate --spec project.yml")
+    sh("xcodegen generate --spec ../project.yml")
 
     # 1. Bump build number using current CI run number (or date-based)
     build_number = ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
