@@ -57,7 +57,7 @@ platform :ios do
       api_key_path: "./fastlane/AuthKey.json"
     )
 
-    # 3. Archive
+    # 3. Archive (need to install iOS 18 device support or skip the runtime check)
     gym(
       project: PROJECT,
       scheme: SCHEME,
@@ -67,8 +67,8 @@ platform :ios do
       output_name: "Arenza",
       clean: true,
       include_symbols: true,
-      include_bitcode: false,     # Bitcode deprecated in Xcode 14+
-      sdk: "iphoneos",            # Use installed device SDK, don't pin to iOS 18.0
+      include_bitcode: false,
+      skip_package_pkg: false,
       xcargs: [
         "SWIFT_STRICT_CONCURRENCY=targeted",
         "MARKETING_VERSION=0.1.0",
@@ -76,7 +76,9 @@ platform :ios do
         "CODE_SIGN_STYLE=Manual",
         "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID'] || '5R8WY2Q734'}",
         "CODE_SIGN_IDENTITY=Apple Distribution",
-        "PROVISIONING_PROFILE_SPECIFIER=match AppStore com.cmxs.arenza"
+        "PROVISIONING_PROFILE_SPECIFIER=match AppStore com.cmxs.arenza",
+        "CODE_SIGNING_REQUIRED=YES",
+        "AD_HOC_CODE_SIGNING_ALLOWED=NO"
       ].join(" ")
     )
 

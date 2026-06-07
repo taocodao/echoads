@@ -183,6 +183,14 @@ jobs:
             -project Arenza.xcodeproj \
             -scheme Arenza
 
+      - name: Install iOS 18 Device Support
+        run: |
+          # Download and install iOS 18 device support so gym can archive for physical devices
+          # This is needed on macos-15 runners where the device SDK is not pre-installed
+          xcrun xcodebuild -downloadPlatform iOS 2>&1 | tail -5 || true
+          # Verify available SDKs
+          xcodebuild -showsdks 2>/dev/null | grep iphoneos || true
+
       - name: Write App Store Connect API Key
         env:
           ASC_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
