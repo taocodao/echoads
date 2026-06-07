@@ -15,19 +15,11 @@ SIMULATOR   = "platform=iOS Simulator,name=iPhone 16"
 
 platform :ios do
 
-  # ── Before all lanes: ensure XcodeGen project exists ──────────────────────
-
-  before_all do
-    # Generate Xcode project from project.yml (no .xcodeproj committed to git)
-    sh("which xcodegen || brew install xcodegen")
-    sh("xcodegen generate --spec project.yml")
-    UI.success("✅ Arenza.xcodeproj generated from project.yml")
-  end
-
   # ── Test: compile + unit test on Simulator ─────────────────────────────────
 
   lane :test do
     UI.header("🧪 Running Arenza Tests on iOS Simulator")
+    sh("xcodegen generate --spec project.yml")
 
     run_tests(
       project: PROJECT,
@@ -47,6 +39,7 @@ platform :ios do
 
   lane :beta do
     UI.header("🚀 Building Arenza for TestFlight")
+    sh("xcodegen generate --spec project.yml")
 
     # 1. Bump build number using current CI run number (or date-based)
     build_number = ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
