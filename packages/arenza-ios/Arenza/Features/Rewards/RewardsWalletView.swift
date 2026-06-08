@@ -30,7 +30,7 @@ struct RewardsWalletView: View {
                 if selectedTab == .wallet {
                     walletContent
                 } else {
-                    LeaderboardView()
+                    SocialLeaderboardView()
                 }
             }
             .navigationTitle("Rewards")

@@ -58,6 +58,18 @@ actor PredictionAPIClient {
         return (try? await session.data(from: url)).flatMap { try? JSONDecoder().decode(SponsorCoupon.self, from: $0.0) }
     }
 
+    struct LeaderboardData: Codable {
+        let entries: [LeaderboardEntry]
+        let myRank: Int
+    }
+
+    func fetchLeaderboard(scope: LeaderboardScope, dmaCode: String?) async -> LeaderboardData? {
+        var urlStr = "\(CMXSConfig.apiBase)/v1/leaderboard?scope=\(scope.rawValue)"
+        if let dma = dmaCode { urlStr += "&dmaCode=\(dma)" }
+        guard let url = URL(string: urlStr) else { return nil }
+        return (try? await session.data(from: url)).flatMap { try? JSONDecoder().decode(LeaderboardData.self, from: $0.0) }
+    }
+
     // MARK: - Demo data
 
     static func demoQuestion(channelID: String) -> PredictionQuestion {
