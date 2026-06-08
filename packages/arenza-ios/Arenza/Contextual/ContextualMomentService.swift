@@ -1,11 +1,13 @@
 // ContextualMomentService.swift — Arenza (C3: Contextual Moment Engine)
-// WebSocket client that receives real-time game state events from CMXS backend.
-// Used by BidRequestAssembler (CPM multipliers) and BettingMomentTrigger (safe windows).
+// Receives real-time game state signals from the Caton MoQ relay.
+// Primary transport: MoQRelayConnector (WebSocket/QUIC).
+// Fallback: timer-based demo mode when relay is unreachable.
+// Feeds: BidRequestAssembler (CPM multipliers) + BettingMomentTrigger (safe windows).
 
 import Foundation
 import Combine
 
-// MARK: - Moment Event (from WebSocket)
+// MARK: - Moment Event (legacy CMXS WebSocket format — kept for backward compat)
 
 private struct MomentEvent: Codable {
     let momentType: String
@@ -27,7 +29,9 @@ final class ContextualMomentService: ObservableObject {
     // Publishers that other services can subscribe to
     let momentPublisher = PassthroughSubject<GameMoment, Never>()
 
-    private var webSocketTask: URLSessionWebSocketTask?
+    // MoQ relay connector (Phase B)
+    private let moqConnector = MoQRelayConnector()
+
     private var currentChannelID: String?
     private var reconnectDelay: TimeInterval = 2.0
     private let maxReconnectDelay: TimeInterval = 60.0
@@ -38,6 +42,32 @@ final class ContextualMomentService: ObservableObject {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 10
         self.session = URLSession(configuration: config)
+        wireMoQConnector()
+    }
+
+    // MARK: - Wire MoQ Connector signals
+
+    private func wireMoQConnector() {
+        // Ad break signals from relay → publish as .timeout moment
+        moqConnector.onAdBreakSignal = { [weak self] durationSeconds in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                let moment: GameMoment = durationSeconds >= 60 ? .halftime : .timeout
+                self.publishMoment(moment)
+                print("[Moments] MoQ ad break signal — \(durationSeconds)s -> \(moment.rawValue)")
+            }
+        }
+        // Game state changes from relay catalog
+        moqConnector.onMomentChange = { [weak self] moment in
+            Task { @MainActor [weak self] in
+                self?.publishMoment(moment)
+            }
+        }
+    }
+
+    private func publishMoment(_ moment: GameMoment) {
+        currentMoment = moment
+        momentPublisher.send(moment)
     }
 
     // MARK: - Connect / Disconnect
@@ -46,11 +76,26 @@ final class ContextualMomentService: ObservableObject {
         guard channelID != currentChannelID else { return }
         currentChannelID = channelID
         reconnectDelay = 2.0
-        openWebSocket(channelID: channelID)
+
+        // Try Caton MoQ relay first — it provides real live signals for the bbb broadcast.
+        // If the relay is unreachable we fall back to demo mode after a short timeout.
+        moqConnector.connect(channelID: channelID)
+        isConnected = true
+
+        // Start demo-mode fallback timer (fires if relay doesn't send a moment in 30s)
+        startDemoModeFallbackIfNeeded()
+
+        // Also try the legacy CMXS WebSocket (no-op if backend not running)
+        let baseURL = ProcessInfo.processInfo.environment["CMXS_WS_URL"]
+        if baseURL != nil {
+            openCMXSWebSocket(channelID: channelID)
+        }
     }
+
 
     func disconnect() {
         reconnectTask?.cancel()
+        moqConnector.disconnect()
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         webSocketTask = nil
         currentChannelID = nil
@@ -58,29 +103,45 @@ final class ContextualMomentService: ObservableObject {
         currentMoment = .neutral
     }
 
-    // MARK: - WebSocket lifecycle
+    // MARK: - Demo Mode Fallback (when MoQ relay is unreachable)
 
-    private func openWebSocket(channelID: String) {
-        // Use sandbox stub URL if CMXS WebSocket endpoint is not yet live
-        let baseURL = ProcessInfo.processInfo.environment["CMXS_WS_URL"]
-                   ?? "wss://api.arenza.tv"
+    private var demoFallbackTask: Task<Void, Never>?
+
+    private func startDemoModeFallbackIfNeeded() {
+        demoFallbackTask?.cancel()
+        // If MoQ relay hasn't sent any moment in 30s, switch to demo mode
+        demoFallbackTask = Task {
+            try? await Task.sleep(nanoseconds: 30_000_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                if self.currentMoment == .neutral {
+                    print("[Moments] MoQ relay timeout — starting demo mode fallback")
+                    self.startDemoMode()
+                }
+            }
+        }
+    }
+
+    // MARK: - Legacy CMXS WebSocket (for when backend is deployed)
+
+    private var webSocketTask: URLSessionWebSocketTask?
+
+    private func openCMXSWebSocket(channelID: String) {
+        let baseURL = ProcessInfo.processInfo.environment["CMXS_WS_URL"] ?? "wss://api.arenza.tv"
         let urlString = "\(baseURL)/v1/moments/stream?channel=\(channelID)"
 
         guard let url = URL(string: urlString) else {
-            print("[Moments] ⚠️ Invalid WebSocket URL — using demo mode")
-            startDemoMode()
+            print("[Moments] Invalid CMXS WebSocket URL")
             return
         }
 
         webSocketTask = session.webSocketTask(with: url)
         webSocketTask?.resume()
-        isConnected = true
-        reconnectDelay = 2.0
-        print("[Moments] 🔌 Connected to \(urlString)")
-        receiveNextMessage()
+        print("[Moments] CMXS WebSocket connected to \(urlString)")
+        receiveCMXSMessage()
     }
 
-    private func receiveNextMessage() {
+    private func receiveCMXSMessage() {
         webSocketTask?.receive { [weak self] result in
             Task { @MainActor [weak self] in
                 guard let self else { return }
@@ -89,11 +150,11 @@ final class ContextualMomentService: ObservableObject {
                     if case .string(let json) = message {
                         self.handleMomentJSON(json)
                     }
-                    self.receiveNextMessage()  // keep listening
+                    self.receiveCMXSMessage()  // keep listening
                 case .failure(let error):
-                    print("[Moments] ❌ WebSocket error: \(error.localizedDescription)")
+                    print("[Moments] CMXS WebSocket error: \(error.localizedDescription)")
                     self.isConnected = false
-                    self.scheduleReconnect()
+                    self.scheduleCMXSReconnect()
                 }
             }
         }
@@ -112,16 +173,15 @@ final class ContextualMomentService: ObservableObject {
 
     // MARK: - Reconnect with exponential backoff
 
-    private func scheduleReconnect() {
+    private func scheduleCMXSReconnect() {
         guard let channelID = currentChannelID else { return }
-        let delay = reconnectDelay + Double.random(in: -0.5...0.5)  // ±0.5s jitter
+        let delay = reconnectDelay + Double.random(in: -0.5...0.5)
         reconnectDelay = min(reconnectDelay * 2, maxReconnectDelay)
-
-        print("[Moments] 🔄 Reconnecting in \(String(format: "%.1f", delay))s…")
+        print("[Moments] CMXS reconnecting in \(String(format: "%.1f", delay))s")
         reconnectTask = Task {
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             guard !Task.isCancelled else { return }
-            await MainActor.run { self.openWebSocket(channelID: channelID) }
+            await MainActor.run { self.openCMXSWebSocket(channelID: channelID) }
         }
     }
 

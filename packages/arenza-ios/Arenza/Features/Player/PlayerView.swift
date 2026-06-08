@@ -1,5 +1,5 @@
 // PlayerView.swift — Arenza
-// Full-screen video player with SGAI, prediction, and betting overlays.
+// Full-screen video player with CSAI ad pods, prediction, and betting overlays.
 
 import SwiftUI
 import AVKit
@@ -40,9 +40,9 @@ struct PlayerView: View {
                 topBar
                 Spacer()
 
-                // ── Ad Break Indicator ───────────────────────────────────
+                // ── Ad Pod Progress Bar (CSAI) ──────────────────────────
                 if vm.isInAdBreak {
-                    adBreakBanner
+                    AdPodProgressOverlay(vm: vm)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
 
@@ -209,6 +209,82 @@ struct PlayerView: View {
             .font(.system(size: 14, weight: .semibold))
             .padding(.top, 4)
         }
+    }
+}
+
+// MARK: - Ad Pod Progress Overlay (CSAI)
+
+struct AdPodProgressOverlay: View {
+    @ObservedObject var vm: PlayerViewModel
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Text("AD")
+                    .font(.system(size: 10, weight: .black))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color(red: 1.0, green: 0.82, blue: 0.0))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                if let event = vm.currentBreakEvent {
+                    Text(event.adSlot.advertiser)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Text("$\(String(format: "%.0f", event.adSlot.cpm)) CPM")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.60))
+                } else {
+                    Text("Ad break")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            // Live pod progress bar driven by AdPodInserter's timer
+            AdPodProgressBar(progress: podFraction)
+        }
+        .background(.ultraThinMaterial)
+        .background(Color.black.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 16)
+    }
+
+    // Compute progress from AdPodInserter if available via vm.switchLatencyMs,
+    // otherwise fall back to adBreakBanner style with no bar.
+    private var podFraction: Double {
+        guard let event = vm.currentBreakEvent else { return 0 }
+        let elapsed = max(0, vm.switchLatencyMs / 1000)
+        return min(elapsed / event.duration, 1.0)
+    }
+}
+
+// MARK: - Thin progress bar
+
+struct AdPodProgressBar: View {
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Rectangle().fill(Color.white.opacity(0.15))
+                Rectangle()
+                    .fill(LinearGradient(
+                        colors: [Color(red: 1.0, green: 0.82, blue: 0.0),
+                                 Color(red: 1.0, green: 0.55, blue: 0.0)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ))
+                    .frame(width: geo.size.width * max(0, min(progress, 1)))
+                    .animation(.linear(duration: 0.5), value: progress)
+            }
+        }
+        .frame(height: 3)
     }
 }
 

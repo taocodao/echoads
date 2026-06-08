@@ -1,6 +1,7 @@
 // PlayerViewModel.swift — Arenza
-// Orchestrates: SSAI session → AVPlayer → AdBreakDetector → SGAI → PoDSubmitter
-// Now also: ProfileEngine → BidAssembler → PredictionEngine → BettingEngine
+// Orchestrates: HLS Direct → AVPlayer → AdPodInserter → PoDSubmitter
+// SSAI session is attempted as an async enrichment when the backend is reachable.
+// Engines: ProfileEngine → BidAssembler → PredictionEngine → BettingEngine
 
 import Foundation
 import AVFoundation
@@ -34,15 +35,19 @@ final class PlayerViewModel: ObservableObject {
     private let channel: Channel
     private let env: AppEnvironment
     private let adBreakDetector = AdBreakDetector()
+    private let adPodInserter = AdPodInserter()
     private var session: PlaybackSession?
     private var podSubmitter: PoDSubmitter { env.podSubmitter }
 
-    // New engine integrations
+    // Engine integrations
     private let predictionEngine = PredictionEngine.shared
     private let bettingTrigger = BettingMomentTrigger()
     private let signalCollector = SignalCollector.shared
     private let anomalyDetector = AnomalyDetector.shared
     private var cancellables = Set<AnyCancellable>()
+
+    // Demo break timer (fires first pod 20s after playback begins)
+    private var firstPodTimer: Timer?
 
     // MARK: - Init
 
@@ -50,6 +55,7 @@ final class PlayerViewModel: ObservableObject {
         self.channel = channel
         self.env = env
         subscribeToPredictionAndBetting()
+        wireAdPodInserter()
     }
 
     // MARK: - Lifecycle
@@ -58,79 +64,64 @@ final class PlayerViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        do {
-            // 1. Create SSAI session → get manifest URL
-            let walletAddress = WalletDerivation.currentWalletAddress()
-            let response = try await env.apiClient.createSSAISession(
-                channelId: channel.id,
-                nodeOperator: walletAddress
-            )
+        // ── STRATEGY ──────────────────────────────────────────────────────
+        // 1. Try direct HLS stream (works on any device, no backend needed).
+        //    This is the primary path for TestFlight + real-device usage.
+        // 2. In parallel, attempt SSAI session for enriched ad data.
+        //    If backend is reachable, the SSAI manifest URL will be used
+        //    for the next playback session.
+        // ──────────────────────────────────────────────────────────────────
 
-            guard let manifestURL = env.apiClient.manifestURL(for: response.sessionId) else {
-                throw CMXSAPIError.invalidURL
-            }
-
-            let playbackSession = PlaybackSession(
-                sessionId: response.sessionId,
-                manifestURL: manifestURL,
-                adSlots: response.adSlots,
-                totalDurationSeconds: response.totalDurationSeconds,
-                auctionLatencyMs: response.auctionLatencyMs
-            )
-            self.session = playbackSession
-
-            sessionInfo = "Session: \(response.sessionId) · \(response.adBreaks) breaks · \(response.auctionLatencyMs)ms"
-
-            // 2. Set up AVPlayer with SSAI manifest
-            let playerItem = AVPlayerItem(url: manifestURL)
-            let newPlayer = AVPlayer(playerItem: playerItem)
-            self.player = newPlayer
-
-            // 3. Attach ad break detector
-            adBreakDetector.onAdBreakStarted = { [weak self] event in
-                self?.handleAdBreakStart(event)
-            }
-            adBreakDetector.onAdBreakCompleted = { [weak self] event, latencyMs in
-                Task { await self?.handleAdBreakComplete(event, latencyMs: latencyMs) }
-            }
-            adBreakDetector.attach(to: newPlayer, session: playbackSession)
-
-            // Connect contextual moments for this channel
-            ContextualMomentService.shared.connect(channelID: channel.id)
-            bettingTrigger.setCurrentEvent(id: channel.id)
-
-            // Start anomaly detector session
-            anomalyDetector.onSessionStart()
-
-            // 4. Start playback
-            newPlayer.play()
+        guard let streamURL = channel.streamURL else {
+            // Very rare — only if a channel somehow has no URL
+            errorMessage = "No stream available for this channel."
             isLoading = false
-
-            // Record content event for AI profiling
-            signalCollector.record(ContentEvent(
-                type: .playbackStarted,
-                channelID: channel.id,
-                sportType: channel.sport,
-                isLive: channel.isLive,
-                timestamp: Date(),
-                sessionID: response.sessionId
-            ))
-
-            print("[Player] ▶️ Playing \(channel.name) via SSAI: \(manifestURL)")
-
-            // 5. Demo mode: trigger first break after 10s if no real breaks
-            if response.adSlots.isEmpty {
-                scheduleDemoBreak()
-            }
-
-        } catch {
-            errorMessage = "Playback failed: \(error.localizedDescription)"
-            isLoading = false
-            print("[Player] ❌ \(error)")
+            return
         }
+
+        // Build and start AVPlayer from direct HLS URL
+        let playerItem = AVPlayerItem(url: streamURL)
+
+        // Observe player item status
+        let newPlayer = AVPlayer(playerItem: playerItem)
+        newPlayer.automaticallyWaitsToMinimizeStalling = true
+        self.player = newPlayer
+        adPodInserter.attach(to: newPlayer)
+
+        // Start playback
+        newPlayer.play()
+        isLoading = false
+
+        // Connect contextual moments (MoQ relay via WebSocket)
+        ContextualMomentService.shared.connect(channelID: channel.id)
+        bettingTrigger.setCurrentEvent(id: channel.id)
+        anomalyDetector.onSessionStart()
+
+        sessionInfo = "Direct HLS — \(channel.name)"
+
+        // Signal AI engine
+        signalCollector.record(ContentEvent(
+            type: .playbackStarted,
+            channelID: channel.id,
+            sportType: channel.sport,
+            isLive: channel.isLive,
+            timestamp: Date(),
+            sessionID: "direct-\(channel.id)"
+        ))
+
+        print("[Player] Playing \(channel.name) via direct HLS: \(streamURL)")
+
+        // Schedule first demo ad pod (20s into content) — subsequent ones auto-fire
+        scheduleFirstDemoPod()
+
+        // Background: try SSAI enrichment (non-blocking, won't affect playback)
+        Task(priority: .background) { await trySSAIEnrichment() }
     }
 
     func stop() {
+        firstPodTimer?.invalidate()
+        firstPodTimer = nil
+        adPodInserter.cancelPod()
         player?.pause()
         adBreakDetector.detach()
         ContextualMomentService.shared.disconnect()
@@ -138,34 +129,126 @@ final class PlayerViewModel: ObservableObject {
         predictionEngine.saveWallet()
     }
 
-    // MARK: - Ad Break Handling
+    // MARK: - SSAI Enrichment (background, optional)
+
+    private func trySSAIEnrichment() async {
+        guard env.isBackendReachable else { return }
+
+        do {
+            let walletAddress = WalletDerivation.currentWalletAddress()
+            let response = try await env.apiClient.createSSAISession(
+                channelId: channel.id,
+                nodeOperator: walletAddress
+            )
+
+            // If we got ad slots, attach the detector for future breaks
+            if !response.adSlots.isEmpty, let player {
+                guard let manifestURL = env.apiClient.manifestURL(for: response.sessionId) else { return }
+                let playbackSession = PlaybackSession(
+                    sessionId: response.sessionId,
+                    manifestURL: manifestURL,
+                    adSlots: response.adSlots,
+                    totalDurationSeconds: response.totalDurationSeconds,
+                    auctionLatencyMs: response.auctionLatencyMs
+                )
+                self.session = playbackSession
+                adBreakDetector.onAdBreakStarted = { [weak self] event in
+                    self?.handleAdBreakStart(event)
+                }
+                adBreakDetector.onAdBreakCompleted = { [weak self] event, latencyMs in
+                    Task { await self?.handleAdBreakComplete(event, latencyMs: latencyMs) }
+                }
+                adBreakDetector.attach(to: player, session: playbackSession)
+                sessionInfo = "SSAI enriched — \(response.adBreaks) breaks"
+                print("[Player] SSAI enrichment attached — \(response.adBreaks) ad breaks")
+            }
+        } catch {
+            // Silent — direct HLS is already playing fine
+            print("[Player] SSAI enrichment unavailable (expected on device): \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Demo Pod Scheduling
+
+    /// Fires the first ad pod 20s after content starts, then every 90s.
+    private func scheduleFirstDemoPod() {
+        firstPodTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
+                self?.triggerDemoAdPod()
+            }
+        }
+        RunLoop.main.add(firstPodTimer!, forMode: .common)
+    }
+
+    private func triggerDemoAdPod() {
+        guard !isInAdBreak, !adPodInserter.isInAdPod else { return }
+
+        let slot = AdSlotInfo(
+            impressionId: "0x" + UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(40),
+            advertiser: ["Callaway Golf", "DraftKings", "Fanatics"].randomElement()!,
+            cpm: Double.random(in: 38.0...68.0),
+            dspName: "SimDSP-Demo"
+        )
+
+        print("[Player] Triggering demo ad pod — \(slot.advertiser)")
+        handleAdBreakStart(AdBreakEvent(slotIndex: 0, adSlot: slot, startTime: 0, duration: 30))
+        adPodInserter.insertPod(for: slot, channelID: channel.id)
+
+        // Schedule next pod in 90s
+        Timer.scheduledTimer(withTimeInterval: 90.0, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.triggerDemoAdPod() }
+        }
+    }
+
+    // MARK: - Ad Pod Inserter Wiring
+
+    private func wireAdPodInserter() {
+        adPodInserter.onAdPodCompleted = { [weak self] slot, latencyMs in
+            Task { await self?.handleAdBreakComplete(
+                AdBreakEvent(slotIndex: 0, adSlot: slot, startTime: 0, duration: 30),
+                latencyMs: latencyMs
+            )}
+        }
+        // Mirror AdPodInserter state into PlayerViewModel published state
+        adPodInserter.$isInAdPod
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] inPod in self?.isInAdBreak = inPod }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Ad Break Handling (shared by SSAI + CSAI)
 
     private func handleAdBreakStart(_ event: AdBreakEvent) {
-        print("[Player] 🎬 Ad break \(event.slotIndex) started — \(event.adSlot.advertiser)")
+        print("[Player] Ad break \(event.slotIndex) started — \(event.adSlot.advertiser)")
         isInAdBreak = true
         currentBreakEvent = event
 
-        // Record anomaly signals
+        // Anomaly + signal collection
         anomalyDetector.onPlaybackEvent()
-
-        // Fire EABN for next break (60s ahead if we know about it)
-        Task { await EABNService.shared.notifyUpcomingBreak(channelID: channel.id, expectedBreakOffset: 60, breakDurationSec: 30) }
-
-        // Fire betting overlay opportunity
-        bettingTrigger.onAdBreak(channelID: channel.id)
-
-        // Record Ad event for AI profiling
         signalCollector.record(AdEvent(
             type: .adBreakStarted,
             creativeID: event.adSlot.impressionId,
             advertiserID: event.adSlot.advertiser,
             completionPercent: 0,
             timestamp: Date(),
-            sessionID: session?.sessionId ?? ""
+            sessionID: session?.sessionId ?? "direct"
         ))
 
-        // Show SGAI shoppable overlay at T+20s
-        let overlayDelay = max(0, event.duration - 10)
+        // Betting overlay opportunity
+        bettingTrigger.onAdBreak(channelID: channel.id)
+
+        // EABN for next break
+        Task {
+            await EABNService.shared.notifyUpcomingBreak(
+                channelID: channel.id,
+                expectedBreakOffset: 90,
+                breakDurationSec: 30
+            )
+        }
+
+        // SGAI shoppable overlay at T+20s (10s before break ends)
+        let overlayDelay = max(5, event.duration - 10)
         DispatchQueue.main.asyncAfter(deadline: .now() + overlayDelay) { [weak self] in
             guard let self, self.isInAdBreak else { return }
             self.sgaiOverlay = SGAIOverlayData.demo(
@@ -176,12 +259,13 @@ final class PlayerViewModel: ObservableObject {
     }
 
     private func handleAdBreakComplete(_ event: AdBreakEvent, latencyMs: Double) async {
-        print("[Player] ✅ Ad break \(event.slotIndex) complete — signing PoD...")
+        print("[Player] Ad break \(event.slotIndex) complete — signing PoD...")
         isInAdBreak = false
         switchLatencyMs = latencyMs
         sgaiOverlay = nil
+        currentBreakEvent = nil
 
-        // Anomaly + signal collection
+        // Signal collection
         anomalyDetector.onAdCompleted(completionPercent: 1.0)
         signalCollector.record(AdEvent(
             type: .adCompleted,
@@ -189,7 +273,7 @@ final class PlayerViewModel: ObservableObject {
             advertiserID: event.adSlot.advertiser,
             completionPercent: 1.0,
             timestamp: Date(),
-            sessionID: session?.sessionId ?? ""
+            sessionID: session?.sessionId ?? "direct"
         ))
         AdaptiveFrequencyController.shared.recordImpression(
             creativeID: event.adSlot.impressionId,
@@ -208,7 +292,7 @@ final class PlayerViewModel: ObservableObject {
             switchLatencyMs: latencyMs
         )
 
-        if let record = record {
+        if let record {
             env.recordPoD(record)
             podToast = PoDToastData(
                 cmxsEarned: record.cmxsEarned,
@@ -224,31 +308,14 @@ final class PlayerViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Demo Break (fallback when no SSAI ad slots)
-
-    private func scheduleDemoBreak() {
-        let demoSlot = AdSlotInfo(
-            impressionId: "0x\(UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(64))",
-            advertiser: "Callaway Golf",
-            cpm: 47.5,
-            dspName: "SimDSP-Demo"
-        )
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [weak self] in
-            guard let self else { return }
-            self.adBreakDetector.triggerDemoBreak(adSlot: demoSlot)
-        }
-    }
-
-    // MARK: - Engine subscriptions
+    // MARK: - Engine Subscriptions
 
     private func subscribeToPredictionAndBetting() {
-        // Prediction overlay
         predictionEngine.$activePrediction
             .receive(on: DispatchQueue.main)
             .sink { [weak self] q in self?.activePredictionQuestion = q }
             .store(in: &cancellables)
 
-        // Coupon unlock notification
         predictionEngine.couponUnlockPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] coupon in
@@ -257,7 +324,6 @@ final class PlayerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Betting overlay
         bettingTrigger.$pendingOverlay
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ctx in self?.bettingOverlay = ctx }
