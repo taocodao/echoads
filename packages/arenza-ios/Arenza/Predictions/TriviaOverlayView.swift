@@ -117,16 +117,19 @@ struct TriviaOverlayView: View {
     // MARK: - Session Summary
 
     private func sessionSummaryCard(session: TriviaSession) -> some View {
-        VStack(spacing: 16) {
-            Text(session.wrongCount >= 3 ? "Game Over!" : "Trivia Complete!")
+        let accuracy: Int = session.questions.isEmpty ? 0
+            : Int(Double(session.correctCount) / Double(session.questions.count) * 100)
+        let headline: String = session.wrongCount >= 3 ? "Game Over!" : "Trivia Complete!"
+
+        return VStack(spacing: 16) {
+            Text(headline)
                 .font(.system(size: 22, weight: .black))
                 .foregroundColor(.white)
 
             HStack(spacing: 32) {
                 statView(label: "Correct", value: "\(session.correctCount)")
                 statView(label: "AZT Earned", value: "+\(session.totalAZTEarned)")
-                statView(label: "Accuracy",
-                         value: "\(Int(Double(session.correctCount) / Double(max(1, session.questions.count)) * 100))%")
+                statView(label: "Accuracy", value: "\(accuracy)%")
             }
 
             Button {

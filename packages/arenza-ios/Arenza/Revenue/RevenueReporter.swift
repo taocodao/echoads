@@ -42,8 +42,10 @@ actor RevenueReporter {
     private let persistenceKey = "arenza.revenue.pending"
 
     private init() {
-        loadPersistedEvents()
-        scheduleFlushLoop()
+        Task {
+            await loadPersistedEvents()
+            await scheduleFlushLoop()
+        }
     }
 
     // MARK: - Record events
