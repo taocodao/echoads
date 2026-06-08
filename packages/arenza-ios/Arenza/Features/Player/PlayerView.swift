@@ -23,196 +23,26 @@ struct PlayerView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            // ── Video Player (AVPlayerViewController) ────────────────────
+        // ── ROOT: AVPlayerViewController fills entire screen ──────────────
+        // CRITICAL: AVPlayerViewController MUST be the root view of the
+        // fullScreenCover — not buried inside a ZStack. When embedded in a
+        // ZStack inside fullScreenCover, the UIKit render surface fails to
+        // attach on real devices (works in Simulator). All overlays go on top
+        // via .overlay() modifier which doesn't interfere with the VC layer.
+        Group {
             if let player = vm.player {
                 PlayerViewControllerRepresentable(player: player)
                     .ignoresSafeArea()
-            }
-
-            // ── Loading Overlay ──────────────────────────────────────────
-            if vm.isLoading {
-                loadingOverlay
-            }
-
-
-            // ── Error Overlay ────────────────────────────────────────────
-            if let error = vm.errorMessage {
-                errorOverlay(message: error)
-            }
-
-            // ── Top Controls ─────────────────────────────────────────────
-            VStack {
-                topBar
-                Spacer()
-
-                // ── Ad Pod Progress Bar (CSAI) ──────────────────────────
-                if vm.isInAdBreak {
-                    AdPodProgressOverlay(vm: vm)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                }
-
-                Spacer()
-
-                // ── PoD Verification Toast ───────────────────────────────
-                if let toast = vm.podToast {
-                    PoDVerificationToast(toast: toast)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 100)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                // ── SGAI Shoppable Overlay ───────────────────────────────
-                if let overlay = vm.sgaiOverlay {
-                    SGAIShoppableCard(data: overlay) {
-                        withAnimation { vm.sgaiOverlay = nil }
-                    }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                // ── Prediction Overlay (C4) ────────────────────────────
-                if let question = vm.activePredictionQuestion {
-                    PredictionOverlayView(
-                        engine: PredictionEngine.shared,
-                        question: question,
-                        onDismiss: {}
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(10)
-                }
-
-                // ── Coupon Unlock Notification (C5) ───────────────────
-                if let coupon = vm.couponUnlock {
-                    RewardUnlockOverlayView(
-                        coupon: coupon,
-                        onRedeem: { vm.couponUnlock = nil },
-                        onDismiss: { vm.couponUnlock = nil }
-                    )
-                    .transition(.scale.combined(with: .opacity))
-                    .zIndex(20)
-                }
-
-                // ── Poll Overlay (Phase 4) ─────────────────────────────
-                if let poll = PollEngine.shared.activePoll,
-                   vm.activePredictionQuestion == nil,
-                   !vm.isInAdBreak {
-                    PollOverlayView(
-                        engine: PollEngine.shared,
-                        poll: poll,
-                        onDismiss: {}
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(12)
-                }
-
-                // ── Trivia Overlay (Phase 4) ───────────────────────────
-                if let _ = TriviaEngine.shared.activeSession,
-                   vm.activePredictionQuestion == nil,
-                   PollEngine.shared.activePoll == nil,
-                   !vm.isInAdBreak {
-                    TriviaOverlayView(
-                        engine: TriviaEngine.shared,
-                        onDismiss: {}
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(11)
-                }
-
-                // ── Betting Overlay (C6) ──────────────────────────────
-                if let bettingCtx = vm.bettingOverlay,
-                   vm.activePredictionQuestion == nil {   // Never stack with predictions
-                    BetSlipOverlayView(context: bettingCtx) {
-                        withAnimation { vm.bettingOverlay = nil }
-                    }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(5)
-                }
-            }
-
-            // ── DEMO: Full-screen Ad Card (zIndex 50) ────────────────────
-            // Shown during ad pods — visually 100% distinct from content.
-            // Keeps video playing underneath (muted); shows targeting data.
-            if vm.isInAdBreak,
-               let creative = vm.adPodInserter.activeCreative {
-                DemoAdCardView(
-                    creative: creative,
-                    podProgress: vm.adPodInserter.podProgress,
-                    podDurationRemaining: vm.adPodInserter.podDurationRemaining,
-                    currentSegment: ProfileEngine.shared.currentSegment.label
-                )
-                .ignoresSafeArea()
-                .transition(.opacity)
-                .zIndex(50)
-            }
-
-            // ── DEMO: Viewer Profiling Card (zIndex 30) ──────────────────
-            if demo.showProfilingCard {
-                VStack {
-                    Spacer().frame(height: 80)
-                    ViewerProfilingCard()
-                    Spacer()
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(30)
-            }
-
-            // ── DEMO: Ad Incoming Badge (zIndex 31) ──────────────────────
-            if demo.showAdIncomingBadge {
-                VStack {
-                    Spacer().frame(height: 70)
-                    HStack { Spacer(); AdIncomingBadge(); Spacer() }
-                    Spacer()
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(31)
-            }
-
-            // ── DEMO: Targeting Debug HUD (shake to reveal, zIndex 55) ───
-            if showDebugHUD {
-                VStack {
-                    Spacer()
-                    TargetingDebugHUD()
-                        .padding(.bottom, 100)
-                }
-                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                .zIndex(55)
-            }
-
-            // ── DEMO: Summary Card (zIndex 60) ───────────────────────────
-            if demo.showDemoSummary {
-                Color.black.opacity(0.6).ignoresSafeArea()
-                    .zIndex(59)
-                VStack {
-                    Spacer()
-                    DemoSummaryCard(
-                        aztEarned: demo.totalAZTEarned,
-                        revenueGenerated: demo.revenueGenerated
-                    ) {
-                        demo.stop()
-                        demo.start(for: vm)
-                    }
-                    Spacer()
-                }
-                .transition(.scale.combined(with: .opacity))
-                .zIndex(60)
-            }
-
-            // ── DEMO: Narration Bar (bottom, zIndex 28) ──────────────────
-            if demo.isRunning && !demo.stepNarration.isEmpty {
-                VStack {
-                    Spacer()
-                    DemoNarrationBar(
-                        narration: demo.stepNarration,
-                        step: demo.currentStep,
-                        elapsed: demo.elapsedSeconds
-                    )
-                }
-                .zIndex(28)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else {
+                Color.black.ignoresSafeArea()
             }
         }
+        // ── Overlays stacked via modifier (safe for UIKit compositing) ────
+        .overlay(alignment: .top) { topBar.padding(.top, 0) }
+        .overlay { errorAndLoadingOverlays }
+        .overlay { demoOverlays }
+        .overlay { gameOverlays }
+        // Animations
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.isInAdBreak)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: vm.podToast != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.sgaiOverlay != nil)
@@ -230,14 +60,171 @@ struct PlayerView: View {
             vm.stop()
             demo.stop()
         }
-        // Shake gesture → toggle targeting debug HUD
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.deviceDidShakeNotification)) { _ in
             withAnimation { showDebugHUD.toggle() }
         }
+        .ignoresSafeArea()
+        .preferredColorScheme(.dark)
     }
 
-    // MARK: - Demo Overlays (injected into the main ZStack via extension)
-    // These are defined inline in the body builder below for access to demo @StateObject.
+    // MARK: - Error / Loading Overlays
+
+    @ViewBuilder
+    private var errorAndLoadingOverlays: some View {
+        if vm.isLoading {
+            loadingOverlay
+        }
+        if let error = vm.errorMessage {
+            errorOverlay(message: error)
+        }
+    }
+
+    // MARK: - Game Interaction Overlays (predictions, betting, polls)
+
+    @ViewBuilder
+    private var gameOverlays: some View {
+        VStack {
+            Spacer()
+
+            if vm.isInAdBreak {
+                AdPodProgressOverlay(vm: vm)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
+            Spacer()
+
+            if let toast = vm.podToast {
+                PoDVerificationToast(toast: toast)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 100)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            if let overlay = vm.sgaiOverlay {
+                SGAIShoppableCard(data: overlay) {
+                    withAnimation { vm.sgaiOverlay = nil }
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            if let question = vm.activePredictionQuestion {
+                PredictionOverlayView(
+                    engine: PredictionEngine.shared,
+                    question: question,
+                    onDismiss: {}
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            if let coupon = vm.couponUnlock {
+                RewardUnlockOverlayView(
+                    coupon: coupon,
+                    onRedeem: { vm.couponUnlock = nil },
+                    onDismiss: { vm.couponUnlock = nil }
+                )
+                .transition(.scale.combined(with: .opacity))
+            }
+
+            if let poll = PollEngine.shared.activePoll,
+               vm.activePredictionQuestion == nil, !vm.isInAdBreak {
+                PollOverlayView(engine: PollEngine.shared, poll: poll, onDismiss: {})
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            if let _ = TriviaEngine.shared.activeSession,
+               vm.activePredictionQuestion == nil,
+               PollEngine.shared.activePoll == nil,
+               !vm.isInAdBreak {
+                TriviaOverlayView(engine: TriviaEngine.shared, onDismiss: {})
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            if let bettingCtx = vm.bettingOverlay, vm.activePredictionQuestion == nil {
+                BetSlipOverlayView(context: bettingCtx) {
+                    withAnimation { vm.bettingOverlay = nil }
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+    }
+
+    // MARK: - Demo Overlays
+
+    @ViewBuilder
+    private var demoOverlays: some View {
+        // Full-screen Ad Card (during pod)
+        if vm.isInAdBreak, let creative = vm.adPodInserter.activeCreative {
+            DemoAdCardView(
+                creative: creative,
+                podProgress: vm.adPodInserter.podProgress,
+                podDurationRemaining: vm.adPodInserter.podDurationRemaining,
+                currentSegment: ProfileEngine.shared.currentSegment.label
+            )
+            .ignoresSafeArea()
+            .transition(.opacity)
+            .zIndex(50)
+        }
+
+        // Viewer Profiling Card
+        if demo.showProfilingCard {
+            VStack {
+                Spacer().frame(height: 80)
+                ViewerProfilingCard()
+                Spacer()
+            }
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+
+        // Ad Incoming Badge
+        if demo.showAdIncomingBadge {
+            VStack {
+                Spacer().frame(height: 70)
+                HStack { Spacer(); AdIncomingBadge(); Spacer() }
+                Spacer()
+            }
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+
+        // Targeting Debug HUD (shake)
+        if showDebugHUD {
+            VStack {
+                Spacer()
+                TargetingDebugHUD().padding(.bottom, 100)
+            }
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        }
+
+        // Demo Summary
+        if demo.showDemoSummary {
+            Color.black.opacity(0.6).ignoresSafeArea()
+            VStack {
+                Spacer()
+                DemoSummaryCard(
+                    aztEarned: demo.totalAZTEarned,
+                    revenueGenerated: demo.revenueGenerated
+                ) {
+                    demo.stop()
+                    demo.start(for: vm)
+                }
+                Spacer()
+            }
+            .transition(.scale.combined(with: .opacity))
+        }
+
+        // Narration Bar
+        if demo.isRunning && !demo.stepNarration.isEmpty {
+            VStack {
+                Spacer()
+                DemoNarrationBar(
+                    narration: demo.stepNarration,
+                    step: demo.currentStep,
+                    elapsed: demo.elapsedSeconds
+                )
+            }
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
 
 
     // MARK: - Top Bar
