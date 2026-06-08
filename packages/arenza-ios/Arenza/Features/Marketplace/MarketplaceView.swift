@@ -480,25 +480,19 @@ final class MarketplaceViewModel: ObservableObject {
     func logImpression(offer: SponsorOffer) {
         guard !impressionLog.contains(offer.id) else { return }
         impressionLog.insert(offer.id)
-        print("[Revenue] CPM impression — \(offer.sponsorName) — $\(offer.impressionCPM)/M")
-
-        // TODO: POST /api/v1/revenue/impression
+        Task { await RevenueReporter.shared.recordImpression(offer: offer) }
     }
 
     func logClick(offer: SponsorOffer) {
-        print("[Revenue] CPC click — \(offer.sponsorName) — $\(offer.clickCPC)")
-
-        // TODO: POST /api/v1/revenue/click
+        Task { await RevenueReporter.shared.recordClick(offer: offer) }
     }
 
     func redeemOffer(_ offer: SponsorOffer, wallet: inout RewardsWallet) {
         let success = wallet.spend(offer.aztCost, source: .redemption, sponsorId: offer.sponsorId)
         if success {
-            print("[Revenue] CPA redemption — \(offer.sponsorName) — $\(offer.redemptionFee) — code: \(offer.couponCode)")
-
-            // TODO: POST /api/v1/revenue/redemption
+            Task { await RevenueReporter.shared.recordRedemption(offer: offer, aztSpent: offer.aztCost) }
         } else {
-            print("[Revenue] Redeem failed — insufficient AZT")
+            print("[Revenue] Redeem failed — insufficient AZT (balance: \(wallet.aztBalance), cost: \(offer.aztCost))")
         }
     }
 }

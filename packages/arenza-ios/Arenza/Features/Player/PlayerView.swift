@@ -86,6 +86,32 @@ struct PlayerView: View {
                     .zIndex(20)
                 }
 
+                // ── Poll Overlay (Phase 4) ─────────────────────────────
+                if let poll = PollEngine.shared.activePoll,
+                   vm.activePredictionQuestion == nil,
+                   !vm.isInAdBreak {
+                    PollOverlayView(
+                        engine: PollEngine.shared,
+                        poll: poll,
+                        onDismiss: {}
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(12)
+                }
+
+                // ── Trivia Overlay (Phase 4) ───────────────────────────
+                if let _ = TriviaEngine.shared.activeSession,
+                   vm.activePredictionQuestion == nil,
+                   PollEngine.shared.activePoll == nil,
+                   !vm.isInAdBreak {
+                    TriviaOverlayView(
+                        engine: TriviaEngine.shared,
+                        onDismiss: {}
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(11)
+                }
+
                 // ── Betting Overlay (C6) ──────────────────────────────
                 if let bettingCtx = vm.bettingOverlay,
                    vm.activePredictionQuestion == nil {   // Never stack with predictions
@@ -101,10 +127,13 @@ struct PlayerView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: vm.podToast != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.sgaiOverlay != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.activePredictionQuestion != nil)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: PollEngine.shared.activePoll != nil)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: TriviaEngine.shared.activeSession != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.bettingOverlay != nil)
         .task { await vm.startPlayback() }
         .onDisappear { vm.stop() }
     }
+
 
     // MARK: - Top Bar
 
