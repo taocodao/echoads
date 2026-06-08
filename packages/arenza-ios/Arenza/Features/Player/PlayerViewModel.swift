@@ -33,7 +33,9 @@ final class PlayerViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let channel: Channel
+    var channelName: String { channel.name }
     private let env: AppEnvironment
+
     private let adBreakDetector = AdBreakDetector()
     let adPodInserter = AdPodInserter()   // internal: PlayerView reads activeCreative
     private var session: PlaybackSession?
@@ -77,17 +79,15 @@ final class PlayerViewModel: ObservableObject {
 
     // MARK: - Lifecycle
 
-    /// Called from .task — player already exists, this starts playback + ancillary services.
+    /// Called from .task — player already exists, this starts ancillary services.
+    /// NOTE: player.play() is called by PlayerHostViewController.viewDidAppear()
+    /// to guarantee the AVPlayerLayer is fully attached to the window first.
     func startPlayback() async {
-        guard let player else {
+        guard player != nil else {
             errorMessage = "No stream available for this channel."
             isLoading = false
             return
         }
-
-        // Start playback
-        player.play()
-        print("[Player] play() called for \(channel.name)")
 
         // Connect contextual moments (MoQ relay via WebSocket)
         ContextualMomentService.shared.connect(channelID: channel.id)

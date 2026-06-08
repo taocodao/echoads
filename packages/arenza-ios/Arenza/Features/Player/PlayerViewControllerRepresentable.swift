@@ -1,34 +1,23 @@
 // PlayerViewControllerRepresentable.swift — Arenza
-// Wraps AVPlayerViewController for reliable video rendering on real devices.
-//
-// WHY: SwiftUI's VideoPlayer has known issues when presented inside
-// fullScreenCover with complex ZStack overlays — the render surface
-// may never attach on physical iPhones. AVPlayerViewController is
-// Apple's recommended path for production video playback.
+// Bridges PlayerHostViewController into SwiftUI's fullScreenCover.
+// PlayerHostViewController is the ROOT — no wrapping ZStack.
 
 import SwiftUI
-import AVKit
+import UIKit
 
 struct PlayerViewControllerRepresentable: UIViewControllerRepresentable {
-    let player: AVPlayer
+    @ObservedObject var vm: PlayerViewModel
+    let demo: DemoOrchestrator
 
-    func makeUIViewController(context: Context) -> AVPlayerViewController {
-        let vc = AVPlayerViewController()
-        vc.player = player
-        vc.showsPlaybackControls = false   // We use custom overlays
-        vc.allowsPictureInPicturePlayback = false
-        vc.entersFullScreenWhenPlaybackBegins = false
-        vc.exitsFullScreenWhenPlaybackEnds = false
-        vc.videoGravity = .resizeAspectFill
-        // Prevent the VC from showing its own dismiss gesture
-        vc.canStartPictureInPictureAutomaticallyFromInline = false
+    func makeUIViewController(context: Context) -> PlayerHostViewController {
+        let vc = PlayerHostViewController(vm: vm, demo: demo)
         return vc
     }
 
-    func updateUIViewController(_ vc: AVPlayerViewController, context: Context) {
-        // Only update if the player instance actually changed
-        if vc.player !== player {
-            vc.player = player
+    func updateUIViewController(_ vc: PlayerHostViewController, context: Context) {
+        // Update player if it changes
+        if let player = vm.player {
+            vc.updatePlayer(player)
         }
     }
 }
