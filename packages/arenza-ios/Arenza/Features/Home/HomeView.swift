@@ -8,6 +8,7 @@ struct HomeView: View {
     @StateObject private var vm: HomeViewModel = HomeViewModel(env: .shared)
     @State private var selectedChannel: Channel?
     @State private var showPlayer = false
+    @State private var showVideoTest = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -71,6 +72,9 @@ struct HomeView: View {
                         .environmentObject(env)
                 }
             }
+            .sheet(isPresented: $showVideoTest) {
+                VideoTestView()
+            }
         }
     }
 
@@ -88,6 +92,8 @@ struct HomeView: View {
                             endPoint: .trailing
                         )
                     )
+                    // Triple-tap opens video diagnostic
+                    .onTapGesture(count: 3) { showVideoTest = true }
                 Text("Sports · Free · Verified")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white.opacity(0.45))
