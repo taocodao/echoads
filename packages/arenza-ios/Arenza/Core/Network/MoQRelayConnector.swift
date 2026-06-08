@@ -379,7 +379,9 @@ final class MoQRelayConnector: ObservableObject {
     private func startPingTimer() {
         pingTimer?.invalidate()
         pingTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { [weak self] _ in
-            self?.webSocketTask?.sendPing { _ in }
+            Task { @MainActor [weak self] in
+                self?.webSocketTask?.sendPing { _ in }
+            }
         }
         RunLoop.main.add(pingTimer!, forMode: .common)
     }
