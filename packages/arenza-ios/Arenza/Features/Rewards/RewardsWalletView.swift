@@ -126,7 +126,7 @@ struct TierStatusCard: View {
                     .font(.system(size: 22, weight: .black))
                     .foregroundColor(.white)
                 HStack(spacing: 20) {
-                    statBadge(label: "Season", value: "\(wallet.seasonPoints) pts")
+                    statBadge(label: "Season", value: "\(wallet.seasonAZT) AZT")
                     statBadge(label: "Streak", value: "🔥 \(wallet.currentStreak)")
                     statBadge(label: "Best", value: "\(wallet.bestStreak)")
                 }
@@ -162,7 +162,7 @@ struct PointsProgressCard: View {
         guard let next = nextTier else { return 1.0 }
         let from = Double(wallet.tier.minPoints)
         let to   = Double(next.minPoints)
-        let curr = Double(wallet.seasonPoints)
+        let curr = Double(wallet.seasonAZT)
         return (curr - from) / (to - from)
     }
 
@@ -170,16 +170,16 @@ struct PointsProgressCard: View {
         VStack(spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Total Points")
+                    Text("AZT Balance")
                         .font(.system(size: 12)).foregroundColor(.white.opacity(0.5))
-                    Text("\(wallet.totalPoints)")
+                    Text("\(wallet.aztBalance)")
                         .font(.system(size: 32, weight: .black)).foregroundColor(.white)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("This Week")
                         .font(.system(size: 12)).foregroundColor(.white.opacity(0.5))
-                    Text("+\(wallet.weeklyPoints)")
+                    Text("+\(wallet.weeklyAZT)")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.60))
                 }
@@ -191,7 +191,7 @@ struct PointsProgressCard: View {
                         Text("Progress to \(next.label)")
                             .font(.system(size: 12)).foregroundColor(.white.opacity(0.5))
                         Spacer()
-                        Text("\(next.minPoints - wallet.seasonPoints) pts to go")
+                        Text("\(next.minPoints - wallet.seasonAZT) AZT to go")
                             .font(.system(size: 12)).foregroundColor(.white.opacity(0.5))
                     }
                     GeometryReader { geo in
@@ -490,7 +490,7 @@ final class LeaderboardViewModel: ObservableObject {
         myEntry = LeaderboardEntry(
             id: UUID(), userID: "me", displayName: "You",
             avatarURL: nil, rank: 7,
-            points: wallet.weeklyPoints,
+            points: wallet.weeklyAZT,
             correctPredictions: 12, totalPredictions: 20,
             currentStreak: wallet.currentStreak,
             tier: wallet.tier

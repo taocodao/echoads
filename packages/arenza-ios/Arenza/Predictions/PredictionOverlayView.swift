@@ -79,7 +79,7 @@ struct PredictionOverlayView: View {
 
             // Points preview
             if !submitted {
-                Text("Correct answer = +\(question.adjustedPoints) pts")
+                Text("Correct answer = +\(question.adjustedPoints) AZT")
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.45))
             }
@@ -126,7 +126,7 @@ struct PredictionOverlayView: View {
             Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .foregroundColor(correct ? Color(red: 0.0, green: 0.82, blue: 0.60) : .red)
             if correct, let pts = pointsEarned {
-                Text("+\(pts) points!")
+                Text("+\(pts) AZT!")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.60))
             } else {

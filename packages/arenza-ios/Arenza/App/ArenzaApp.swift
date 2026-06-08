@@ -92,7 +92,7 @@ struct PredictionsTabView: View {
                         Label("Total Points", systemImage: "star.fill")
                             .foregroundColor(.primary)
                         Spacer()
-                        Text("\(engine.wallet.totalPoints)")
+                        Text("\(engine.wallet.aztBalance) AZT")
                             .fontWeight(.bold)
                             .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.60))
                     }

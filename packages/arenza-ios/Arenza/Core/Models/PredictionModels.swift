@@ -70,40 +70,136 @@ struct PredictionResolution: Codable {
     var totalPoints: Int { Int(Float(basePoints) * streakMultiplier) }
 }
 
+// MARK: - AZT Entry (lightweight transaction record for history display)
+//
+// AZT = Arenza Tokens — simple integer points stored in the DB.
+// Not a crypto token. No blockchain. Backend holds canonical balance;
+// the app caches a local copy in UserDefaults.
+
+struct AZTEntry: Codable, Identifiable {
+    let id: UUID
+    let amount: Int                     // positive = earned, negative = spent
+    let source: AZTSource
+    let date: Date
+    let expiresAt: Date?                // nil = never expires; 90 days from earn by default
+    let gameId: String?
+    let sponsorId: String?
+
+    var isExpired: Bool {
+        guard let exp = expiresAt else { return false }
+        return exp < Date()
+    }
+}
+
+enum AZTSource: String, Codable {
+    case prediction     = "prediction"
+    case poll           = "poll"
+    case trivia         = "trivia"
+    case adView         = "ad_view"
+    case dailyCheckIn   = "daily_checkin"
+    case streakBonus    = "streak_bonus"
+    case referral       = "referral"
+    case socialShare    = "social_share"
+    case redemption     = "redemption"      // negative (spend)
+    case expired        = "expired"         // negative (auto-expire)
+}
+
 // MARK: - Rewards Wallet
 
 struct RewardsWallet: Codable {
-    var totalPoints: Int
-    var weeklyPoints: Int
-    var seasonPoints: Int
+    var aztBalance: Int                 // total active AZT (DB is source of truth)
+    var weeklyAZT: Int                  // earned this week
+    var seasonAZT: Int                  // earned this season (drives tier)
     var currentStreak: Int
     var bestStreak: Int
     var tier: RewardsTier
     var availableCoupons: [SponsorCoupon]
     var redeemedCoupons: [SponsorCoupon]
-    var pendingPoints: Int              // from unresolved predictions
+    var pendingAZT: Int                 // from unresolved predictions
+    var aztHistory: [AZTEntry]          // recent transaction log for UI
+    var lastCheckInDate: Date?          // tracks daily check-in streak
 
     static var empty: RewardsWallet {
         RewardsWallet(
-            totalPoints: 0, weeklyPoints: 0, seasonPoints: 0,
+            aztBalance: 0, weeklyAZT: 0, seasonAZT: 0,
             currentStreak: 0, bestStreak: 0, tier: .bronze,
-            availableCoupons: [], redeemedCoupons: [], pendingPoints: 0
+            availableCoupons: [], redeemedCoupons: [],
+            pendingAZT: 0, aztHistory: [], lastCheckInDate: nil
         )
     }
 
+    // MARK: - Earn AZT (positive)
+
+    mutating func earn(_ amount: Int, source: AZTSource, gameId: String? = nil, sponsorId: String? = nil) {
+        aztBalance += amount
+        weeklyAZT  += amount
+        seasonAZT  += amount
+        tier = RewardsTier.tier(for: seasonAZT)
+
+        let entry = AZTEntry(
+            id: UUID(), amount: amount, source: source,
+            date: Date(),
+            expiresAt: Date().addingTimeInterval(90 * 86400), // 90-day expiry
+            gameId: gameId, sponsorId: sponsorId
+        )
+        aztHistory.insert(entry, at: 0)
+
+        // Cap history to last 200 entries locally
+        if aztHistory.count > 200 { aztHistory = Array(aztHistory.prefix(200)) }
+    }
+
+    // MARK: - Spend AZT (negative)
+
+    mutating func spend(_ amount: Int, source: AZTSource = .redemption, sponsorId: String? = nil) -> Bool {
+        guard aztBalance >= amount else { return false }
+        aztBalance -= amount
+
+        let entry = AZTEntry(
+            id: UUID(), amount: -amount, source: source,
+            date: Date(), expiresAt: nil,
+            gameId: nil, sponsorId: sponsorId
+        )
+        aztHistory.insert(entry, at: 0)
+        if aztHistory.count > 200 { aztHistory = Array(aztHistory.prefix(200)) }
+        return true
+    }
+
+    // MARK: - Apply prediction resolution (updates streak + awards AZT)
+
     mutating func applyResolution(_ resolution: PredictionResolution) {
-        pendingPoints = max(0, pendingPoints - resolution.basePoints)
+        pendingAZT = max(0, pendingAZT - resolution.basePoints)
         if resolution.isCorrect {
-            let earned = resolution.totalPoints
-            totalPoints   += earned
-            weeklyPoints  += earned
-            seasonPoints  += earned
+            earn(resolution.totalPoints, source: .prediction)
             currentStreak += 1
             bestStreak     = max(bestStreak, currentStreak)
         } else {
             currentStreak = 0
         }
-        tier = RewardsTier.tier(for: seasonPoints)
+        tier = RewardsTier.tier(for: seasonAZT)
+    }
+
+    // MARK: - Daily check-in
+
+    mutating func performDailyCheckIn() -> Int {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+
+        // Already checked in today?
+        if let last = lastCheckInDate, cal.isDate(last, inSameDayAs: today) {
+            return 0
+        }
+
+        lastCheckInDate = today
+        var bonus = 10  // base daily AZT
+
+        // 7-day streak bonus
+        if currentStreak >= 7 && currentStreak.isMultiple(of: 7) {
+            bonus += 50
+            earn(50, source: .streakBonus)
+        }
+
+        earn(bonus, source: .dailyCheckIn)
+        return bonus
     }
 }
 
@@ -152,12 +248,14 @@ enum RewardsTier: String, Codable, CaseIterable, Comparable {
 // MARK: - Sponsor Coupon
 
 enum CouponCategory: String, Codable {
-    case food       = "food"
-    case sports     = "sports"
-    case betting    = "betting"
-    case retail     = "retail"
-    case travel     = "travel"
-    case streaming  = "streaming"
+    case food           = "food"
+    case sports         = "sports"
+    case betting        = "betting"
+    case retail         = "retail"
+    case travel         = "travel"
+    case streaming      = "streaming"
+    case electronics    = "electronics"
+    case entertainment  = "entertainment"
 }
 
 struct SponsorCoupon: Codable, Identifiable {
@@ -173,7 +271,7 @@ struct SponsorCoupon: Codable, Identifiable {
     let minimumPurchase: Double?
     let maximumDiscount: Double?
     let category: CouponCategory
-    let pointCost: Int                  // points required to unlock
+    let aztCost: Int                    // AZT required to redeem
     var isRedeemed: Bool
     var redeemedAt: Date?
     var unlockedAt: Date
@@ -183,6 +281,9 @@ struct SponsorCoupon: Codable, Identifiable {
     var daysUntilExpiry: Int {
         Calendar.current.dateComponents([.day], from: Date(), to: expiresAt).day ?? 0
     }
+
+    // Backward compat alias
+    var pointCost: Int { aztCost }
 
     // Demo coupon for UI testing
     static func demo() -> SponsorCoupon {
@@ -199,7 +300,7 @@ struct SponsorCoupon: Codable, Identifiable {
             minimumPurchase: 15.00,
             maximumDiscount: 10.00,
             category: .food,
-            pointCost: 250,
+            aztCost: 2500,              // 2,500 AZT ≈ $2.50 implied value
             isRedeemed: false,
             redeemedAt: nil,
             unlockedAt: Date()
@@ -235,6 +336,8 @@ enum LeaderboardScope: String, CaseIterable, Identifiable {
     case weekly  = "weekly"
     case monthly = "monthly"
     case season  = "season"
+    case local   = "local"      // DMA-scoped leaderboard
+    case friends = "friends"    // custom private league
 
     var id: String { rawValue }
     var label: String { rawValue.capitalized }

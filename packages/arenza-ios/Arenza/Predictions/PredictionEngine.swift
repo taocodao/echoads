@@ -137,7 +137,7 @@ final class PredictionEngine: ObservableObject {
         )
         if let q = question, !q.isExpired {
             activePrediction = q
-            wallet.pendingPoints += q.adjustedPoints
+            wallet.pendingAZT += q.adjustedPoints
         }
     }
 
@@ -170,7 +170,7 @@ final class PredictionEngine: ObservableObject {
     // MARK: - Dismiss active prediction (timed out)
 
     func dismissActivePrediction() {
-        wallet.pendingPoints = max(0, wallet.pendingPoints - (activePrediction?.adjustedPoints ?? 0))
+        wallet.pendingAZT = max(0, wallet.pendingAZT - (activePrediction?.adjustedPoints ?? 0))
         activePrediction = nil
     }
 
@@ -226,7 +226,7 @@ final class PredictionEngine: ObservableObject {
 
     func checkCouponUnlock() async {
         if let coupon = await PredictionAPIClient.shared.checkCouponUnlock(
-            seasonPoints: wallet.seasonPoints,
+            seasonPoints: wallet.seasonAZT,
             tier: wallet.tier
         ) {
             wallet.availableCoupons.append(coupon)
@@ -236,7 +236,7 @@ final class PredictionEngine: ObservableObject {
 
         // Demo: unlock a coupon at 100+ season points
         #if DEBUG
-        if wallet.seasonPoints >= 100 && wallet.availableCoupons.isEmpty {
+        if wallet.seasonAZT >= 100 && wallet.availableCoupons.isEmpty {
             let demo = SponsorCoupon.demo()
             wallet.availableCoupons.append(demo)
             pendingUnlock = demo
@@ -255,6 +255,12 @@ final class PredictionEngine: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "arenza.wallet"),
            let saved = try? JSONDecoder().decode(RewardsWallet.self, from: data) {
             wallet = saved
+        }
+        // Perform daily check-in on each app launch
+        let bonus = wallet.performDailyCheckIn()
+        if bonus > 0 {
+            print("[AZT] Daily check-in: +\(bonus) AZT")
+            saveWallet()
         }
     }
 

@@ -236,10 +236,17 @@ final class PlayerViewModel: ObservableObject {
 
     private func wireAdPodInserter() {
         adPodInserter.onAdPodCompleted = { [weak self] slot, latencyMs in
-            Task { await self?.handleAdBreakComplete(
-                AdBreakEvent(slotIndex: 0, adSlot: slot, startTime: 0, duration: 30),
-                latencyMs: latencyMs
-            )}
+            Task { @MainActor in
+                // Award 15 AZT for watching the ad pod
+                PredictionEngine.shared.wallet.earn(15, source: .adView, sponsorId: slot.advertiser)
+                PredictionEngine.shared.saveWallet()
+                print("[AZT] +15 AZT for ad view — \(slot.advertiser)")
+
+                await self?.handleAdBreakComplete(
+                    AdBreakEvent(slotIndex: 0, adSlot: slot, startTime: 0, duration: 30),
+                    latencyMs: latencyMs
+                )
+            }
         }
         // Mirror AdPodInserter state into PlayerViewModel published state
         adPodInserter.$isInAdPod
