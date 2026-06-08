@@ -151,7 +151,7 @@ final class PredictionEngine: ObservableObject {
             questionID: questionID,
             selectedOptionID: optionID,
             submittedAt: Date(),
-            streakMultiplier: streakMultiplier
+            streakMultiplierApplied: streakMultiplier
         )
         pendingPredictions[questionID] = prediction
         SignalCollector.shared.recordPredictionResult(correct: false)  // will be updated on resolution

@@ -466,30 +466,34 @@ final class LeaderboardViewModel: ObservableObject {
         defer { isLoading = false }
 
         // TODO: fetch from /v1/leaderboard?scope=weekly&limit=100
-        // Demo data for now
-        let demos = (1...20).map { rank in
-            LeaderboardEntry(
-                id: UUID(),
-                userID: "user_\(rank)",
-                displayName: ["SportsGuru", "PredictKing", "FanZone", "LiveBet", "GOAT"][rank % 5] + " \(rank)",
-                avatarURL: nil,
-                rank: rank,
-                points: max(0, 500 - (rank * 20) + Int.random(in: -10...10)),
-                correctPredictions: Int.random(in: 15...40),
-                totalPredictions: Int.random(in: 45...60),
-                currentStreak: max(0, 10 - rank),
-                tier: RewardsTier.tier(for: max(0, 500 - rank * 20))
+        // Demo data — broken into discrete steps to avoid Swift type-checker timeout
+        let names = ["SportsGuru", "PredictKing", "FanZone", "LiveBet", "GOAT"]
+        var demos: [LeaderboardEntry] = []
+        for rank in 1...20 {
+            let pts: Int = max(0, 500 - (rank * 20) + Int.random(in: -10...10))
+            let correct: Int = Int.random(in: 15...40)
+            let total: Int = Int.random(in: 45...60)
+            let streak: Int = max(0, 10 - rank)
+            let tier: RewardsTier = RewardsTier.tier(for: max(0, 500 - rank * 20))
+            let name: String = names[rank % 5] + " \(rank)"
+            let entry = LeaderboardEntry(
+                id: UUID(), userID: "user_\(rank)", displayName: name,
+                avatarURL: nil, rank: rank, points: pts,
+                correctPredictions: correct, totalPredictions: total,
+                currentStreak: streak, tier: tier
             )
+            demos.append(entry)
         }
         entries = demos
+
+        let wallet = PredictionEngine.shared.wallet
         myEntry = LeaderboardEntry(
-            id: UUID(), userID: "me",
-            displayName: "You",
+            id: UUID(), userID: "me", displayName: "You",
             avatarURL: nil, rank: 7,
-            points: PredictionEngine.shared.wallet.weeklyPoints,
+            points: wallet.weeklyPoints,
             correctPredictions: 12, totalPredictions: 20,
-            currentStreak: PredictionEngine.shared.wallet.currentStreak,
-            tier: PredictionEngine.shared.wallet.tier
+            currentStreak: wallet.currentStreak,
+            tier: wallet.tier
         )
     }
 }
