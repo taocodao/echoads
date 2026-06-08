@@ -81,16 +81,18 @@ final class PlayerViewModel: ObservableObject {
 
         // Build and start AVPlayer from direct HLS URL
         let playerItem = AVPlayerItem(url: streamURL)
-
-        // Observe player item status
         let newPlayer = AVPlayer(playerItem: playerItem)
+        // Keep default stalling behaviour — setting to false can cause stuttering on device
         newPlayer.automaticallyWaitsToMinimizeStalling = true
         self.player = newPlayer
         adPodInserter.attach(to: newPlayer)
 
-        // Start playback
+        // Observe item status so we know when video is actually ready vs still loading
+        observePlayerItemStatus(playerItem, player: newPlayer)
+
+        // Start playback — AVPlayer will buffer and play when ready
         newPlayer.play()
-        isLoading = false
+        // Keep isLoading = true until item.status == .readyToPlay (set in observer)
 
         // Connect contextual moments (MoQ relay via WebSocket)
         ContextualMomentService.shared.connect(channelID: channel.id)
@@ -166,6 +168,35 @@ final class PlayerViewModel: ObservableObject {
             // Silent — direct HLS is already playing fine
             print("[Player] SSAI enrichment unavailable (expected on device): \(error.localizedDescription)")
         }
+    }
+
+    // MARK: - Player Item Status Observation
+
+    private var itemStatusObserver: AnyCancellable?
+
+    private func observePlayerItemStatus(_ item: AVPlayerItem, player: AVPlayer) {
+        // Use Combine publisher on AVPlayerItem.status
+        itemStatusObserver = item.publisher(for: \.status)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self else { return }
+                switch status {
+                case .readyToPlay:
+                    // Video buffer ready — hide the loading spinner
+                    self.isLoading = false
+                    print("[Player] ✅ Item ready to play")
+                case .failed:
+                    self.isLoading = false
+                    let err = item.error?.localizedDescription ?? "Unknown playback error"
+                    self.errorMessage = err
+                    print("[Player] ❌ Item failed: \(err)")
+                case .unknown:
+                    // Still loading — keep spinner visible
+                    self.isLoading = true
+                @unknown default:
+                    break
+                }
+            }
     }
 
     // MARK: - Demo Pod Scheduling

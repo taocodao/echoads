@@ -3,14 +3,33 @@
 
 import SwiftUI
 import BackgroundTasks
+import AVFoundation
 
 @main
 struct ArenzaApp: App {
     @StateObject private var env = AppEnvironment.shared
 
     init() {
+        // Configure audio session BEFORE any AVPlayer is created.
+        // Without .playback category, AVPlayerLayer shows black on physical iPhones
+        // even though Simulator works fine (Simulator doesn't enforce audio session routing).
+        configureAudioSession()
+
         // Register background task handlers on launch
         HouseAdBGTask.register()
+    }
+
+    private func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            // .playback: allows video+audio even when silent switch is on
+            // .moviePlayback: optimised mode for video content
+            try session.setCategory(.playback, mode: .moviePlayback, options: [.allowAirPlay])
+            try session.setActive(true)
+        } catch {
+            // Non-fatal — log and continue. Video may still play without audio on some devices.
+            print("[Audio] AVAudioSession setup failed: \(error.localizedDescription)")
+        }
     }
 
     var body: some Scene {
