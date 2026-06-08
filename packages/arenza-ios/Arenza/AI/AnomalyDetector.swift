@@ -169,9 +169,8 @@ final class AnomalyDetector: ObservableObject {
     }
 
     private func observeNetworkChanges() {
-        // Lightweight — just count changes. Full NWPathMonitor in Phase 2.
-        NotificationCenter.default.publisher(for: .NSBundleDidLoad)
-            .sink { [weak self] _ in self?.networkSwitchCount += 1 }
-            .store(in: &cancellables)
+        // TODO Phase 2: replace with NWPathMonitor for actual network path change detection.
+        // NSBundleDidLoad is not valid for this purpose — NWPathMonitor is the correct API.
+        // networkSwitchCount stays at 0 until Phase 2 implementation.
     }
 }

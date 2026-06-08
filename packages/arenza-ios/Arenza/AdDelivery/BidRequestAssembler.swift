@@ -97,13 +97,14 @@ actor BidRequestAssembler {
         }
 
         // Fallback: serve house ad
-        return makeFallbackResponse(bidRequest: bidRequest)
+        return await makeFallbackResponse(bidRequest: bidRequest)
     }
 
     // MARK: - House ad fallback response
 
-    private func makeFallbackResponse(bidRequest: EnrichedBidRequest) -> BidResponse? {
-        let houseAd = HouseAdCache.shared.nextHouseAd()
+    private func makeFallbackResponse(bidRequest: EnrichedBidRequest) async -> BidResponse? {
+        // HouseAdCache is @MainActor — hop to main to access it
+        let houseAd = await MainActor.run { HouseAdCache.shared.nextHouseAd() }
         guard let ad = houseAd else { return nil }
 
         return BidResponse(

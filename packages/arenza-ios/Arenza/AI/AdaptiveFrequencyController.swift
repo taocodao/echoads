@@ -132,8 +132,11 @@ final class AdaptiveFrequencyController {
         // Penalize high impression count
         score -= Double(record.impressionCount) * 0.1
 
-        // Apply segment modifier (SEG-01, SEG-09 tolerate more impressions)
-        let segmentBoost = ProfileEngine.shared.currentSegment.rawValue <= 4 ? 0.1 : 0.0
+        // Apply segment modifier (SEG-01 through SEG-04 tolerate more impressions).
+        // ProfileEngine.shared.currentSegment is @MainActor — we read a cached value instead
+        // to avoid actor-isolation violations in this synchronous context.
+        let cachedSegmentRaw = UserDefaults.standard.integer(forKey: "arenza.cachedSegmentID")
+        let segmentBoost = (cachedSegmentRaw > 0 && cachedSegmentRaw <= 4) ? 0.1 : 0.0
         score += segmentBoost
 
         return max(0, min(1, score))

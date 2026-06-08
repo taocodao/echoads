@@ -37,6 +37,9 @@ final class ProfileEngine: ObservableObject {
         viewerScore    = score
         sportAffinities = buildSportAffinities(from: features)
 
+        // Cache segment ID for nonisolated consumers (e.g. AdaptiveFrequencyController)
+        UserDefaults.standard.set(segment.rawValue, forKey: "arenza.cachedSegmentID")
+
         // Upload segment ID only — never raw behavioral data
         await uploadSegment(segment: segment, score: score)
 
