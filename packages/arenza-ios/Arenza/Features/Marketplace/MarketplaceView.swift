@@ -439,21 +439,8 @@ struct OfferDetailSheet: View {
     }
 }
 
-// MARK: - Safari View Wrapper
+// SafariView is defined in RewardsWalletView.swift and shared app-wide.
 
-struct SafariView: UIViewControllerRepresentable {
-    let url: URL
-
-    func makeUIViewController(context: Context) -> SFSafariViewController {
-        let vc = SFSafariViewController(url: url)
-        vc.preferredControlTintColor = UIColor(red: 0.0, green: 0.82, blue: 0.60, alpha: 1.0)
-        return vc
-    }
-
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
-}
-
-// MARK: - Marketplace ViewModel
 
 enum BrowseMode: String, CaseIterable {
     case nearMe = "Near Me"
