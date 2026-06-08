@@ -14,12 +14,18 @@ import SafariServices
 struct MarketplaceView: View {
     @StateObject private var vm = MarketplaceViewModel()
     @ObservedObject private var engine = PredictionEngine.shared
+    @ObservedObject private var geo = LocalizationEngine.shared
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 // AZT balance header
                 aztBalanceHeader
+
+                // Stadium Mode banner
+                if geo.isAtStadium, let stadium = geo.nearbyStadium {
+                    stadiumBanner(stadium: stadium)
+                }
 
                 // Browse mode picker
                 Picker("", selection: $vm.browseMode) {
@@ -46,6 +52,7 @@ struct MarketplaceView: View {
             .navigationTitle("Marketplace")
             .navigationBarTitleDisplayMode(.large)
             .background(Color(white: 0.05).ignoresSafeArea())
+            .onAppear { geo.requestLocationIfNeeded() }
             .sheet(item: $vm.selectedOffer) { offer in
                 OfferDetailSheet(offer: offer, wallet: $engine.wallet) {
                     vm.logClick(offer: offer)
@@ -55,6 +62,32 @@ struct MarketplaceView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Stadium Mode Banner
+
+    private func stadiumBanner(stadium: Stadium) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "stadium")
+                .font(.system(size: 16))
+                .foregroundColor(.orange)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("STADIUM MODE")
+                    .font(.system(size: 10, weight: .black))
+                    .foregroundColor(.orange)
+                    .tracking(1.2)
+                Text(stadium.name)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            Spacer()
+            Text("3× local boost")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.orange)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color.orange.opacity(0.10))
     }
 
     // MARK: - AZT Balance Header
@@ -459,13 +492,17 @@ final class MarketplaceViewModel: ObservableObject {
 
     var filteredOffers: [SponsorOffer] {
         var result = offers.filter { $0.isAvailable }
+        let geo = LocalizationEngine.shared
 
         switch browseMode {
         case .nearMe:
-            result = result.filter { $0.isLocalOnly }
+            // Geo-ranked: local offers first, then national
+            result = geo.localOffers(from: result)
+            result = geo.rankOffers(result)
         case .forYou:
-            // TODO: rank by AI profile (ProfileEngine.shared.currentSegment)
-            break
+            // AI profile ranking (ProfileEngine.shared.currentSegment)
+            // For now: weight by impressionCPM as a proxy for relevance
+            result = result.sorted { $0.impressionCPM > $1.impressionCPM }
         case .browseAll:
             if let cat = selectedCategory {
                 result = result.filter { $0.category == cat }
