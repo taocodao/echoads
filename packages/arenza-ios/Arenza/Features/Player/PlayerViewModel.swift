@@ -1,5 +1,6 @@
-// PlayerViewModel.swift — Arenza Prototype
+// PlayerViewModel.swift — Arenza
 // Orchestrates: SSAI session → AVPlayer → AdBreakDetector → SGAI → PoDSubmitter
+// Now also: ProfileEngine → BidAssembler → PredictionEngine → BettingEngine
 
 import Foundation
 import AVFoundation
@@ -21,6 +22,13 @@ final class PlayerViewModel: ObservableObject {
     @Published var switchLatencyMs: Double = 0
     @Published var isInAdBreak = false
 
+    // Phase 2 — Prediction overlay
+    @Published var activePredictionQuestion: PredictionQuestion?
+    @Published var couponUnlock: SponsorCoupon?
+
+    // Phase 3 — Betting overlay
+    @Published var bettingOverlay: BettingOverlayContext?
+
     // MARK: - Dependencies
 
     private let channel: Channel
@@ -29,11 +37,19 @@ final class PlayerViewModel: ObservableObject {
     private var session: PlaybackSession?
     private var podSubmitter: PoDSubmitter { env.podSubmitter }
 
+    // New engine integrations
+    private let predictionEngine = PredictionEngine.shared
+    private let bettingTrigger = BettingMomentTrigger()
+    private let signalCollector = SignalCollector.shared
+    private let anomalyDetector = AnomalyDetector.shared
+    private var cancellables = Set<AnyCancellable>()
+
     // MARK: - Init
 
     init(channel: Channel, env: AppEnvironment) {
         self.channel = channel
         self.env = env
+        subscribeToPredictionAndBetting()
     }
 
     // MARK: - Lifecycle
@@ -79,9 +95,26 @@ final class PlayerViewModel: ObservableObject {
             }
             adBreakDetector.attach(to: newPlayer, session: playbackSession)
 
+            // Connect contextual moments for this channel
+            ContextualMomentService.shared.connect(channelID: channel.id)
+            bettingTrigger.setCurrentEvent(id: channel.id)
+
+            // Start anomaly detector session
+            anomalyDetector.onSessionStart()
+
             // 4. Start playback
             newPlayer.play()
             isLoading = false
+
+            // Record content event for AI profiling
+            signalCollector.record(ContentEvent(
+                type: .playbackStarted,
+                channelID: channel.id,
+                sportType: channel.sport,
+                isLive: channel.isLive,
+                timestamp: Date(),
+                sessionID: response.sessionId
+            ))
 
             print("[Player] ▶️ Playing \(channel.name) via SSAI: \(manifestURL)")
 
@@ -100,7 +133,9 @@ final class PlayerViewModel: ObservableObject {
     func stop() {
         player?.pause()
         adBreakDetector.detach()
+        ContextualMomentService.shared.disconnect()
         player = nil
+        predictionEngine.saveWallet()
     }
 
     // MARK: - Ad Break Handling
@@ -109,6 +144,25 @@ final class PlayerViewModel: ObservableObject {
         print("[Player] 🎬 Ad break \(event.slotIndex) started — \(event.adSlot.advertiser)")
         isInAdBreak = true
         currentBreakEvent = event
+
+        // Record anomaly signals
+        anomalyDetector.onPlaybackEvent()
+
+        // Fire EABN for next break (60s ahead if we know about it)
+        Task { await EABNService.shared.notifyUpcomingBreak(channelID: channel.id, expectedBreakOffset: 60, breakDurationSec: 30) }
+
+        // Fire betting overlay opportunity
+        bettingTrigger.onAdBreak(channelID: channel.id)
+
+        // Record Ad event for AI profiling
+        signalCollector.record(AdEvent(
+            type: .adBreakStarted,
+            creativeID: event.adSlot.impressionId,
+            advertiserID: event.adSlot.advertiser,
+            completionPercent: 0,
+            timestamp: Date(),
+            sessionID: session?.sessionId ?? ""
+        ))
 
         // Show SGAI shoppable overlay at T+20s
         let overlayDelay = max(0, event.duration - 10)
@@ -127,6 +181,24 @@ final class PlayerViewModel: ObservableObject {
         switchLatencyMs = latencyMs
         sgaiOverlay = nil
 
+        // Anomaly + signal collection
+        anomalyDetector.onAdCompleted(completionPercent: 1.0)
+        signalCollector.record(AdEvent(
+            type: .adCompleted,
+            creativeID: event.adSlot.impressionId,
+            advertiserID: event.adSlot.advertiser,
+            completionPercent: 1.0,
+            timestamp: Date(),
+            sessionID: session?.sessionId ?? ""
+        ))
+        AdaptiveFrequencyController.shared.recordImpression(
+            creativeID: event.adSlot.impressionId,
+            advertiserID: event.adSlot.advertiser,
+            completionPercent: 1.0,
+            wasEngaged: sgaiOverlay != nil,
+            wasSkipped: false
+        )
+
         // Sign and submit PoD receipt
         let record = await podSubmitter.submit(
             impressionId: event.adSlot.impressionId,
@@ -138,14 +210,12 @@ final class PlayerViewModel: ObservableObject {
 
         if let record = record {
             env.recordPoD(record)
-            // Show verification toast
             podToast = PoDToastData(
                 cmxsEarned: record.cmxsEarned,
                 txHash: record.txHash,
                 latencyMs: latencyMs,
                 isHardwareSigned: env.seManager.isUsingSecureEnclave
             )
-            // Auto-hide toast after 4s
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
                 Task { @MainActor [weak self] in
                     withAnimation { self?.podToast = nil }
@@ -163,11 +233,35 @@ final class PlayerViewModel: ObservableObject {
             cpm: 47.5,
             dspName: "SimDSP-Demo"
         )
-
         DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [weak self] in
             guard let self else { return }
             self.adBreakDetector.triggerDemoBreak(adSlot: demoSlot)
         }
+    }
+
+    // MARK: - Engine subscriptions
+
+    private func subscribeToPredictionAndBetting() {
+        // Prediction overlay
+        predictionEngine.$activePrediction
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] q in self?.activePredictionQuestion = q }
+            .store(in: &cancellables)
+
+        // Coupon unlock notification
+        predictionEngine.couponUnlockPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] coupon in
+                self?.couponUnlock = coupon
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) { self?.couponUnlock = nil }
+            }
+            .store(in: &cancellables)
+
+        // Betting overlay
+        bettingTrigger.$pendingOverlay
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ctx in self?.bettingOverlay = ctx }
+            .store(in: &cancellables)
     }
 }
 

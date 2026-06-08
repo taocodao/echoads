@@ -1,5 +1,5 @@
-// PlayerView.swift — Arenza Prototype
-// Full-screen video player with SGAI overlay and PoD verification toast.
+// PlayerView.swift — Arenza
+// Full-screen video player with SGAI, prediction, and betting overlays.
 
 import SwiftUI
 import AVKit
@@ -63,11 +63,45 @@ struct PlayerView: View {
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+
+                // ── Prediction Overlay (C4) ────────────────────────────
+                if let question = vm.activePredictionQuestion {
+                    PredictionOverlayView(
+                        engine: PredictionEngine.shared,
+                        question: question,
+                        onDismiss: {}
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(10)
+                }
+
+                // ── Coupon Unlock Notification (C5) ───────────────────
+                if let coupon = vm.couponUnlock {
+                    RewardUnlockOverlayView(
+                        coupon: coupon,
+                        onRedeem: { vm.couponUnlock = nil },
+                        onDismiss: { vm.couponUnlock = nil }
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(20)
+                }
+
+                // ── Betting Overlay (C6) ──────────────────────────────
+                if let bettingCtx = vm.bettingOverlay,
+                   vm.activePredictionQuestion == nil {   // Never stack with predictions
+                    BetSlipOverlayView(context: bettingCtx) {
+                        withAnimation { vm.bettingOverlay = nil }
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(5)
+                }
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.isInAdBreak)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: vm.podToast != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.sgaiOverlay != nil)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.activePredictionQuestion != nil)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.bettingOverlay != nil)
         .task { await vm.startPlayback() }
         .onDisappear { vm.stop() }
     }

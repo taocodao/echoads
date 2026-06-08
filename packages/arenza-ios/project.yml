@@ -55,8 +55,13 @@ targets:
         UIRequiresFullScreen: false
         NSFaceIDUsageDescription: "Arenza uses Face ID to protect your PoD signing key and verify ad impressions."
         NSUserTrackingUsageDescription: "Arenza uses your advertising identifier to deliver relevant sports ads. You can deny this — a privacy-preserving anonymous ID will be used instead."
+        NSLocationWhenInUseUsageDescription: "Arenza uses your location only to determine if sports betting features are available in your state. Your precise location is never stored or transmitted."
         UIBackgroundModes:
           - audio
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.arenza.housead.refresh
+          - com.arenza.model.update
+          - com.arenza.profile.sync
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true   # Dev only — restrict to cmxs.io in production
     entitlements:
