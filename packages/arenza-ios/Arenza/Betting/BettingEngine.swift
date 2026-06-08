@@ -197,8 +197,4 @@ final class ResponsibleGamingManager: ObservableObject {
     }
 }
 
-// MARK: - Data extension for hex encoding
-
-extension Data {
-    var hexString: String { map { String(format: "%02x", $0) }.joined() }
-}
+// hexString extension is defined in Core/SecureEnclave/SecureEnclaveManager.swift
