@@ -127,19 +127,21 @@ final class ContextualMomentService: ObservableObject {
 
     // MARK: - Demo mode (fires simulated moments when no backend)
 
+    private var demoMomentIndex: Int = 0  // class property avoids captured-var concurrency error
+
     private func startDemoMode() {
         isConnected = true
         let moments: [GameMoment] = [.neutral, .neutral, .timeout, .neutral, .neutral, .halftime, .neutral]
-        var index = 0
 
         Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { [weak self] timer in
             guard let self else { timer.invalidate(); return }
-            let moment = moments[index % moments.count]
-            index += 1
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                let moment = moments[self.demoMomentIndex % moments.count]
+                self.demoMomentIndex += 1
                 self.currentMoment = moment
                 self.momentPublisher.send(moment)
-                print("[Moments] 🎭 Demo moment: \(moment.rawValue)")
+                print("[Moments] Demo moment: \(moment.rawValue)")
             }
         }
     }
@@ -148,14 +150,16 @@ final class ContextualMomentService: ObservableObject {
 // MARK: - Game Moment Enricher (bid request extension)
 
 enum GameMomentEnricher {
-    /// Builds the CMXS extension dict for OpenRTB bid requests
+    /// Builds the CMXS extension dict for OpenRTB bid requests.
+    /// segmentID is passed in from the caller (who is @MainActor) to avoid isolation crossing.
     static func buildBidExtension(
         moment: GameMoment,
+        segmentID: Int,
         podPosition: Int,
         breakDurationSec: Int
     ) -> CMXSBidExtension {
         CMXSBidExtension(
-            segmentID: ProfileEngine.shared.currentSegment.rawValue,
+            segmentID: segmentID,
             gameMoment: moment.rawValue,
             cpmMultiplierHint: moment.cpmMultiplier,
             podPosition: podPosition,
@@ -165,7 +169,7 @@ enum GameMomentEnricher {
         )
     }
 
-    /// Effective CPM for this moment × segment combination
+    /// Effective CPM for this moment x segment combination
     static func effectiveCPM(baseCPM: Double, moment: GameMoment) -> Double {
         baseCPM * moment.cpmMultiplier
     }
