@@ -54,45 +54,40 @@ final class PlayerViewModel: ObservableObject {
     init(channel: Channel, env: AppEnvironment) {
         self.channel = channel
         self.env = env
+
+        // ── CRITICAL: Create AVPlayer SYNCHRONOUSLY in init ──────────────
+        // The player must exist BEFORE fullScreenCover finishes presenting.
+        // Creating it async inside .task causes the render surface to never
+        // attach on real iPhones (works in Simulator due to different
+        // GPU/compositor timing).
+        // ──────────────────────────────────────────────────────────────────
+        if let streamURL = channel.streamURL {
+            let playerItem = AVPlayerItem(url: streamURL)
+            let newPlayer = AVPlayer(playerItem: playerItem)
+            newPlayer.automaticallyWaitsToMinimizeStalling = true
+            self.player = newPlayer
+            self.adPodInserter.attach(to: newPlayer)
+            self.observePlayerItemStatus(playerItem)
+            print("[Player] AVPlayer created for \(channel.name): \(streamURL)")
+        }
+
         subscribeToPredictionAndBetting()
         wireAdPodInserter()
     }
 
     // MARK: - Lifecycle
 
+    /// Called from .task — player already exists, this starts playback + ancillary services.
     func startPlayback() async {
-        isLoading = true
-        errorMessage = nil
-
-        // ── STRATEGY ──────────────────────────────────────────────────────
-        // 1. Try direct HLS stream (works on any device, no backend needed).
-        //    This is the primary path for TestFlight + real-device usage.
-        // 2. In parallel, attempt SSAI session for enriched ad data.
-        //    If backend is reachable, the SSAI manifest URL will be used
-        //    for the next playback session.
-        // ──────────────────────────────────────────────────────────────────
-
-        guard let streamURL = channel.streamURL else {
-            // Very rare — only if a channel somehow has no URL
+        guard let player else {
             errorMessage = "No stream available for this channel."
             isLoading = false
             return
         }
 
-        // Build and start AVPlayer from direct HLS URL
-        let playerItem = AVPlayerItem(url: streamURL)
-        let newPlayer = AVPlayer(playerItem: playerItem)
-        // Keep default stalling behaviour — setting to false can cause stuttering on device
-        newPlayer.automaticallyWaitsToMinimizeStalling = true
-        self.player = newPlayer
-        adPodInserter.attach(to: newPlayer)
-
-        // Observe item status so we know when video is actually ready vs still loading
-        observePlayerItemStatus(playerItem, player: newPlayer)
-
-        // Start playback — AVPlayer will buffer and play when ready
-        newPlayer.play()
-        // Keep isLoading = true until item.status == .readyToPlay (set in observer)
+        // Start playback
+        player.play()
+        print("[Player] play() called for \(channel.name)")
 
         // Connect contextual moments (MoQ relay via WebSocket)
         ContextualMomentService.shared.connect(channelID: channel.id)
@@ -111,14 +106,13 @@ final class PlayerViewModel: ObservableObject {
             sessionID: "direct-\(channel.id)"
         ))
 
-        print("[Player] Playing \(channel.name) via direct HLS: \(streamURL)")
-
         // Schedule first demo ad pod (20s into content) — subsequent ones auto-fire
         scheduleFirstDemoPod()
 
         // Background: try SSAI enrichment (non-blocking, won't affect playback)
         Task(priority: .background) { await trySSAIEnrichment() }
     }
+
 
     func stop() {
         firstPodTimer?.invalidate()
@@ -174,7 +168,7 @@ final class PlayerViewModel: ObservableObject {
 
     private var itemStatusObserver: AnyCancellable?
 
-    private func observePlayerItemStatus(_ item: AVPlayerItem, player: AVPlayer) {
+    private func observePlayerItemStatus(_ item: AVPlayerItem) {
         // Use Combine publisher on AVPlayerItem.status
         itemStatusObserver = item.publisher(for: \.status)
             .receive(on: DispatchQueue.main)

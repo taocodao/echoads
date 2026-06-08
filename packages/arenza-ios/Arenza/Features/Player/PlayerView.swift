@@ -1,6 +1,10 @@
 // PlayerView.swift — Arenza
 // Full-screen video player with CSAI ad pods, prediction, and betting overlays.
 // Phase D: DemoOrchestrator + DemoAdCardView + TargetingDebugHUD wired in.
+//
+// ARCHITECTURE NOTE: Uses AVPlayerViewController (not SwiftUI VideoPlayer)
+// because VideoPlayer has known render-surface issues inside fullScreenCover
+// with complex ZStack overlays on physical iPhones.
 
 import SwiftUI
 import AVKit
@@ -22,19 +26,17 @@ struct PlayerView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            // ── Video Player ─────────────────────────────────────────────
+            // ── Video Player (AVPlayerViewController) ────────────────────
             if let player = vm.player {
-                VideoPlayer(player: player)
+                PlayerViewControllerRepresentable(player: player)
                     .ignoresSafeArea()
-                    .onAppear {
-                        player.play()
-                    }
             }
 
             // ── Loading Overlay ──────────────────────────────────────────
             if vm.isLoading {
                 loadingOverlay
             }
+
 
             // ── Error Overlay ────────────────────────────────────────────
             if let error = vm.errorMessage {
