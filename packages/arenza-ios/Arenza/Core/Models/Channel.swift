@@ -42,7 +42,7 @@ struct Channel: Identifiable, Codable {
             isLive: true,
             currentProgram: "Patriots vs Eagles — Q3 10:47",
             viewerCount: 284_320,
-            streamURL: Streams.appleAdvFmp4       // most reliable stream on iOS
+            streamURL: Streams.muxBBB             // 100% reliable TS stream
         ),
         Channel(
             id: "cmxs-nba-live",

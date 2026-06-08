@@ -24,8 +24,11 @@ struct PlayerView: View {
 
             // ── Video Player ─────────────────────────────────────────────
             if let player = vm.player {
-                VideoPlayerWrapper(player: player)
+                VideoPlayer(player: player)
                     .ignoresSafeArea()
+                    .onAppear {
+                        player.play()
+                    }
             }
 
             // ── Loading Overlay ──────────────────────────────────────────
@@ -436,43 +439,7 @@ struct AdPodProgressBar: View {
     }
 }
 
-// MARK: - AVPlayerLayer UIView Wrapper
-//
-// WHY UIViewRepresentable + AVPlayerLayer instead of UIViewControllerRepresentable + AVPlayerViewController:
-// AVPlayerViewController embedded in a SwiftUI ZStack via UIViewControllerRepresentable causes the
-// CALayer (video surface) to render behind the app's UIWindow on real devices (works in Simulator
-// because Simulator doesn't have the same compositing layer restrictions). Using AVPlayerLayer
-// directly via UIViewRepresentable attaches the video surface to the correct UIView hierarchy and
-// renders correctly on all physical iPhones regardless of iOS version.
 
-final class PlayerLayerView: UIView {
-    override class var layerClass: AnyClass { AVPlayerLayer.self }
-    var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        playerLayer.frame = bounds
-    }
-}
-
-struct VideoPlayerWrapper: UIViewRepresentable {
-    let player: AVPlayer
-
-    func makeUIView(context: Context) -> PlayerLayerView {
-        let view = PlayerLayerView()
-        view.playerLayer.player = player
-        view.playerLayer.videoGravity = .resizeAspectFill
-        view.backgroundColor = .black
-        return view
-    }
-
-    func updateUIView(_ uiView: PlayerLayerView, context: Context) {
-        // Update player if it changes (e.g. ad pod swap)
-        if uiView.playerLayer.player !== player {
-            uiView.playerLayer.player = player
-        }
-    }
-}
 
 // MARK: - PoD Verification Toast
 

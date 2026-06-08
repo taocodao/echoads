@@ -226,8 +226,8 @@ final class PlayerViewModel: ObservableObject {
         let cpm: Double = advertiser == "DraftKings" ? 62.0 : advertiser == "Nike" ? 48.5 : 41.75
         let slot = AdSlotInfo(
             impressionId: "0x" + UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(40),
-            advertiser: ["Callaway Golf", "DraftKings", "Fanatics"].randomElement()!,
-            cpm: Double.random(in: 38.0...68.0),
+            advertiser: advertiser,
+            cpm: cpm,
             dspName: "SimDSP-Demo"
         )
 
