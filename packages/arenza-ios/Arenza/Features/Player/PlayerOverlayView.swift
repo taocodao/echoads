@@ -237,3 +237,166 @@ struct PlayerOverlayView: View {
         .padding(.bottom, 8)
     }
 }
+
+// MARK: - Ad Pod Progress Overlay (CSAI)
+
+struct AdPodProgressOverlay: View {
+    @ObservedObject var vm: PlayerViewModel
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Text("AD")
+                    .font(.system(size: 10, weight: .black))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color(red: 1.0, green: 0.82, blue: 0.0))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                if let event = vm.currentBreakEvent {
+                    Text(event.adSlot.advertiser)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Text("$\(String(format: "%.0f", event.adSlot.cpm)) CPM")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.60))
+                } else {
+                    Text("Ad break")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            // Live pod progress bar driven by AdPodInserter's timer
+            AdPodProgressBar(progress: podFraction)
+        }
+        .background(.ultraThinMaterial)
+        .background(Color.black.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 16)
+    }
+
+    // Compute progress from AdPodInserter if available via vm.switchLatencyMs,
+    // otherwise fall back to adBreakBanner style with no bar.
+    private var podFraction: Double {
+        guard let event = vm.currentBreakEvent else { return 0 }
+        let elapsed = max(0, vm.switchLatencyMs / 1000)
+        return min(elapsed / event.duration, 1.0)
+    }
+}
+
+// MARK: - Thin progress bar
+
+struct AdPodProgressBar: View {
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Rectangle().fill(Color.white.opacity(0.15))
+                Rectangle()
+                    .fill(LinearGradient(
+                        colors: [Color(red: 1.0, green: 0.82, blue: 0.0),
+                                 Color(red: 1.0, green: 0.55, blue: 0.0)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ))
+                    .frame(width: geo.size.width * max(0, min(progress, 1)))
+                    .animation(.linear(duration: 0.5), value: progress)
+            }
+        }
+        .frame(height: 3)
+    }
+}
+
+// MARK: - PoD Verification Toast
+
+struct PoDVerificationToast: View {
+    let toast: PoDToastData
+    @State private var showDetails = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                // Animated checkmark
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.0, green: 0.82, blue: 0.60).opacity(0.2))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.60))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text("Ad Verified")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                        if toast.isHardwareSigned {
+                            Text("SE")
+                                .font(.system(size: 9, weight: .black))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Color(red: 0.0, green: 0.82, blue: 0.60))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                        }
+                    }
+                    Text("+\(String(format: "%.4f", toast.cmxsEarned)) CMXS · \(Int(toast.latencyMs))ms")
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+
+                Spacer()
+
+                if toast.txHash != nil {
+                    Button {
+                        withAnimation { showDetails.toggle() }
+                    } label: {
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.system(size: 16))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+
+            if showDetails, let url = toast.basescanURL {
+                Divider().background(Color.white.opacity(0.1))
+                Link(destination: url) {
+                    HStack(spacing: 6) {
+                        Text("View on Basescan")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(red: 0.0, green: 0.65, blue: 0.95))
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(red: 0.0, green: 0.65, blue: 0.95))
+                        Spacer()
+                        if let hash = toast.txHash {
+                            Text(hash.prefix(12) + "...")
+                                .font(.system(size: 9, design: .monospaced))
+                                .foregroundColor(.white.opacity(0.3))
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                }
+            }
+        }
+        .background(.ultraThinMaterial)
+        .background(Color(white: 0.08).opacity(0.9))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(red: 0.0, green: 0.82, blue: 0.60).opacity(0.3), lineWidth: 1)
+        )
+        .shadow(color: Color(red: 0.0, green: 0.82, blue: 0.60).opacity(0.15), radius: 12)
+    }
+}
