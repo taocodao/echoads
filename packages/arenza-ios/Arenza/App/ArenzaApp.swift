@@ -70,6 +70,12 @@ struct ContentView: View {
                     Label("Rewards", systemImage: "gift.fill")
                 }
 
+            // Token Marketplace
+            MarketplaceView()
+                .tabItem {
+                    Label("Shop", systemImage: "storefront")
+                }
+
             EarningsView()
                 .tabItem {
                     Label("Earnings", systemImage: "chart.line.uptrend.xyaxis")
