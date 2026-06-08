@@ -102,7 +102,33 @@ struct BettingOverlayContext: Identifiable {
         self.deepLinkURL = affiliatePartner.buildDeepLink(odds: odds)
         self.createdAt = Date()
     }
+
+    /// Scripted demo context — Patriots vs Eagles, DraftKings, live in-play odds.
+    static func demo(channelID: String) -> BettingOverlayContext {
+        let odds = LiveOdds(
+            id: "demo_nfl_001",
+            eventID: channelID,
+            homeTeam: "Patriots",
+            awayTeam: "Eagles",
+            homeMoneyline: "-140",
+            awayMoneyline: "+118",
+            spread: "Patriots -3.5",
+            total: "O/U 44.5",
+            aiSuggestedBet: AIBetSuggestion(
+                description: "Patriots -3.5 spread",
+                reasoning: "Home field advantage + Eagles 3rd-quarter struggles (22% cover rate)"
+            ),
+            updatedAt: Date()
+        )
+        return BettingOverlayContext(
+            odds: odds,
+            triggerReason: .adBreakOpportunity,
+            breakDuration: 30,
+            affiliatePartner: .draftKings
+        )
+    }
 }
+
 
 // MARK: - Affiliate Partner
 

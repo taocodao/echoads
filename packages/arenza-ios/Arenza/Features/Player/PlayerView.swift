@@ -1,5 +1,6 @@
 // PlayerView.swift — Arenza
 // Full-screen video player with CSAI ad pods, prediction, and betting overlays.
+// Phase D: DemoOrchestrator + DemoAdCardView + TargetingDebugHUD wired in.
 
 import SwiftUI
 import AVKit
@@ -9,6 +10,8 @@ struct PlayerView: View {
     @EnvironmentObject var env: AppEnvironment
     @StateObject private var vm: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var demo = DemoOrchestrator.shared
+    @State private var showDebugHUD = false
 
     init(channel: Channel) {
         self.channel = channel
@@ -122,6 +125,88 @@ struct PlayerView: View {
                     .zIndex(5)
                 }
             }
+
+            // ── DEMO: Full-screen Ad Card (zIndex 50) ────────────────────
+            // Shown during ad pods — visually 100% distinct from content.
+            // Keeps video playing underneath (muted); shows targeting data.
+            if vm.isInAdBreak,
+               let creative = vm.adPodInserter.activeCreative {
+                DemoAdCardView(
+                    creative: creative,
+                    podProgress: vm.adPodInserter.podProgress,
+                    podDurationRemaining: vm.adPodInserter.podDurationRemaining,
+                    currentSegment: ProfileEngine.shared.currentSegment.label
+                )
+                .ignoresSafeArea()
+                .transition(.opacity)
+                .zIndex(50)
+            }
+
+            // ── DEMO: Viewer Profiling Card (zIndex 30) ──────────────────
+            if demo.showProfilingCard {
+                VStack {
+                    Spacer().frame(height: 80)
+                    ViewerProfilingCard()
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(30)
+            }
+
+            // ── DEMO: Ad Incoming Badge (zIndex 31) ──────────────────────
+            if demo.showAdIncomingBadge {
+                VStack {
+                    Spacer().frame(height: 70)
+                    HStack { Spacer(); AdIncomingBadge(); Spacer() }
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(31)
+            }
+
+            // ── DEMO: Targeting Debug HUD (shake to reveal, zIndex 55) ───
+            if showDebugHUD {
+                VStack {
+                    Spacer()
+                    TargetingDebugHUD()
+                        .padding(.bottom, 100)
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                .zIndex(55)
+            }
+
+            // ── DEMO: Summary Card (zIndex 60) ───────────────────────────
+            if demo.showDemoSummary {
+                Color.black.opacity(0.6).ignoresSafeArea()
+                    .zIndex(59)
+                VStack {
+                    Spacer()
+                    DemoSummaryCard(
+                        aztEarned: demo.totalAZTEarned,
+                        revenueGenerated: demo.revenueGenerated
+                    ) {
+                        demo.stop()
+                        demo.start(for: vm)
+                    }
+                    Spacer()
+                }
+                .transition(.scale.combined(with: .opacity))
+                .zIndex(60)
+            }
+
+            // ── DEMO: Narration Bar (bottom, zIndex 28) ──────────────────
+            if demo.isRunning && !demo.stepNarration.isEmpty {
+                VStack {
+                    Spacer()
+                    DemoNarrationBar(
+                        narration: demo.stepNarration,
+                        step: demo.currentStep,
+                        elapsed: demo.elapsedSeconds
+                    )
+                }
+                .zIndex(28)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.isInAdBreak)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: vm.podToast != nil)
@@ -130,9 +215,24 @@ struct PlayerView: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: PollEngine.shared.activePoll != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: TriviaEngine.shared.activeSession != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.bettingOverlay != nil)
+        .animation(.spring(response: 0.35), value: demo.showProfilingCard)
+        .animation(.spring(response: 0.35), value: demo.showAdIncomingBadge)
+        .animation(.spring(response: 0.5), value: demo.showDemoSummary)
+        .animation(.spring(response: 0.3), value: showDebugHUD)
         .task { await vm.startPlayback() }
-        .onDisappear { vm.stop() }
+        .onAppear { demo.start(for: vm) }
+        .onDisappear {
+            vm.stop()
+            demo.stop()
+        }
+        // Shake gesture → toggle targeting debug HUD
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.deviceDidShakeNotification)) { _ in
+            withAnimation { showDebugHUD.toggle() }
+        }
     }
+
+    // MARK: - Demo Overlays (injected into the main ZStack via extension)
+    // These are defined inline in the body builder below for access to demo @StateObject.
 
 
     // MARK: - Top Bar
@@ -141,6 +241,7 @@ struct PlayerView: View {
         HStack {
             Button {
                 vm.stop()
+                demo.stop()
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
@@ -164,6 +265,24 @@ struct PlayerView: View {
                 Text(channel.name)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.white.opacity(0.85))
+            }
+
+            // Demo mode indicator
+            if demo.isRunning {
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 6, height: 6)
+                    Text("DEMO")
+                        .font(.system(size: 9, weight: .black))
+                        .foregroundColor(.orange)
+                        .tracking(1)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.orange.opacity(0.12))
+                .clipShape(Capsule())
+                .padding(.leading, 8)
             }
         }
         .padding(.horizontal, 16)

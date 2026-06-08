@@ -292,4 +292,38 @@ final class PredictionEngine: ObservableObject {
         default:     return 3.0
         }
     }
+
+    // MARK: - Demo helpers (called by DemoOrchestrator)
+
+    /// Instantly resolve a prediction for demo continuity without waiting for backend.
+    func resolveForDemo(resolution: PredictionResolution) {
+        let multiplier = pendingPredictions[resolution.questionID]?.streakMultiplierApplied ?? Float(streakMultiplier)
+        let earned = Int(Double(resolution.basePoints) * Double(multiplier))
+        if resolution.isCorrect {
+            wallet.earn(earned, source: .prediction, sponsorId: nil)
+            wallet.currentStreak += 1
+            print("[AZT] Demo resolution: Correct — +\(earned) AZT")
+        } else {
+            wallet.currentStreak = 0
+        }
+        pendingPredictions.removeValue(forKey: resolution.questionID)
+        activePrediction = nil
+        resolutionPublisher.send(resolution)
+        saveWallet()
+    }
+}
+
+// MARK: - UIDevice Shake Notification (for TargetingDebugHUD)
+
+extension UIDevice {
+    static let deviceDidShakeNotification = Notification.Name("deviceDidShakeNotification")
+}
+
+extension UIWindow {
+    open override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+        super.motionEnded(motion, with: event)
+        if motion == .motionShake {
+            NotificationCenter.default.post(name: UIDevice.deviceDidShakeNotification, object: nil)
+        }
+    }
 }

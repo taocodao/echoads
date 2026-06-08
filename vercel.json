@@ -1,19 +1,48 @@
 {
   "version": 2,
-  "name": "cmxs-demo",
+  "name": "cmxs-arenza-demo",
   "builds": [
     {
       "src": "packages/dashboard/package.json",
       "use": "@vercel/next",
-      "config": {
-        "distDir": ".next"
-      }
+      "config": { "distDir": ".next" }
     }
   ],
   "routes": [
     {
       "src": "/demo/flywheel/(.*)",
       "dest": "/demo/flywheel/$1"
+    },
+    {
+      "src": "/api/channels",
+      "dest": "/api/channels.json"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=60, stale-while-revalidate=300" }
+      ]
+    },
+    {
+      "source": "/streams/(.*)\\.m3u8",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Content-Type", "value": "application/x-mpegURL" },
+        { "key": "Cache-Control", "value": "public, max-age=3" }
+      ]
+    },
+    {
+      "source": "/streams/(.*)\\.ts",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Content-Type", "value": "video/MP2T" },
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
     }
   ]
 }

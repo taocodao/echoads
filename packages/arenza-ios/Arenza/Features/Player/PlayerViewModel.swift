@@ -35,7 +35,7 @@ final class PlayerViewModel: ObservableObject {
     private let channel: Channel
     private let env: AppEnvironment
     private let adBreakDetector = AdBreakDetector()
-    private let adPodInserter = AdPodInserter()
+    let adPodInserter = AdPodInserter()   // internal: PlayerView reads activeCreative
     private var session: PlaybackSession?
     private var podSubmitter: PoDSubmitter { env.podSubmitter }
 
@@ -212,9 +212,18 @@ final class PlayerViewModel: ObservableObject {
         RunLoop.main.add(firstPodTimer!, forMode: .common)
     }
 
+    /// Called by DemoOrchestrator to fire a scripted ad pod at the right step.
+    func triggerDemoAdPodFromOrchestrator() {
+        triggerDemoAdPod()
+    }
+
     private func triggerDemoAdPod() {
         guard !isInAdBreak, !adPodInserter.isInAdPod else { return }
 
+        // Rotate through advertisers for demo variety
+        let advertisers = ["DraftKings", "Nike", "Domino's"]
+        let advertiser = advertisers.randomElement()!
+        let cpm: Double = advertiser == "DraftKings" ? 62.0 : advertiser == "Nike" ? 48.5 : 41.75
         let slot = AdSlotInfo(
             impressionId: "0x" + UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(40),
             advertiser: ["Callaway Golf", "DraftKings", "Fanatics"].randomElement()!,
