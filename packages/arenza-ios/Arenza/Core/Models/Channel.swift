@@ -23,9 +23,9 @@ struct Channel: Identifiable, Codable {
     // • muxBBB        — Mux-hosted Big Buck Bunny (fast global CDN)
     // For production: replace with Vercel-hosted sports HLS or SSAI manifest.
     private enum Streams {
-        // arenza.tv → www.arenza.tv → Vercel CDN (200 OK, confirmed)
+        // NFL demo clip hosted on Vercel Blob (~10 min MP4 — AVPlayer plays natively)
         static let vercelFootball = URL(string:
-            "https://www.arenza.tv/streams/game.m3u8")!
+            "https://lavcma6duvpplftv.public.blob.vercel-storage.com/NFL%20video%20clips%20for%20demo.mp4")!
         static let appleAdvFmp4 = URL(string:
             "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8")!
         static let appleBipbop  = URL(string:

@@ -5,7 +5,7 @@ import { useGameEngine } from './lib/useGameEngine';
 import { AD_CATALOG, GAME_META } from './lib/gameData';
 import type { AdCreative } from './lib/gameData';
 
-const HLS_URL = '/streams/game.m3u8';
+const VIDEO_URL = 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/NFL%20video%20clips%20for%20demo.mp4';
 
 // ── Design tokens (from arenza-sports-game HTML mockup) ────────────────────────
 const T = {
@@ -28,35 +28,15 @@ export default function GamePage() {
     .reduce((sum, a) => sum + a.cpm / 1000, 0);
   const adsServed = AD_CATALOG.filter(a => a.appearsAt <= g.elapsed).length;
 
-  // ── HLS.js setup ─────────────────────────────────────────────────────────────
+  // ── MP4 Blob setup — native playback, auto-loop ──────────────────────────────
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    let hls: any;
-    (async () => {
-      const Hls = (await import('hls.js')).default;
-      if (Hls.isSupported()) {
-        hls = new Hls({ enableWorker: true });
-        hls.loadSource(HLS_URL);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => {});
-          setVideoReady(true);
-        });
-        // Loop at end
-        hls.on(Hls.Events.BUFFER_EOS, () => {
-          hls.stopLoad();
-          video.currentTime = 0;
-          hls.startLoad();
-          video.play().catch(() => {});
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = HLS_URL;
-        video.play().catch(() => {});
-        setVideoReady(true);
-      }
-    })();
-    return () => hls?.destroy();
+    video.src = VIDEO_URL;
+    video.load();
+    const onCanPlay = () => { video.play().catch(() => {}); setVideoReady(true); };
+    video.addEventListener('canplay', onCanPlay, { once: true });
+    return () => video.removeEventListener('canplay', onCanPlay);
   }, []);
 
   return (
@@ -64,7 +44,7 @@ export default function GamePage() {
 
       {/* ── TOP HALF: Video ──────────────────────────────────────────────── */}
       <div style={{ flex: '0 0 50%', position: 'relative', background: '#000', overflow: 'hidden' }}>
-        <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted loop />
+        <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted loop preload="auto" />
 
         {/* Scoreboard overlay */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '10px 16px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

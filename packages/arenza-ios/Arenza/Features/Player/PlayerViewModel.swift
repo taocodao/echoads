@@ -70,6 +70,7 @@ final class PlayerViewModel: ObservableObject {
             self.player = newPlayer
             self.adPodInserter.attach(to: newPlayer)
             self.observePlayerItemStatus(playerItem)
+            self.observePlaybackEnd(for: newPlayer)
             print("[Player] AVPlayer created for \(channel.name): \(streamURL)")
         }
 
@@ -191,6 +192,23 @@ final class PlayerViewModel: ObservableObject {
                     break
                 }
             }
+    }
+
+    // MARK: - Playback End → Loop
+
+    private var endObserver: Any?
+
+    private func observePlaybackEnd(for player: AVPlayer) {
+        endObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: .main
+        ) { [weak player] _ in
+            // Seek to start and resume — seamless loop for the demo clip
+            player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { _ in
+                player?.play()
+            }
+        }
     }
 
     // MARK: - Demo Pod Scheduling
