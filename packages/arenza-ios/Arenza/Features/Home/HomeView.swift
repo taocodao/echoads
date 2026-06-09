@@ -2,11 +2,12 @@
 // Premium dark sports grid with featured hero and live channel cards.
 
 import SwiftUI
-import UIKit
 
 struct HomeView: View {
     @EnvironmentObject var env: AppEnvironment
     @StateObject private var vm: HomeViewModel = HomeViewModel(env: .shared)
+    @State private var selectedChannel: Channel?
+    @State private var showPlayer = false
     @State private var showVideoTest = false
 
     private let columns = [
@@ -65,6 +66,17 @@ struct HomeView: View {
             .navigationTitle("")
             .navigationBarHidden(true)
             .task { await vm.load() }
+            // KEY FIX: .sheet (not .fullScreenCover) — diagnostic proves
+            // VideoPlayer works in .sheet. presentationDetents fills screen.
+            .sheet(isPresented: $showPlayer) {
+                if let channel = selectedChannel {
+                    PlayerView(channel: channel)
+                        .environmentObject(env)
+                        .presentationDetents([.fraction(1.0)])
+                        .presentationDragIndicator(.hidden)
+                        .interactiveDismissDisabled(false)
+                }
+            }
             .sheet(isPresented: $showVideoTest) {
                 VideoTestView()
             }
@@ -189,34 +201,10 @@ struct HomeView: View {
     // MARK: - Helpers
 
     private func selectChannel(_ channel: Channel) {
-        // BYPASS SwiftUI fullScreenCover entirely.
-        // fullScreenCover wraps content in UIHostingController which breaks
-        // AVPlayerLayer CALayer attachment on real devices, even with
-        // UIViewControllerRepresentable and proper child VC containment.
-        //
-        // Instead: present PlayerHostViewController directly via UIKit.
-        // This gives AVPlayerViewController a completely clean UIKit parentage
-        // to the UIWindow with NO UIHostingController in the hierarchy.
-        let playerVM = PlayerViewModel(channel: channel, env: .shared)
-        let playerVC = PlayerHostViewController(vm: playerVM, demo: DemoOrchestrator.shared)
-        playerVC.modalPresentationStyle = .fullScreen
-        playerVC.modalTransitionStyle = .crossDissolve
-
-        // Also start ancillary services
-        Task { await playerVM.startPlayback() }
-
-        // Find the topmost presented view controller to present from
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootVC = scene.windows.first(where: \.isKeyWindow)?.rootViewController else {
-            return
-        }
-
-        var topVC = rootVC
-        while let presented = topVC.presentedViewController {
-            topVC = presented
-        }
-        topVC.present(playerVC, animated: true)
+        selectedChannel = channel
+        showPlayer = true
     }
+
 
 
     private func formatViewers(_ count: Int) -> String {
