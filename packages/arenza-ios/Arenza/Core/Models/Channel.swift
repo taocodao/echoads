@@ -23,6 +23,8 @@ struct Channel: Identifiable, Codable {
     // • muxBBB        — Mux-hosted Big Buck Bunny (fast global CDN)
     // For production: replace with Vercel-hosted sports HLS or SSAI manifest.
     private enum Streams {
+        static let vercelFootball = URL(string:
+            "https://cmxs-arenza.vercel.app/streams/game.m3u8")!
         static let appleAdvFmp4 = URL(string:
             "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8")!
         static let appleBipbop  = URL(string:
@@ -42,7 +44,7 @@ struct Channel: Identifiable, Codable {
             isLive: true,
             currentProgram: "Patriots vs Eagles — Q3 10:47",
             viewerCount: 284_320,
-            streamURL: Streams.muxBBB             // 100% reliable TS stream
+            streamURL: Streams.vercelFootball     // Vercel-hosted football HLS
         ),
         Channel(
             id: "cmxs-nba-live",

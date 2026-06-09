@@ -35,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {[
               { href: '/',            label: '📊 Overview'    },
               { href: '/player',      label: '📺 Live Player'  },
+              { href: '/game',        label: '🏟️ Game'          },
               { href: '/demo/arenza/index.html',  label: '🎬 Demo'         },
               { href: '/auction',     label: '⚡ Auction'      },
               { href: '/nodes',       label: '🏗️ Nodes'        },

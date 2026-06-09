@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arenza Sports Game — Live Fan Engagement Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
+:root {
+  --color-bg: #0d0f14;
+  --color-surface: #141720;
+  --color-surface-2: #1a1e2a;
+  --color-surface-3: #232840;
+  --color-border: rgba(255,255,255,0.08);
+  --color-text: #f0f2ff;
+  --color-text-muted: #8892b0;
+  --color-text-faint: #4a5568;
+
+  /* Brand accents */
+  --orange: #ff6b35;
+  --orange-hover: #ff8c5a;
+  --teal: #00c9b1;
+  --teal-hover: #00e5cc;
+  --gold: #ffc107;
+  --purple: #7c3aed;
+  --success: #22c55e;
+  --error: #ef4444;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+  --shadow-glow-orange: 0 0 20px rgba(255,107,53,0.3);
+  --shadow-glow-teal: 0 0 20px rgba(0,201,177,0.3);
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE RESET
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: none; scroll-behavior: smooth; }
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT SHELL
+═══════════════════════════════════════════════════════════ */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOP NAV
+═══════════════════════════════════════════════════════════ */
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky; top: 0; z-index: 100;
+}
+.topnav .logo {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  letter-spacing: 0.04em;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--orange), var(--teal));
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.logo-text { color: var(--color-text); }
+.logo-text span { color: var(--orange); }
+
+.nav-tabs {
+  display: flex; gap: var(--space-1);
+  background: var(--color-bg);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  margin-left: auto;
+}
+.nav-tab {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.nav-tab:hover { color: var(--color-text); }
+.nav-tab.active {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.nav-right {
+  display: flex; align-items: center; gap: var(--space-3);
+  margin-left: auto;
+}
+.points-badge {
+  display: flex; align-items: center; gap: var(--space-2);
+  background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,107,53,0.15));
+  border: 1px solid rgba(255,193,7,0.3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--gold);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--orange);
+  color: white;
+  box-shadow: var(--shadow-glow-orange);
+}
+.btn-primary:hover { background: var(--orange-hover); transform: translateY(-1px); }
+.btn-ghost {
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.btn-ghost:hover { color: var(--color-text); border-color: rgba(255,255,255,0.15); }
+.btn-teal {
+  background: var(--teal);
+  color: #0d0f14;
+  font-weight: 700;
+  box-shadow: var(--shadow-glow-teal);
+}
+.btn-teal:hover { background: var(--teal-hover); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN SYSTEM
+═══════════════════════════════════════════════════════════ */
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO / LIVE GAME SCREEN
+═══════════════════════════════════════════════════════════ */
+.live-hero {
+  background: linear-gradient(180deg, #0a1628 0%, var(--color-bg) 100%);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.live-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.live-badge {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: #ff4444;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+.live-dot {
+  width: 8px; height: 8px;
+  background: #ff4444;
+  border-radius: 50%;
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+.scoreboard {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-8);
+  margin-bottom: var(--space-6);
+}
+.team-block { text-align: center; }
+.team-name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+.team-score {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 5rem);
+  color: var(--orange);
+  line-height: 1;
+}
+.score-divider {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-text-muted);
+}
+.game-info {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  display: flex; align-items: center; justify-content: center; gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.game-info-sep { opacity: 0.3; }
+
+/* ═══════════════════════════════════════════════════════════
+   GAME GRID
+═══════════════════════════════════════════════════════════ */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+@media (max-width: 900px) {
+  .main-layout { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD COMPONENT
+═══════════════════════════════════════════════════════════ */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  letter-spacing: 0.05em;
+}
+.card-body { padding: var(--space-5); }
+
+/* ═══════════════════════════════════════════════════════════
+   BINGO CARD
+═══════════════════════════════════════════════════════════ */
+.bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+.bingo-header-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.bingo-header-cell {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.bingo-cell {
+  aspect-ratio: 1;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  padding: 4px;
+  position: relative;
+}
+.bingo-cell:hover { border-color: var(--orange); color: var(--color-text); }
+.bingo-cell.marked {
+  background: linear-gradient(135deg, rgba(255,107,53,0.3), rgba(0,201,177,0.2));
+  border-color: var(--orange);
+  color: var(--color-text);
+}
+.bingo-cell.marked::after {
+  content: '✓';
+  position: absolute;
+  top: 2px; right: 4px;
+  font-size: 8px;
+  color: var(--teal);
+}
+.bingo-cell.free-space {
+  background: linear-gradient(135deg, var(--orange), var(--teal));
+  color: white;
+  font-weight: 700;
+  cursor: default;
+  font-size: 9px;
+}
+.bingo-cell.bingo-line {
+  background: linear-gradient(135deg, rgba(255,193,7,0.4), rgba(255,107,53,0.3));
+  border-color: var(--gold);
+  animation: shimmer 1s ease infinite alternate;
+}
+@keyframes shimmer { from{box-shadow:0 0 6px rgba(255,193,7,0.3)} to{box-shadow:0 0 16px rgba(255,193,7,0.6)} }
+
+.bingo-progress {
+  display: flex; gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.bingo-line-indicator {
+  flex: 1;
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.bingo-line-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--teal));
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PREDICTIONS / PROP BETS
+═══════════════════════════════════════════════════════════ */
+.prediction-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.prediction-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  transition: border-color var(--transition);
+}
+.prediction-card:hover { border-color: rgba(255,255,255,0.15); }
+.prediction-question {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+.prediction-pts {
+  font-size: var(--text-xs);
+  color: var(--gold);
+  font-weight: 700;
+  display: flex; align-items: center; gap: 4px;
+}
+.prediction-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+.prediction-options {
+  display: flex; gap: var(--space-2);
+}
+.prediction-opt {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+}
+.prediction-opt:hover { border-color: var(--orange); color: var(--color-text); }
+.prediction-opt.selected {
+  background: rgba(255,107,53,0.15);
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.prediction-opt.correct {
+  background: rgba(34,197,94,0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+.prediction-opt.wrong {
+  background: rgba(239,68,68,0.1);
+  border-color: var(--error);
+  color: var(--error);
+  opacity: 0.6;
+}
+
+.prediction-result {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+.prediction-result.win {
+  background: rgba(34,197,94,0.1);
+  color: var(--success);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+.prediction-result.pending {
+  background: rgba(255,193,7,0.1);
+  color: var(--gold);
+  border: 1px solid rgba(255,193,7,0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════════ */
+.leaderboard-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.leaderboard-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  border: 1px solid transparent;
+  transition: border-color var(--transition);
+}
+.leaderboard-item.you {
+  border-color: rgba(0,201,177,0.4);
+  background: rgba(0,201,177,0.08);
+}
+.leaderboard-rank {
+  width: 28px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-align: center;
+  flex-shrink: 0;
+}
+.rank-gold { color: var(--gold); font-size: var(--text-base); }
+.rank-silver { color: #9ca3af; }
+.rank-bronze { color: #cd7f32; }
+.lb-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.lb-name { flex: 1; font-size: var(--text-xs); font-weight: 600; }
+.lb-pts {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--gold);
+}
+.lb-bar {
+  width: 60px;
+  height: 4px;
+  background: var(--color-bg);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.lb-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--gold));
+  border-radius: var(--radius-full);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════ */
+.sidebar { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.stat-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+.stat-label { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: 4px; }
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.stat-delta { font-size: var(--text-xs); color: var(--success); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════════
+   PRIZE SHOP SCREEN
+═══════════════════════════════════════════════════════════ */
+.shop-header {
+  padding: var(--space-6);
+  background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(255,107,53,0.1));
+  border-bottom: 1px solid var(--color-border);
+}
+.shop-balance {
+  display: flex; align-items: center; gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.balance-display {
+  background: var(--color-surface);
+  border: 1px solid rgba(255,193,7,0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+}
+.balance-label { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: 2px; }
+.balance-amount {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.shop-filters {
+  display: flex; gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border);
+}
+.filter-pill {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.filter-pill:hover { color: var(--color-text); }
+.filter-pill.active {
+  background: rgba(255,107,53,0.15);
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+.product-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.product-card:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.product-img {
+  aspect-ratio: 1.2/1;
+  background: var(--color-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+  position: relative;
+}
+.product-badge {
+  position: absolute; top: var(--space-2); right: var(--space-2);
+  background: var(--orange);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+.product-badge.sponsor { background: var(--purple); }
+.product-info { padding: var(--space-3) var(--space-4); }
+.product-name { font-size: var(--text-sm); font-weight: 600; margin-bottom: 4px; }
+.product-brand { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3); }
+.product-price {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.price-pts {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--gold);
+}
+.price-pts.affordable { color: var(--teal); }
+.price-pts.cant-afford { color: var(--error); opacity: 0.7; }
+
+.add-to-cart {
+  width: 100%;
+  padding: var(--space-2);
+  margin-top: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  background: var(--orange);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+}
+.add-to-cart:hover { background: var(--orange-hover); }
+.add-to-cart:disabled {
+  background: var(--color-surface-3);
+  color: var(--color-text-faint);
+  cursor: not-allowed;
+}
+.add-to-cart.added {
+  background: var(--success);
+  animation: addPop 0.3s ease;
+}
+@keyframes addPop { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+
+/* ═══════════════════════════════════════════════════════════
+   CART / CHECKOUT SCREEN
+═══════════════════════════════════════════════════════════ */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+@media (max-width: 900px) { .checkout-layout { grid-template-columns: 1fr; } }
+
+.cart-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.cart-item {
+  display: flex; align-items: center; gap: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+.cart-emoji { font-size: 32px; width: 48px; text-align: center; flex-shrink: 0; }
+.cart-details { flex: 1; }
+.cart-item-name { font-size: var(--text-sm); font-weight: 600; margin-bottom: 2px; }
+.cart-item-brand { font-size: var(--text-xs); color: var(--color-text-muted); }
+.cart-item-price {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--gold);
+}
+.cart-remove {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--color-surface-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.cart-remove:hover { background: rgba(239,68,68,0.2); color: var(--error); }
+
+.order-summary {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+}
+.summary-row:last-of-type { border-bottom: none; }
+.summary-label { color: var(--color-text-muted); }
+.summary-value { font-weight: 600; font-family: var(--font-mono); }
+.summary-total .summary-label { color: var(--color-text); font-weight: 700; font-size: var(--text-sm); }
+.summary-total .summary-value { color: var(--gold); font-size: var(--text-sm); }
+
+/* COUPON INPUT */
+.coupon-section {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.coupon-label { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-2); font-weight: 600; }
+.coupon-input-row {
+  display: flex; gap: var(--space-2);
+}
+.coupon-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.coupon-input:focus { border-color: var(--teal); }
+.coupon-input::placeholder { color: var(--color-text-faint); letter-spacing: 0; font-family: var(--font-body); text-transform: none; }
+.coupon-status { margin-top: var(--space-2); font-size: var(--text-xs); font-weight: 600; }
+.coupon-status.valid { color: var(--success); }
+.coupon-status.invalid { color: var(--error); }
+
+/* Coupon Tracker */
+.coupon-tracker {
+  margin-top: var(--space-4);
+}
+.coupon-tracker-title {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.coupon-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.coupon-tag {
+  display: flex; align-items: center; gap: var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.coupon-tag:hover { border-color: var(--teal); background: rgba(0,201,177,0.05); }
+.coupon-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 0.12em;
+  flex: 1;
+}
+.coupon-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
+.coupon-discount {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--success);
+  background: rgba(34,197,94,0.1);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+.coupon-used {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.coupon-applied-banner {
+  display: flex; align-items: center; gap: var(--space-2);
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--success);
+  margin-top: var(--space-2);
+}
+
+.checkout-btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-4);
+  margin: var(--space-5);
+  width: calc(100% - var(--space-10));
+  background: linear-gradient(135deg, var(--orange), var(--teal));
+  color: white;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  letter-spacing: 0.08em;
+  text-align: center;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+}
+.checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,53,0.4); }
+
+/* ═══════════════════════════════════════════════════════════
+   ORDER CONFIRMATION
+═══════════════════════════════════════════════════════════ */
+.confirm-screen {
+  text-align: center;
+  padding: var(--space-16) var(--space-6);
+  max-width: 480px;
+  margin: 0 auto;
+}
+.confirm-icon {
+  font-size: 64px;
+  margin-bottom: var(--space-6);
+  animation: bounce 0.6s ease;
+}
+@keyframes bounce { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.confirm-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--teal);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-3);
+}
+.confirm-sub { color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: var(--space-8); }
+.coupon-reward {
+  background: var(--color-surface);
+  border: 1px solid rgba(255,193,7,0.3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+.new-coupon-display {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  background: var(--color-surface-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  border: 2px dashed rgba(255,193,7,0.4);
+  display: inline-block;
+  margin-top: var(--space-3);
+  cursor: pointer;
+}
+.copy-hint { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-2); }
+
+/* ═══════════════════════════════════════════════════════════
+   B2B MARKETING SECTION
+═══════════════════════════════════════════════════════════ */
+.b2b-screen { padding: var(--space-6); }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+.section-sub { color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: var(--space-8); max-width: 60ch; }
+
+.value-props {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-10);
+}
+.vp-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transition: border-color var(--transition);
+}
+.vp-card:hover { border-color: rgba(255,255,255,0.15); }
+.vp-icon { font-size: 28px; margin-bottom: var(--space-3); }
+.vp-title { font-weight: 700; font-size: var(--text-sm); margin-bottom: var(--space-2); }
+.vp-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.6; }
+
+.pricing-section { margin-bottom: var(--space-10); }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+.pricing-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  text-align: center;
+  position: relative;
+}
+.pricing-card.featured {
+  border-color: var(--orange);
+  background: linear-gradient(135deg, rgba(255,107,53,0.06), rgba(0,201,177,0.06));
+}
+.pricing-tier {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-2);
+}
+.pricing-price {
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: var(--space-1);
+}
+.pricing-period { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-4); }
+.pricing-features { text-align: left; margin-bottom: var(--space-5); }
+.pricing-feature {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.pricing-feature:last-child { border-bottom: none; }
+.feat-check { color: var(--success); flex-shrink: 0; }
+.featured-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--orange), var(--teal));
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-10);
+}
+.metric-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  text-align: center;
+}
+.metric-number {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--orange);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+.metric-label { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.4; }
+
+.how-it-works {
+  margin-bottom: var(--space-10);
+}
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+.step-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  position: relative;
+}
+.step-num {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 5rem);
+  color: rgba(255,107,53,0.12);
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-4);
+  line-height: 1;
+}
+.step-icon { font-size: 24px; margin-bottom: var(--space-3); }
+.step-title { font-weight: 700; font-size: var(--text-sm); margin-bottom: var(--space-2); }
+.step-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.6; }
+
+.cta-bar {
+  background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(0,201,177,0.1));
+  border: 1px solid rgba(255,107,53,0.2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  text-align: center;
+}
+.cta-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-3);
+}
+.cta-sub { color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: var(--space-6); }
+.cta-buttons { display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed; bottom: var(--space-6); right: var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  z-index: 1000; pointer-events: none;
+}
+.toast {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  min-width: 220px;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.3s ease;
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.toast.success { border-color: rgba(34,197,94,0.4); color: var(--success); }
+.toast.info { border-color: rgba(0,201,177,0.4); color: var(--teal); }
+.toast.points { border-color: rgba(255,193,7,0.4); color: var(--gold); }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(20px)} }
+
+/* ═══════════════════════════════════════════════════════════
+   POINTS ANIMATION
+═══════════════════════════════════════════════════════════ */
+.pts-fly {
+  position: fixed;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--gold);
+  pointer-events: none;
+  z-index: 9999;
+  animation: flyUp 1.2s ease forwards;
+  text-shadow: 0 0 10px rgba(255,193,7,0.5);
+}
+@keyframes flyUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.3); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE FIXES
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .topnav { padding: var(--space-3) var(--space-4); }
+  .nav-tabs { display: none; }
+  .shop-grid { grid-template-columns: repeat(2, 1fr); }
+  .bingo-cell { font-size: 8px; }
+}
+</style>
+</head>
+
+<body>
+<div class="shell">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">AREN<span>ZA</span></div>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-screen="game" onclick="switchScreen('game', this)">🏟️ Live Game</div>
+      <div class="nav-tab" data-screen="shop" onclick="switchScreen('shop', this)">🛍️ Prize Shop</div>
+      <div class="nav-tab" data-screen="cart" onclick="switchScreen('cart', this)">🛒 Cart <span id="cart-count-badge" style="display:none;background:var(--orange);border-radius:50%;width:16px;height:16px;line-height:16px;text-align:center;font-size:10px;margin-left:2px;"></span></div>
+      <div class="nav-tab" data-screen="b2b" onclick="switchScreen('b2b', this)">📊 For Sponsors</div>
+    </div>
+    <div class="nav-right">
+      <div class="points-badge">⭐ <span id="pts-display">1,250</span> pts</div>
+      <button class="btn btn-primary" onclick="switchScreen('shop', document.querySelector('[data-screen=shop]'))">Redeem</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════ SCREEN: LIVE GAME ══════════════════════ -->
+  <div id="screen-game" class="screen active">
+
+    <!-- Live Scoreboard Hero -->
+    <div class="live-hero">
+      <div class="live-badge"><div class="live-dot"></div> LIVE NOW</div>
+      <div class="scoreboard">
+        <div class="team-block">
+          <div class="team-name">🦅 EAGLES</div>
+          <div class="team-score" id="score-home">21</div>
+        </div>
+        <div class="score-divider">—</div>
+        <div class="team-block">
+          <div class="team-name">🐻 BEARS</div>
+          <div class="team-score" id="score-away">17</div>
+        </div>
+      </div>
+      <div class="game-info">
+        <span>Q3 · 8:44</span>
+        <span class="game-info-sep">|</span>
+        <span>NFC Wild Card</span>
+        <span class="game-info-sep">|</span>
+        <span>🌡️ 34°F · Clear</span>
+      </div>
+      <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="newQuestion()">⚡ Quick Prediction</button>
+        <button class="btn btn-ghost">📢 Share Score</button>
+      </div>
+    </div>
+
+    <div class="main-layout">
+
+      <!-- LEFT: GAME PANELS -->
+      <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+
+        <!-- SPORTS BINGO -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎯 SPORTS BINGO</div>
+            <div style="display:flex;align-items:center;gap:var(--space-3)">
+              <div style="font-size:var(--text-xs);color:var(--gold);font-weight:700;">+500 pts for BINGO!</div>
+              <button class="btn btn-ghost" onclick="shuffleBingo()" style="font-size:10px;">Shuffle</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="bingo-header-row">
+              <div class="bingo-header-cell">B</div>
+              <div class="bingo-header-cell">I</div>
+              <div class="bingo-header-cell">N</div>
+              <div class="bingo-header-cell">G</div>
+              <div class="bingo-header-cell">O</div>
+            </div>
+            <div class="bingo-grid" id="bingo-grid"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:var(--space-3)">
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted)">Lines completed:</div>
+              <div class="bingo-progress">
+                <div class="bingo-line-indicator"><div class="bingo-line-fill" id="bp-1" style="width:40%"></div></div>
+                <div class="bingo-line-indicator"><div class="bingo-line-fill" id="bp-2" style="width:20%"></div></div>
+                <div class="bingo-line-indicator"><div class="bingo-line-fill" id="bp-3" style="width:60%"></div></div>
+                <div class="bingo-line-indicator"><div class="bingo-line-fill" id="bp-4" style="width:80%"></div></div>
+                <div class="bingo-line-indicator"><div class="bingo-line-fill" id="bp-5" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE PREDICTIONS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🔮 LIVE PREDICTIONS</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted)">Answer to earn points</div>
+          </div>
+          <div class="card-body">
+            <div class="prediction-list" id="predictions-list"></div>
+          </div>
+        </div>
+
+        <!-- TRIVIA CARD -->
+        <div class="card" id="trivia-card">
+          <div class="card-header">
+            <div class="card-title">🧠 GAME TRIVIA</div>
+            <div class="points-badge" style="font-size:10px;">+100 pts</div>
+          </div>
+          <div class="card-body">
+            <div id="trivia-q" style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-4)">Which NFL team holds the record for the most consecutive playoff appearances?</div>
+            <div id="trivia-opts" style="display:flex;flex-direction:column;gap:var(--space-2)"></div>
+            <div id="trivia-result" style="margin-top:var(--space-3);display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="sidebar">
+
+        <!-- My Stats -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 MY STATS</div>
+          </div>
+          <div class="card-body">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Points</div>
+                <div class="stat-value" id="stat-pts">1,250</div>
+                <div class="stat-delta">+350 today</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Predictions</div>
+                <div class="stat-value">7/9</div>
+                <div class="stat-delta" style="color:var(--teal)">78% acc.</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Bingo Marks</div>
+                <div class="stat-value" id="bingo-count">4</div>
+                <div class="stat-delta" style="color:var(--gold)">⬆ +1</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Rank</div>
+                <div class="stat-value" style="color:var(--orange);">#14</div>
+                <div class="stat-delta" style="color:var(--success)">↑ from #23</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🏆 LEADERBOARD</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted)">Top wins prize</div>
+          </div>
+          <div class="card-body">
+            <div class="leaderboard-list" id="leaderboard"></div>
+          </div>
+        </div>
+
+        <!-- Sponsor Prize Banner -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(255,107,53,0.1)); border-color: rgba(124,58,237,0.3);">
+          <div class="card-body">
+            <div style="font-size:var(--text-xs);color:var(--purple);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:var(--space-2)">🎁 Sponsor Prize</div>
+            <div style="font-weight:700;font-size:var(--text-sm);margin-bottom:var(--space-2)">Win a signed Eagles jersey!</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3)">Presented by <strong style="color:var(--color-text)">Pepsi</strong> · Top prediction accuracy wins</div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-3)">
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:4px">Time remaining</div>
+              <div style="font-family:var(--font-mono);font-size:var(--text-lg);color:var(--orange);font-weight:700;" id="countdown">08:44</div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="switchScreen('shop', document.querySelector('[data-screen=shop]'))">View All Prizes →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ SCREEN: PRIZE SHOP ══════════════════════ -->
+  <div id="screen-shop" class="screen">
+    <div class="shop-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4)">
+        <div>
+          <div style="font-family:var(--font-display);font-size:var(--text-2xl);letter-spacing:0.05em;">PRIZE SHOP</div>
+          <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Use your earned points to redeem real rewards</div>
+        </div>
+        <div class="shop-balance">
+          <div class="balance-display">
+            <div class="balance-label">Your Balance</div>
+            <div class="balance-amount">⭐ <span id="shop-pts">1,250</span> pts</div>
+          </div>
+          <button class="btn btn-ghost" onclick="switchScreen('cart', document.querySelector('[data-screen=cart]'))">🛒 View Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="shop-filters">
+      <div class="filter-pill active" onclick="filterShop('all', this)">All Items</div>
+      <div class="filter-pill" onclick="filterShop('apparel', this)">👕 Apparel</div>
+      <div class="filter-pill" onclick="filterShop('gift-cards', this)">🎁 Gift Cards</div>
+      <div class="filter-pill" onclick="filterShop('experiences', this)">🎟️ Experiences</div>
+      <div class="filter-pill" onclick="filterShop('food', this)">🍔 Food & Drink</div>
+      <div class="filter-pill" onclick="filterShop('sponsor', this)">⭐ Sponsor Deals</div>
+    </div>
+    <div class="shop-grid" id="shop-grid"></div>
+  </div>
+
+  <!-- ══════════════════════ SCREEN: CART ══════════════════════ -->
+  <div id="screen-cart" class="screen">
+    <div id="cart-view">
+      <div style="padding:var(--space-6);border-bottom:1px solid var(--color-border)">
+        <div style="font-family:var(--font-display);font-size:var(--text-xl);letter-spacing:0.05em;">CART & CHECKOUT</div>
+        <div style="font-size:var(--text-xs);color:var(--color-text-muted)">Review your selections and apply coupon codes</div>
+      </div>
+      <div class="checkout-layout">
+        <!-- Cart Items -->
+        <div>
+          <div style="font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-4);">Cart Items</div>
+          <div class="cart-list" id="cart-list">
+            <div id="empty-cart" style="text-align:center;padding:var(--space-12);color:var(--color-text-muted)">
+              <div style="font-size:48px;margin-bottom:var(--space-4)">🛒</div>
+              <div style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-2)">Cart is empty</div>
+              <div style="font-size:var(--text-xs)">Browse the Prize Shop and add items!</div>
+              <button class="btn btn-primary" style="margin:var(--space-4) auto 0;display:flex;" onclick="switchScreen('shop', document.querySelector('[data-screen=shop]'))">Browse Prizes →</button>
+            </div>
+          </div>
+
+          <!-- Coupon Tracker -->
+          <div class="coupon-tracker" id="coupon-tracker" style="margin-top:var(--space-6)">
+            <div class="coupon-tracker-title">🏷️ My Coupon Codes</div>
+            <div class="coupon-list" id="coupon-list"></div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div>
+          <div style="font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-4);">Order Summary</div>
+          <div class="order-summary">
+            <div class="summary-row">
+              <span class="summary-label">Items Subtotal</span>
+              <span class="summary-value" id="subtotal-display">0 pts</span>
+            </div>
+            <div class="summary-row" id="discount-row" style="display:none">
+              <span class="summary-label" style="color:var(--success)">🏷️ Coupon Discount</span>
+              <span class="summary-value" id="discount-display" style="color:var(--success)">-0 pts</span>
+            </div>
+            <div class="summary-row summary-total">
+              <span class="summary-label">Total Points</span>
+              <span class="summary-value" id="total-display">0 pts</span>
+            </div>
+
+            <!-- Coupon Input -->
+            <div class="coupon-section">
+              <div class="coupon-label">Have a coupon code?</div>
+              <div class="coupon-input-row">
+                <input type="text" class="coupon-input" id="coupon-input" placeholder="Enter code (e.g. EAGLE25)" maxlength="12" oninput="this.value = this.value.toUpperCase()">
+                <button class="btn btn-teal" onclick="applyCoupon()">Apply</button>
+              </div>
+              <div class="coupon-status" id="coupon-feedback"></div>
+              <div id="applied-coupon-banner" class="coupon-applied-banner" style="display:none">
+                ✅ <span id="applied-coupon-text"></span> <button onclick="removeCoupon()" style="margin-left:auto;color:var(--error);font-size:11px;cursor:pointer;">Remove ✕</button>
+              </div>
+            </div>
+
+            <button class="checkout-btn" id="checkout-btn" onclick="doCheckout()">PAY WITH POINTS →</button>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);text-align:center;">
+            Your remaining balance after checkout: <strong id="remaining-pts" style="color:var(--teal)">1,250 pts</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation View -->
+    <div id="confirm-view" style="display:none;">
+      <div class="confirm-screen">
+        <div class="confirm-icon">🎉</div>
+        <div class="confirm-title">ORDER CONFIRMED!</div>
+        <div class="confirm-sub">Your prizes are on their way! Check your email for delivery details.</div>
+        <div class="coupon-reward">
+          <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-2);">🏷️ Bonus Sponsor Coupon Earned!</div>
+          <div style="font-size:var(--text-sm);color:var(--color-text);margin-bottom:var(--space-3);">Thank you for your order. Here's a reward from our sponsor:</div>
+          <div class="new-coupon-display" id="new-coupon-code" onclick="copyCoupon()">PEPSI2026</div>
+          <div class="copy-hint">Click to copy · Valid 30 days</div>
+          <div style="margin-top:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted)">Save 25% on Pepsi products at checkout</div>
+        </div>
+        <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="backToGame()">← Back to Game</button>
+          <button class="btn btn-ghost" onclick="switchScreen('shop', document.querySelector('[data-screen=shop]'))">Shop More</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ SCREEN: B2B ══════════════════════ -->
+  <div id="screen-b2b" class="screen">
+    <div class="b2b-screen">
+      <div style="max-width:700px;margin-bottom:var(--space-10)">
+        <div style="font-size:var(--text-xs);color:var(--teal);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:var(--space-3)">For Sports Sponsors & Networks</div>
+        <div class="section-title">Turn Every Game Into a Revenue Engine</div>
+        <div class="section-sub">Arenza is the second-screen fan engagement platform that drives measurable ROI for sports sponsors, broadcasters, and leagues through prediction games, interactive bingo, and a points-based prize marketplace.</div>
+        <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+          <button class="btn btn-primary">Request Demo</button>
+          <button class="btn btn-ghost">Download Media Kit</button>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="section-title" style="font-size:var(--text-xl);margin-bottom:var(--space-4)">PLATFORM STATS</div>
+      <div class="metrics-grid" style="margin-bottom:var(--space-10)">
+        <div class="metric-card"><div class="metric-number">87%</div><div class="metric-label">of sports fans use a second screen during live matches</div></div>
+        <div class="metric-card"><div class="metric-number">3.2×</div><div class="metric-label">higher coupon redemption vs. standard digital ads</div></div>
+        <div class="metric-card"><div class="metric-number">47%</div><div class="metric-label">increase in session time when gamification is active</div></div>
+        <div class="metric-card"><div class="metric-number">$14B</div><div class="metric-label">projected sports fan loyalty program market by 2033</div></div>
+        <div class="metric-card"><div class="metric-number">82%</div><div class="metric-label">user retention rate per game session</div></div>
+        <div class="metric-card"><div class="metric-number">29%</div><div class="metric-label">multi-device sports fans growing year over year</div></div>
+      </div>
+
+      <!-- Value Props -->
+      <div class="section-title" style="font-size:var(--text-xl);margin-bottom:var(--space-4)">WHY ARENZA</div>
+      <div class="value-props">
+        <div class="vp-card">
+          <div class="vp-icon">🎯</div>
+          <div class="vp-title">Branded Prediction Games</div>
+          <div class="vp-desc">Sponsor live Q&A moments, prop bets, and outcome predictions. Your brand appears as the "prize presenter" every time a fan wins points.</div>
+        </div>
+        <div class="vp-card">
+          <div class="vp-icon">🛍️</div>
+          <div class="vp-title">Integrated Prize Marketplace</div>
+          <div class="vp-desc">Fans redeem points for your products. Drive direct-to-consumer sales, coupon activations, and brand trials — all within the game experience.</div>
+        </div>
+        <div class="vp-card">
+          <div class="vp-icon">🏷️</div>
+          <div class="vp-title">Smart Coupon Distribution</div>
+          <div class="vp-desc">Automatically issue unique, trackable coupon codes to high-engagement fans. Real-time redemption tracking with full attribution reports.</div>
+        </div>
+        <div class="vp-card">
+          <div class="vp-icon">📊</div>
+          <div class="vp-title">First-Party Fan Data</div>
+          <div class="vp-desc">Collect rich behavioral data — which offers fans respond to, their spending habits, team affiliations — with full consent compliance.</div>
+        </div>
+        <div class="vp-card">
+          <div class="vp-icon">⚡</div>
+          <div class="vp-title">48-Hour Activation</div>
+          <div class="vp-desc">Deploy branded campaigns in under 48 hours. White-label SDK integrates with existing broadcast apps, streaming platforms, and stadium systems.</div>
+        </div>
+        <div class="vp-card">
+          <div class="vp-icon">🔒</div>
+          <div class="vp-title">Legal & Compliant</div>
+          <div class="vp-desc">Free-to-play architecture — no gambling mechanics. Compliant across all 50 US states. GDPR & CCPA compliant data practices built in.</div>
+        </div>
+      </div>
+
+      <!-- How it Works -->
+      <div class="how-it-works">
+        <div class="section-title" style="font-size:var(--text-xl);margin-bottom:var(--space-4)">HOW IT WORKS</div>
+        <div class="steps-row">
+          <div class="step-card"><div class="step-num">01</div><div class="step-icon">📺</div><div class="step-title">Fan Watches Live Game</div><div class="step-desc">Viewer opens Arenza companion app (or broadcaster-embedded SDK) while watching sports on any screen.</div></div>
+          <div class="step-card"><div class="step-num">02</div><div class="step-icon">🔮</div><div class="step-title">Plays Prediction Games</div><div class="step-desc">Fan makes predictions, marks bingo cards, answers trivia — all synchronized to the live broadcast in real time.</div></div>
+          <div class="step-card"><div class="step-num">03</div><div class="step-icon">⭐</div><div class="step-title">Earns Points & Coupons</div><div class="step-desc">Correct answers earn platform points. Sponsor-branded milestone coupons unlock automatically throughout the game.</div></div>
+          <div class="step-card"><div class="step-num">04</div><div class="step-icon">🛍️</div><div class="step-title">Redeems in Prize Shop</div><div class="step-desc">Fan browses sponsor-stocked marketplace, adds items to cart, applies coupon codes, and pays using earned points.</div></div>
+          <div class="step-card"><div class="step-num">05</div><div class="step-icon">📈</div><div class="step-title">Sponsor Gets ROI Data</div><div class="step-desc">Full attribution dashboard: impressions, coupon opens, conversions, CAC, and LTV metrics — all in real time.</div></div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="pricing-section">
+        <div class="section-title" style="font-size:var(--text-xl);margin-bottom:var(--space-2)">SPONSOR PACKAGES</div>
+        <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-6)">All plans include platform access, white-label branding, and real-time analytics dashboard</div>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <div class="pricing-tier">STARTER</div>
+            <div class="pricing-price">$2,500</div>
+            <div class="pricing-period">per game / one-time</div>
+            <div class="pricing-features">
+              <div class="pricing-feature"><span class="feat-check">✓</span>1 sponsored prediction question</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Branded prize in marketplace</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>500 coupon code distribution</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Post-game analytics report</div>
+            </div>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;">Get Started</button>
+          </div>
+
+          <div class="pricing-card featured">
+            <div class="featured-badge">⭐ MOST POPULAR</div>
+            <div class="pricing-tier">SEASON</div>
+            <div class="pricing-price">$18,000</div>
+            <div class="pricing-period">per season · ~82 games</div>
+            <div class="pricing-features">
+              <div class="pricing-feature"><span class="feat-check">✓</span>Full prediction suite branding</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Unlimited prize catalog slots</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>10,000 coupon codes/game</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Real-time ROI dashboard</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Dedicated account manager</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>First-party data export</div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;">Book Season Package</button>
+          </div>
+
+          <div class="pricing-card">
+            <div class="pricing-tier">ENTERPRISE</div>
+            <div class="pricing-price">Custom</div>
+            <div class="pricing-period">multi-team / league-wide</div>
+            <div class="pricing-features">
+              <div class="pricing-feature"><span class="feat-check">✓</span>White-label platform</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Full SDK + API integration</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Custom game mechanics</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>League-wide rollout</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Dedicated engineering support</div>
+              <div class="pricing-feature"><span class="feat-check">✓</span>Custom data agreements</div>
+            </div>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;">Contact Sales</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-bar">
+        <div class="cta-title">READY TO ACTIVATE YOUR FANS?</div>
+        <div class="cta-sub">Join 30+ sports sponsors already using Arenza to transform passive viewers into active, trackable, revenue-generating fan relationships.</div>
+        <div class="cta-buttons">
+          <button class="btn btn-primary" style="padding:var(--space-3) var(--space-8);">Schedule a Demo</button>
+          <button class="btn btn-teal" style="padding:var(--space-3) var(--space-8);">Download Case Studies</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end shell -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let userPoints = 1250;
+let cartItems = [];
+let appliedCoupon = null;
+let markedCells = new Set([12]); // free space
+let coupons = [
+  { code: 'EAGLE25', desc: 'Eagles Fan Special', discount: 250, used: false, source: 'Game Achievement' },
+  { code: 'PEPSI10', desc: 'Pepsi Sponsor Deal', discount: 100, used: false, source: 'Sponsor Reward' },
+  { code: 'NFL2026', desc: 'Season Opener Bonus', discount: 150, used: false, source: 'Registration' },
+];
+let currentFilter = 'all';
+
+const VALID_COUPONS = {
+  'EAGLE25': { discount: 250, desc: '250 pts off your order!' },
+  'PEPSI10': { discount: 100, desc: '100 pts off your order!' },
+  'NFL2026': { discount: 150, desc: '150 pts off — Season Opener!' },
+  'WIN500': { discount: 500, desc: '500 pts off — Big Win Reward!' },
+  'SPONSOR20': { discount: 200, desc: '200 pts off — Sponsor Deal!' },
+};
+
+/* ═══════════════════════════════════════════════════════════
+   BINGO DATA
+═══════════════════════════════════════════════════════════ */
+const BINGO_CELLS = [
+  'Field Goal',  'Touchdown', 'Interception', 'Sack', 'Fumble',
+  '1st Down', 'Flag Thrown', 'Replay Review', '2-pt Conv.', 'Punt',
+  'Timeout', 'Injury Sub', 'FREE\nSPACE', '4th Down', '3 & Out',
+  'Crowd Roar', 'QB Scramble', 'Red Zone', 'Challenge', 'No-Huddle',
+  '50+ Yd Play', 'Pick-6', 'Safety', 'Spike', 'OT Risk'
+];
+
+/* ═══════════════════════════════════════════════════════════
+   SHOP DATA
+═══════════════════════════════════════════════════════════ */
+const SHOP_ITEMS = [
+  { id: 1, name: 'Eagles Authentic Jersey', brand: 'Fanatics', emoji: '🦅', pts: 800, cat: 'apparel', badge: 'Hot' },
+  { id: 2, name: 'Nike Air Max 270', brand: 'Nike', emoji: '👟', pts: 1200, cat: 'apparel', badge: null },
+  { id: 3, name: 'Team Hoodie', brand: 'NFL Shop', emoji: '🧥', pts: 650, cat: 'apparel', badge: null },
+  { id: 4, name: '$25 Amazon Gift Card', brand: 'Amazon', emoji: '🎁', pts: 500, cat: 'gift-cards', badge: 'Popular' },
+  { id: 5, name: '$50 Best Buy Card', brand: 'Best Buy', emoji: '💙', pts: 900, cat: 'gift-cards', badge: null },
+  { id: 6, name: 'Uber Eats $30 Credit', brand: 'Uber Eats', emoji: '🍕', pts: 600, cat: 'food', badge: 'Sponsor', sponsor: true },
+  { id: 7, name: 'Game Day VIP Pass', brand: 'Arenza', emoji: '🎟️', pts: 2000, cat: 'experiences', badge: 'Rare' },
+  { id: 8, name: 'Meet & Greet Ticket', brand: 'Eagles', emoji: '🤝', pts: 3000, cat: 'experiences', badge: 'Rare' },
+  { id: 9, name: 'Pepsi Fan Bundle', brand: 'Pepsi', emoji: '🥤', pts: 300, cat: 'food', badge: 'Sponsor', sponsor: true },
+  { id: 10, name: 'Sports Memorabilia Set', brand: 'Sports Authority', emoji: '🏈', pts: 750, cat: 'apparel', badge: null },
+  { id: 11, name: '$10 DoorDash Credit', brand: 'DoorDash', emoji: '🛵', pts: 200, cat: 'food', badge: 'Sponsor', sponsor: true },
+  { id: 12, name: 'Signed Poster', brand: 'Eagles', emoji: '🖼️', pts: 400, cat: 'apparel', badge: 'Limited' },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   PREDICTIONS DATA
+═══════════════════════════════════════════════════════════ */
+const QUESTIONS = [
+  { id: 1, q: 'Who scores the next touchdown?', opts: ['Eagles QB', 'Eagles WR', 'Bears RB', 'Bears QB'], pts: 150, ans: null },
+  { id: 2, q: 'Will there be a field goal in the next drive?', opts: ['Yes', 'No'], pts: 75, ans: null },
+  { id: 3, q: 'Total points in Q3?', opts: ['0–7', '8–14', '15–21', '22+'], pts: 200, ans: null },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   TRIVIA DATA
+═══════════════════════════════════════════════════════════ */
+const TRIVIA = [
+  { q: 'Which NFL team holds the record for most Super Bowl wins?', opts: ['New England Patriots', 'Pittsburgh Steelers', 'San Francisco 49ers', 'Dallas Cowboys'], ans: 1 },
+  { q: 'What does "MVP" stand for?', opts: ['Most Valued Player', 'Most Valuable Player', 'Maximum Victory Points', 'Most Victorious Player'], ans: 1 },
+  { q: 'How many players are on the field per team in football?', opts: ['9', '10', '11', '12'], ans: 2 },
+];
+let triviaIdx = 0;
+let triviaAnswered = false;
+
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD DATA
+═══════════════════════════════════════════════════════════ */
+const LB_DATA = [
+  { name: 'SportsFan_NYC', pts: 2840, emoji: '🦅', pct: 100 },
+  { name: 'TDKing_Phil', pts: 2210, emoji: '🏈', pct: 78 },
+  { name: 'GridironGuru', pts: 1980, emoji: '⚡', pct: 70 },
+  { name: 'You (FanXX9)', pts: 1250, emoji: '🎯', pct: 44, isYou: true },
+  { name: 'BearDown_CHI', pts: 1180, emoji: '🐻', pct: 42 },
+  { name: 'QBWhisperer', pts: 950, emoji: '🎯', pct: 34 },
+  { name: 'FanZone_LA', pts: 720, emoji: '🏟️', pct: 25 },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+function init() {
+  renderBingo();
+  renderPredictions();
+  renderTrivia();
+  renderLeaderboard();
+  renderShop();
+  renderCouponTracker();
+  updateCartCount();
+  updateOrderSummary();
+  startCountdown();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN SWITCH
+═══════════════════════════════════════════════════════════ */
+function switchScreen(name, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'shop') { updateShopBalance(); renderShop(); }
+  if (name === 'cart') { renderCart(); renderCouponTracker(); updateOrderSummary(); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POINTS
+═══════════════════════════════════════════════════════════ */
+function addPoints(pts, event) {
+  userPoints += pts;
+  updatePointsDisplay();
+  if (event) {
+    const fly = document.createElement('div');
+    fly.className = 'pts-fly';
+    fly.textContent = '+' + pts + ' pts';
+    fly.style.left = (event.clientX || 200) + 'px';
+    fly.style.top = (event.clientY || 300) + 'px';
+    document.body.appendChild(fly);
+    setTimeout(() => fly.remove(), 1200);
+  }
+}
+
+function updatePointsDisplay() {
+  document.getElementById('pts-display').textContent = userPoints.toLocaleString();
+  document.getElementById('stat-pts').textContent = userPoints.toLocaleString();
+  const shopPts = document.getElementById('shop-pts');
+  if (shopPts) shopPts.textContent = userPoints.toLocaleString();
+  updateOrderSummary();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BINGO
+═══════════════════════════════════════════════════════════ */
+function renderBingo() {
+  const grid = document.getElementById('bingo-grid');
+  grid.innerHTML = '';
+  BINGO_CELLS.forEach((text, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'bingo-cell' + (i === 12 ? ' free-space' : '') + (markedCells.has(i) ? ' marked' : '');
+    cell.textContent = text;
+    if (i !== 12) cell.onclick = (e) => markBingo(i, e);
+    grid.appendChild(cell);
+  });
+  document.getElementById('bingo-count').textContent = markedCells.size;
+}
+
+function markBingo(idx, event) {
+  if (markedCells.has(idx)) return;
+  markedCells.add(idx);
+  renderBingo();
+  addPoints(25, event);
+  toast('🎯 Bingo cell marked! +25 pts', 'points');
+  checkBingo();
+}
+
+function checkBingo() {
+  const lines = [
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+    [0,6,12,18,24],[4,8,12,16,20]
+  ];
+  for (const line of lines) {
+    if (line.every(i => markedCells.has(i))) {
+      toast('🎉 BINGO! +500 pts earned!', 'success');
+      addPoints(500);
+      return;
+    }
+  }
+}
+
+function shuffleBingo() {
+  markedCells = new Set([12]);
+  renderBingo();
+  toast('🔀 New bingo card generated!', 'info');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PREDICTIONS
+═══════════════════════════════════════════════════════════ */
+function renderPredictions() {
+  const list = document.getElementById('predictions-list');
+  list.innerHTML = '';
+  QUESTIONS.forEach(q => {
+    const card = document.createElement('div');
+    card.className = 'prediction-card';
+    card.id = 'pred-' + q.id;
+    let optsHTML = q.opts.map((opt, i) =>
+      `<div class="prediction-opt${q.ans === i ? ' selected' : ''}" onclick="pickPrediction(${q.id}, ${i}, event)">${opt}</div>`
+    ).join('');
+    let resultHTML = q.ans !== null ?
+      `<div class="prediction-result pending">⏳ Awaiting game result... +${q.pts} pts if correct</div>` : '';
+    card.innerHTML = `
+      <div class="prediction-meta">
+        <div class="prediction-question">${q.q}</div>
+        <div class="prediction-pts">⭐ ${q.pts} pts</div>
+      </div>
+      <div class="prediction-options">${optsHTML}</div>
+      ${resultHTML}
+    `;
+    list.appendChild(card);
+  });
+}
+
+function pickPrediction(qId, optIdx, event) {
+  const q = QUESTIONS.find(x => x.id === qId);
+  if (q.ans !== null) return;
+  q.ans = optIdx;
+  renderPredictions();
+  toast(`✅ Prediction locked in! +${q.pts} pts if correct`, 'info');
+}
+
+function newQuestion() {
+  const newQ = {
+    id: QUESTIONS.length + 1,
+    q: ['Next play: Run or Pass?', 'Will Eagles score this drive?', 'Next penalty against?'][Math.floor(Math.random()*3)],
+    opts: [['Run', 'Pass'], ['Yes', 'No'], ['Eagles', 'Bears']][Math.floor(Math.random()*3)],
+    pts: [50, 75, 100][Math.floor(Math.random()*3)],
+    ans: null
+  };
+  QUESTIONS.push(newQ);
+  renderPredictions();
+  toast('⚡ New prediction question added!', 'info');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TRIVIA
+═══════════════════════════════════════════════════════════ */
+function renderTrivia() {
+  const t = TRIVIA[triviaIdx % TRIVIA.length];
+  document.getElementById('trivia-q').textContent = t.q;
+  const opts = document.getElementById('trivia-opts');
+  opts.innerHTML = '';
+  triviaAnswered = false;
+  document.getElementById('trivia-result').style.display = 'none';
+  t.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'prediction-opt';
+    btn.textContent = opt;
+    btn.onclick = (e) => answerTrivia(i, t.ans, e);
+    opts.appendChild(btn);
+  });
+}
+
+function answerTrivia(chosen, correct, event) {
+  if (triviaAnswered) return;
+  triviaAnswered = true;
+  const opts = document.querySelectorAll('#trivia-opts .prediction-opt');
+  opts[correct].classList.add('correct');
+  if (chosen !== correct) opts[chosen].classList.add('wrong');
+  const res = document.getElementById('trivia-result');
+  res.style.display = 'block';
+  if (chosen === correct) {
+    res.className = 'prediction-result win';
+    res.innerHTML = '✅ Correct! +100 pts';
+    addPoints(100, event);
+    toast('🧠 Correct trivia answer! +100 pts', 'points');
+  } else {
+    res.className = 'prediction-result';
+    res.style.background = 'rgba(239,68,68,0.1)';
+    res.style.color = 'var(--error)';
+    res.style.border = '1px solid rgba(239,68,68,0.2)';
+    res.innerHTML = `❌ Incorrect. Correct: "${TRIVIA[triviaIdx % TRIVIA.length].opts[correct]}"`;
+  }
+  setTimeout(() => {
+    triviaIdx++;
+    renderTrivia();
+  }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════════ */
+function renderLeaderboard() {
+  const lb = document.getElementById('leaderboard');
+  lb.innerHTML = '';
+  LB_DATA.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'leaderboard-item' + (p.isYou ? ' you' : '');
+    const rankClass = i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : '';
+    const rankText = i < 3 ? ['🥇','🥈','🥉'][i] : `#${i+1}`;
+    item.innerHTML = `
+      <div class="leaderboard-rank ${rankClass}">${rankText}</div>
+      <div class="lb-avatar">${p.emoji}</div>
+      <div class="lb-name">${p.name}${p.isYou ? ' <span style="color:var(--teal);font-size:10px">(You)</span>' : ''}</div>
+      <div class="lb-pts">${p.pts.toLocaleString()}</div>
+      <div class="lb-bar"><div class="lb-bar-fill" style="width:${p.pct}%"></div></div>
+    `;
+    lb.appendChild(item);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHOP
+═══════════════════════════════════════════════════════════ */
+function renderShop() {
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = '';
+  const filtered = currentFilter === 'all' ? SHOP_ITEMS :
+    currentFilter === 'sponsor' ? SHOP_ITEMS.filter(i => i.sponsor) :
+    SHOP_ITEMS.filter(i => i.cat === currentFilter);
+
+  filtered.forEach(item => {
+    const inCart = cartItems.some(c => c.id === item.id);
+    const canAfford = userPoints >= item.pts;
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      <div class="product-img">
+        ${item.emoji}
+        ${item.badge ? `<div class="product-badge${item.sponsor ? ' sponsor' : ''}">${item.badge}</div>` : ''}
+      </div>
+      <div class="product-info">
+        <div class="product-name">${item.name}</div>
+        <div class="product-brand">${item.brand}</div>
+        <div class="product-price">
+          <div class="price-pts ${canAfford ? 'affordable' : 'cant-afford'}">⭐ ${item.pts.toLocaleString()} pts</div>
+        </div>
+        <button class="add-to-cart${inCart ? ' added' : ''}" ${inCart ? '' : !canAfford ? 'disabled' : ''} onclick="addToCart(${item.id}, event)">
+          ${inCart ? '✓ Added!' : canAfford ? 'Add to Cart' : 'Need More Points'}
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterShop(cat, el) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderShop();
+}
+
+function addToCart(itemId, event) {
+  if (cartItems.some(c => c.id === itemId)) return;
+  const item = SHOP_ITEMS.find(i => i.id === itemId);
+  if (!item || userPoints < item.pts) return;
+  cartItems.push({...item});
+  renderShop();
+  updateCartCount();
+  updateOrderSummary();
+  toast(`🛒 ${item.name} added to cart!`, 'success');
+}
+
+function updateCartCount() {
+  const badge = document.getElementById('cart-count-badge');
+  if (cartItems.length > 0) {
+    badge.style.display = 'inline-block';
+    badge.textContent = cartItems.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function updateShopBalance() {
+  const el = document.getElementById('shop-pts');
+  if (el) el.textContent = userPoints.toLocaleString();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CART
+═══════════════════════════════════════════════════════════ */
+function renderCart() {
+  const list = document.getElementById('cart-list');
+  const empty = document.getElementById('empty-cart');
+  list.querySelectorAll('.cart-item').forEach(e => e.remove());
+  if (cartItems.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    cartItems.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div class="cart-emoji">${item.emoji}</div>
+        <div class="cart-details">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-brand">${item.brand}</div>
+        </div>
+        <div class="cart-item-price">⭐ ${item.pts.toLocaleString()} pts</div>
+        <div class="cart-remove" onclick="removeFromCart(${item.id})">✕</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+}
+
+function removeFromCart(itemId) {
+  cartItems = cartItems.filter(i => i.id !== itemId);
+  renderCart();
+  renderShop();
+  updateCartCount();
+  updateOrderSummary();
+}
+
+function updateOrderSummary() {
+  const subtotal = cartItems.reduce((s, i) => s + i.pts, 0);
+  const discount = appliedCoupon ? appliedCoupon.discount : 0;
+  const total = Math.max(0, subtotal - discount);
+  const remaining = userPoints - total;
+
+  document.getElementById('subtotal-display').textContent = subtotal.toLocaleString() + ' pts';
+  document.getElementById('total-display').textContent = total.toLocaleString() + ' pts';
+  const remEl = document.getElementById('remaining-pts');
+  if (remEl) {
+    remEl.textContent = remaining.toLocaleString() + ' pts';
+    remEl.style.color = remaining >= 0 ? 'var(--teal)' : 'var(--error)';
+  }
+  const discRow = document.getElementById('discount-row');
+  if (discRow) {
+    if (appliedCoupon) {
+      discRow.style.display = 'flex';
+      document.getElementById('discount-display').textContent = '-' + discount.toLocaleString() + ' pts';
+    } else {
+      discRow.style.display = 'none';
+    }
+  }
+  const btn = document.getElementById('checkout-btn');
+  if (btn) {
+    btn.disabled = cartItems.length === 0 || remaining < 0;
+    btn.style.opacity = btn.disabled ? '0.5' : '1';
+    btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COUPON SYSTEM
+═══════════════════════════════════════════════════════════ */
+function renderCouponTracker() {
+  const list = document.getElementById('coupon-list');
+  if (!list) return;
+  list.innerHTML = '';
+  coupons.forEach(c => {
+    const tag = document.createElement('div');
+    tag.className = 'coupon-tag' + (c.used ? ' coupon-used' : '');
+    tag.innerHTML = `
+      <div>
+        <div class="coupon-code">${c.code}</div>
+        <div class="coupon-desc">${c.desc} · from ${c.source}</div>
+      </div>
+      <div class="coupon-discount">${c.used ? 'USED' : '-' + c.discount + ' pts'}</div>
+    `;
+    if (!c.used) {
+      tag.onclick = () => {
+        document.getElementById('coupon-input').value = c.code;
+        applyCoupon();
+      };
+    }
+    list.appendChild(tag);
+  });
+}
+
+function applyCoupon() {
+  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+  const fb = document.getElementById('coupon-feedback');
+  const banner = document.getElementById('applied-coupon-banner');
+  const appliedText = document.getElementById('applied-coupon-text');
+
+  if (!code) { fb.className = 'coupon-status invalid'; fb.textContent = '⚠️ Enter a coupon code first.'; return; }
+
+  const existing = coupons.find(c => c.code === code);
+  if (existing && existing.used) {
+    fb.className = 'coupon-status invalid'; fb.textContent = '❌ This coupon has already been used.'; return;
+  }
+
+  const validData = VALID_COUPONS[code];
+  if (!validData) {
+    fb.className = 'coupon-status invalid'; fb.textContent = `❌ Code "${code}" is not valid.`; return;
+  }
+
+  appliedCoupon = { code, ...validData };
+  fb.className = 'coupon-status valid'; fb.textContent = '';
+  banner.style.display = 'flex';
+  appliedText.textContent = `Code "${code}" applied! ${validData.desc}`;
+  updateOrderSummary();
+  toast(`🏷️ Coupon ${code} applied! Saving ${validData.discount} pts`, 'success');
+}
+
+function removeCoupon() {
+  appliedCoupon = null;
+  document.getElementById('coupon-input').value = '';
+  document.getElementById('coupon-feedback').textContent = '';
+  document.getElementById('applied-coupon-banner').style.display = 'none';
+  updateOrderSummary();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHECKOUT
+═══════════════════════════════════════════════════════════ */
+function doCheckout() {
+  if (cartItems.length === 0) { toast('🛒 Add items to your cart first!', 'info'); return; }
+  const subtotal = cartItems.reduce((s, i) => s + i.pts, 0);
+  const discount = appliedCoupon ? appliedCoupon.discount : 0;
+  const total = Math.max(0, subtotal - discount);
+  if (userPoints < total) { toast('❌ Not enough points!', 'info'); return; }
+
+  // Mark coupon as used
+  if (appliedCoupon) {
+    const c = coupons.find(x => x.code === appliedCoupon.code);
+    if (c) c.used = true;
+  }
+
+  userPoints -= total;
+  updatePointsDisplay();
+  cartItems = [];
+  appliedCoupon = null;
+  updateCartCount();
+
+  // Add a new sponsor coupon as reward
+  const newCoupons = ['PEPSI2026', 'NFL30OFF', 'WIN500'];
+  const newCode = newCoupons[Math.floor(Math.random() * newCoupons.length)];
+  document.getElementById('new-coupon-code').textContent = newCode;
+  VALID_COUPONS[newCode] = { discount: 250, desc: '250 pts off — Sponsor Reward!' };
+  coupons.push({ code: newCode, desc: 'Post-Purchase Reward', discount: 250, used: false, source: 'Order Bonus' });
+
+  document.getElementById('cart-view').style.display = 'none';
+  document.getElementById('confirm-view').style.display = 'block';
+  toast('🎉 Order placed successfully!', 'success');
+}
+
+function backToGame() {
+  document.getElementById('cart-view').style.display = 'block';
+  document.getElementById('confirm-view').style.display = 'none';
+  switchScreen('game', document.querySelector('[data-screen=game]'));
+}
+
+function copyCoupon() {
+  const code = document.getElementById('new-coupon-code').textContent;
+  navigator.clipboard.writeText(code).catch(() => {});
+  toast(`📋 Coupon code ${code} copied!`, 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COUNTDOWN TIMER
+═══════════════════════════════════════════════════════════ */
+let countdownSec = 524;
+function startCountdown() {
+  setInterval(() => {
+    if (countdownSec <= 0) return;
+    countdownSec--;
+    const m = Math.floor(countdownSec / 60);
+    const s = countdownSec % 60;
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }, 1000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = msg;
+  container.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   START
+═══════════════════════════════════════════════════════════ */
+init();
+</script>
+</body>
+</html>
