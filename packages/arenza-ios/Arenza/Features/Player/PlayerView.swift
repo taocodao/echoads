@@ -1,10 +1,10 @@
 // PlayerView.swift — Arenza
-// Full-screen player using the SAME pattern as VideoTestView (which works).
+// Split-screen sports game player:
+//   Top 50%  — HLS video with scoreboard overlay + ad L-bar
+//   Bottom 50% — Four game tabs: Bets, Bingo, Live Feed, Profile
 //
-// KEY INSIGHT from diagnostic: VideoPlayer inside .sheet works perfectly.
-// The failure is .fullScreenCover specifically. Solution: present via .sheet
-// with .presentationDetents([.fraction(1.0)]) for true fullscreen appearance,
-// using the exact VideoPlayer pattern proven to work.
+// Video is served from Vercel: https://cmxs-arenza.vercel.app/streams/game.m3u8
+// Presentation: .sheet with .fraction(1.0) — proven stable on real device.
 
 import SwiftUI
 import AVKit
@@ -13,9 +13,17 @@ struct PlayerView: View {
     let channel: Channel
     @EnvironmentObject var env: AppEnvironment
     @StateObject private var vm: PlayerViewModel
+    @StateObject private var game = GameEngine()
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var demo = DemoOrchestrator.shared
-    @State private var showDebugHUD = false
+
+    @State private var activeTab: GameTab = .bets
+
+    enum GameTab: String, CaseIterable {
+        case bets   = "🎯 Bets"
+        case bingo  = "🎲 Bingo"
+        case feed   = "🏆 Feed"
+        case profile = "👤 Profile"
+    }
 
     init(channel: Channel) {
         self.channel = channel
@@ -23,166 +31,235 @@ struct PlayerView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        GeometryReader { geo in
+            VStack(spacing: 0) {
+                // ── TOP: Video Panel ─────────────────────────────────────────
+                videoPanel
+                    .frame(height: geo.size.height * 0.50)
 
-            // ── VideoPlayer — same pattern as VideoTestView (proven to work) ──
+                // ── BOTTOM: Game Tabs ────────────────────────────────────────
+                gamePanel
+                    .frame(height: geo.size.height * 0.50)
+            }
+        }
+        .background(Color(hex: "#0d0f14"))
+        .ignoresSafeArea(edges: .top)
+        .preferredColorScheme(.dark)
+        .task { await vm.startPlayback() }
+        .onAppear { vm.player?.play(); game.start() }
+        .onDisappear { vm.stop(); game.stop() }
+    }
+
+    // MARK: - Video Panel
+
+    private var videoPanel: some View {
+        ZStack(alignment: .bottom) {
+            Color.black
+
+            // Video
             if let player = vm.player {
                 VideoPlayer(player: player)
-                    .ignoresSafeArea()
+                    .ignoresSafeArea(edges: .top)
+                    .disabled(true) // disable native controls — we overlay our own
             }
 
-            // ── Loading ────────────────────────────────────────────────────
+            // Loading
             if vm.isLoading {
-                VStack(spacing: 16) {
-                    ProgressView().tint(.white).scaleEffect(1.3)
-                    Text("Connecting...")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
-                }
-            }
-
-            // ── Error ──────────────────────────────────────────────────────
-            if let error = vm.errorMessage {
                 VStack(spacing: 12) {
-                    Image(systemName: "wifi.slash").font(.system(size: 32)).foregroundColor(.orange)
-                    Text(error).font(.system(size: 13)).foregroundColor(.white.opacity(0.7))
-                        .multilineTextAlignment(.center).padding(.horizontal, 32)
+                    ProgressView().tint(.white).scaleEffect(1.2)
+                    Text("Connecting to stream…")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
                 }
             }
 
-            // ── Overlays ───────────────────────────────────────────────────
-            VStack {
-                // Top bar
-                HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Circle())
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
-                        HStack(spacing: 4) {
-                            Circle().fill(Color.red).frame(width: 6, height: 6)
-                            Text("LIVE").font(.system(size: 10, weight: .black)).foregroundColor(.white).tracking(1.5)
-                        }
-                        Text(channel.name).font(.system(size: 12, weight: .semibold)).foregroundColor(.white.opacity(0.85))
-                    }
-                    if demo.isRunning {
-                        Text("DEMO T+\(demo.elapsedSeconds)s")
-                            .font(.system(size: 9, weight: .black)).foregroundColor(.orange)
-                            .padding(.horizontal, 8).padding(.vertical, 4)
-                            .background(Color.orange.opacity(0.15)).clipShape(Capsule())
-                    }
+            // Error
+            if let error = vm.errorMessage {
+                VStack(spacing: 8) {
+                    Image(systemName: "wifi.slash").font(.system(size: 28)).foregroundColor(.orange)
+                    Text(error).font(.system(size: 12)).foregroundColor(.white.opacity(0.7))
+                        .multilineTextAlignment(.center).padding(.horizontal, 24)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 56)
+            }
+
+            // Scoreboard overlay (top)
+            scoreboardOverlay
+
+            // Ad L-bar overlay (bottom)
+            if let ad = game.activeAd {
+                adLBar(ad)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            // Points fly-up
+            if let fly = game.flyText {
+                Text(fly)
+                    .font(.system(size: 32, weight: .black))
+                    .foregroundColor(Color(hex: "#ffc107"))
+                    .shadow(color: Color(hex: "#ffc107").opacity(0.6), radius: 12)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+                    .id(fly)
+            }
+        }
+        .animation(.spring(response: 0.4), value: game.activeAd?.id)
+        .animation(.easeInOut(duration: 0.3), value: game.flyText)
+        .clipped()
+    }
+
+    // MARK: - Scoreboard
+
+    private var scoreboardOverlay: some View {
+        VStack {
+            HStack(alignment: .center, spacing: 0) {
+                // Close
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 32, height: 32)
+                        .background(Color.black.opacity(0.55))
+                        .clipShape(Circle())
+                }
 
                 Spacer()
 
-                // Game overlays
-                if vm.isInAdBreak {
-                    AdPodProgressOverlay(vm: vm)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                }
-
-                if let toast = vm.podToast {
-                    PoDVerificationToast(toast: toast)
-                        .padding(.horizontal, 16).padding(.bottom, 16)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                if let question = vm.activePredictionQuestion {
-                    PredictionOverlayView(engine: PredictionEngine.shared, question: question, onDismiss: {})
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                if let coupon = vm.couponUnlock {
-                    RewardUnlockOverlayView(coupon: coupon, onRedeem: { vm.couponUnlock = nil }, onDismiss: { vm.couponUnlock = nil })
-                        .transition(.scale.combined(with: .opacity))
-                }
-
-                if let poll = PollEngine.shared.activePoll, vm.activePredictionQuestion == nil, !vm.isInAdBreak {
-                    PollOverlayView(engine: PollEngine.shared, poll: poll, onDismiss: {})
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                if TriviaEngine.shared.activeSession != nil, vm.activePredictionQuestion == nil, PollEngine.shared.activePoll == nil, !vm.isInAdBreak {
-                    TriviaOverlayView(engine: TriviaEngine.shared, onDismiss: {})
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                if let bettingCtx = vm.bettingOverlay, vm.activePredictionQuestion == nil {
-                    BetSlipOverlayView(context: bettingCtx) { withAnimation { vm.bettingOverlay = nil } }
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                if demo.isRunning && !demo.stepNarration.isEmpty {
-                    DemoNarrationBar(narration: demo.stepNarration, step: demo.currentStep, elapsed: demo.elapsedSeconds)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-
-            // Demo full-screen ad card
-            if vm.isInAdBreak, let creative = vm.adPodInserter.activeCreative {
-                DemoAdCardView(
-                    creative: creative,
-                    podProgress: vm.adPodInserter.podProgress,
-                    podDurationRemaining: vm.adPodInserter.podDurationRemaining,
-                    currentSegment: ProfileEngine.shared.currentSegment.label
-                )
-                .ignoresSafeArea().transition(.opacity).zIndex(50)
-            }
-
-            // Demo profiling card
-            if demo.showProfilingCard {
-                VStack { Spacer().frame(height: 80); ViewerProfilingCard(); Spacer() }
-                    .transition(.move(edge: .top).combined(with: .opacity)).zIndex(30)
-            }
-
-            // Ad incoming badge
-            if demo.showAdIncomingBadge {
-                VStack { Spacer().frame(height: 70); HStack { Spacer(); AdIncomingBadge(); Spacer() }; Spacer() }
-                    .transition(.move(edge: .top).combined(with: .opacity)).zIndex(31)
-            }
-
-            // Debug HUD
-            if showDebugHUD {
-                VStack { Spacer(); TargetingDebugHUD().padding(.bottom, 100) }
-                    .transition(.opacity).zIndex(55)
-            }
-
-            // Demo summary
-            if demo.showDemoSummary {
-                Color.black.opacity(0.6).ignoresSafeArea().zIndex(59)
-                VStack {
-                    Spacer()
-                    DemoSummaryCard(aztEarned: demo.totalAZTEarned, revenueGenerated: demo.revenueGenerated) {
-                        demo.stop(); demo.start(for: vm)
+                // Scoreboard
+                HStack(spacing: 10) {
+                    teamScoreView(emoji: "🦅", name: "EAGLES", score: game.homeScore, color: Color(hex: "#ff6b35"))
+                    VStack(spacing: 0) {
+                        Text("Q\(game.quarter)")
+                            .font(.system(size: 10, weight: .black)).foregroundColor(.white.opacity(0.6))
+                        Text(game.clockDisplay)
+                            .font(.system(size: 14, weight: .black, design: .monospaced)).foregroundColor(.white)
                     }
-                    Spacer()
+                    teamScoreView(emoji: "🐻", name: "BEARS", score: game.awayScore, color: Color(hex: "#00c9b1"))
                 }
-                .transition(.scale.combined(with: .opacity)).zIndex(60)
+                .padding(.horizontal, 14).padding(.vertical, 6)
+                .background(Color.black.opacity(0.75))
+                .clipShape(Capsule())
+
+                Spacer()
+
+                // Live badge
+                HStack(spacing: 4) {
+                    Circle().fill(Color.red).frame(width: 6, height: 6)
+                    Text("LIVE").font(.system(size: 9, weight: .black)).foregroundColor(.red).tracking(1.5)
+                }
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(Color.black.opacity(0.55))
+                .clipShape(Capsule())
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 50) // safe area
+            Spacer()
+        }
+    }
+
+    private func teamScoreView(emoji: String, name: String, score: Int, color: Color) -> some View {
+        VStack(spacing: 1) {
+            Text("\(emoji) \(name)")
+                .font(.system(size: 9, weight: .semibold)).foregroundColor(.white.opacity(0.7))
+            Text("\(score)")
+                .font(.system(size: 28, weight: .black, design: .monospaced)).foregroundColor(color)
+        }
+    }
+
+    // MARK: - Ad L-Bar
+
+    private func adLBar(_ ad: GameAdCreative) -> some View {
+        HStack(spacing: 12) {
+            Text(ad.emoji).font(.system(size: 24))
+            VStack(alignment: .leading, spacing: 1) {
+                Text("SPONSORED")
+                    .font(.system(size: 8, weight: .black)).foregroundColor(.white.opacity(0.5)).tracking(1.2)
+                Text("\(ad.brand) — \(ad.tagline)")
+                    .font(.system(size: 13, weight: .bold)).foregroundColor(.white)
+                Text("$\(ad.cpm) CPM · \(ad.targetSegment)")
+                    .font(.system(size: 10)).foregroundColor(.white.opacity(0.6))
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("✅ PoD Verified")
+                    .font(.system(size: 10, weight: .semibold)).foregroundColor(Color(hex: "#22c55e"))
+                // Timer bar
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 2).fill(Color.white.opacity(0.15)).frame(height: 3)
+                        RoundedRectangle(cornerRadius: 2).fill(ad.color)
+                            .frame(width: geo.size.width * CGFloat(game.adTimerRemaining) / CGFloat(max(ad.durationSec, 1)), height: 3)
+                            .animation(.linear(duration: 1), value: game.adTimerRemaining)
+                    }
+                }
+                .frame(width: 80, height: 3)
             }
         }
-        .animation(.spring(response: 0.35), value: vm.isInAdBreak)
-        .animation(.spring(response: 0.35), value: vm.activePredictionQuestion != nil)
-        .animation(.spring(response: 0.35), value: demo.showProfilingCard)
-        .animation(.spring(response: 0.35), value: demo.showAdIncomingBadge)
-        .animation(.spring(response: 0.5),  value: demo.showDemoSummary)
-        .task { await vm.startPlayback() }
-        .onAppear {
-            vm.player?.play()
-            demo.start(for: vm)
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(LinearGradient(
+            colors: [Color.black.opacity(0.92), Color.black.opacity(0.7)],
+            startPoint: .bottom, endPoint: .top
+        ))
+        .overlay(Divider().background(ad.color.opacity(0.6)), alignment: .top)
+    }
+
+    // MARK: - Game Panel
+
+    private var gamePanel: some View {
+        VStack(spacing: 0) {
+            // Tab bar
+            tabBar
+
+            // Tab content
+            tabContent
         }
-        .onDisappear { vm.stop(); demo.stop() }
-        .onReceive(NotificationCenter.default.publisher(for: UIDevice.deviceDidShakeNotification)) { _ in
-            withAnimation { showDebugHUD.toggle() }
+        .background(Color(hex: "#0d0f14"))
+    }
+
+    private var tabBar: some View {
+        HStack(spacing: 0) {
+            ForEach(GameTab.allCases, id: \.self) { tab in
+                Button { withAnimation(.easeInOut(duration: 0.2)) { activeTab = tab } } label: {
+                    VStack(spacing: 3) {
+                        Text(tab.rawValue)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(activeTab == tab ? Color(hex: "#ff6b35") : Color(hex: "#8892b0"))
+                        Rectangle()
+                            .fill(activeTab == tab ? Color(hex: "#ff6b35") : Color.clear)
+                            .frame(height: 2)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+            }
+
+            // Points badge
+            VStack(spacing: 1) {
+                Text("⭐")
+                    .font(.system(size: 11))
+                Text("\(game.points.formatted())")
+                    .font(.system(size: 10, weight: .black, design: .monospaced))
+                    .foregroundColor(Color(hex: "#ffc107"))
+            }
+            .padding(.horizontal, 10)
         }
-        .ignoresSafeArea()
-        .preferredColorScheme(.dark)
+        .background(Color(hex: "#141720"))
+        .overlay(Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1), alignment: .top)
+    }
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch activeTab {
+        case .bets:
+            BetsTab(engine: game)
+        case .bingo:
+            BingoTab(engine: game)
+        case .feed:
+            LiveFeedTab(engine: game)
+        case .profile:
+            ProfileTab(engine: game)
+        }
     }
 }
