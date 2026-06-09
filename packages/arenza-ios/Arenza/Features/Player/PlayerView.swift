@@ -42,7 +42,7 @@ struct PlayerView: View {
                     .frame(height: geo.size.height * 0.50)
             }
         }
-        .background(Color(hex: "#0d0f14"))
+        .background(Color(arenza: "#0d0f14"))
         .ignoresSafeArea(edges: .top)
         .preferredColorScheme(.dark)
         .task { await vm.startPlayback() }
@@ -95,8 +95,8 @@ struct PlayerView: View {
             if let fly = game.flyText {
                 Text(fly)
                     .font(.system(size: 32, weight: .black))
-                    .foregroundColor(Color(hex: "#ffc107"))
-                    .shadow(color: Color(hex: "#ffc107").opacity(0.6), radius: 12)
+                    .foregroundColor(Color(arenza: "#ffc107"))
+                    .shadow(color: Color(arenza: "#ffc107").opacity(0.6), radius: 12)
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),
                         removal: .move(edge: .top).combined(with: .opacity)
@@ -128,14 +128,14 @@ struct PlayerView: View {
 
                 // Scoreboard
                 HStack(spacing: 10) {
-                    teamScoreView(emoji: "🦅", name: "EAGLES", score: game.homeScore, color: Color(hex: "#ff6b35"))
+                    teamScoreView(emoji: "🦅", name: "EAGLES", score: game.homeScore, color: Color(arenza: "#ff6b35"))
                     VStack(spacing: 0) {
                         Text("Q\(game.quarter)")
                             .font(.system(size: 10, weight: .black)).foregroundColor(.white.opacity(0.6))
                         Text(game.clockDisplay)
                             .font(.system(size: 14, weight: .black, design: .monospaced)).foregroundColor(.white)
                     }
-                    teamScoreView(emoji: "🐻", name: "BEARS", score: game.awayScore, color: Color(hex: "#00c9b1"))
+                    teamScoreView(emoji: "🐻", name: "BEARS", score: game.awayScore, color: Color(arenza: "#00c9b1"))
                 }
                 .padding(.horizontal, 14).padding(.vertical, 6)
                 .background(Color.black.opacity(0.75))
@@ -183,7 +183,7 @@ struct PlayerView: View {
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
                 Text("✅ PoD Verified")
-                    .font(.system(size: 10, weight: .semibold)).foregroundColor(Color(hex: "#22c55e"))
+                    .font(.system(size: 10, weight: .semibold)).foregroundColor(Color(arenza: "#22c55e"))
                 // Timer bar
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
@@ -214,7 +214,7 @@ struct PlayerView: View {
             // Tab content
             tabContent
         }
-        .background(Color(hex: "#0d0f14"))
+        .background(Color(arenza: "#0d0f14"))
     }
 
     private var tabBar: some View {
@@ -224,9 +224,9 @@ struct PlayerView: View {
                     VStack(spacing: 3) {
                         Text(tab.rawValue)
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(activeTab == tab ? Color(hex: "#ff6b35") : Color(hex: "#8892b0"))
+                            .foregroundColor(activeTab == tab ? Color(arenza: "#ff6b35") : Color(arenza: "#8892b0"))
                         Rectangle()
-                            .fill(activeTab == tab ? Color(hex: "#ff6b35") : Color.clear)
+                            .fill(activeTab == tab ? Color(arenza: "#ff6b35") : Color.clear)
                             .frame(height: 2)
                     }
                     .frame(maxWidth: .infinity)
@@ -241,11 +241,11 @@ struct PlayerView: View {
                     .font(.system(size: 11))
                 Text("\(game.points.formatted())")
                     .font(.system(size: 10, weight: .black, design: .monospaced))
-                    .foregroundColor(Color(hex: "#ffc107"))
+                    .foregroundColor(Color(arenza: "#ffc107"))
             }
             .padding(.horizontal, 10)
         }
-        .background(Color(hex: "#141720"))
+        .background(Color(arenza: "#141720"))
         .overlay(Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1), alignment: .top)
     }
 

@@ -83,19 +83,19 @@ let AD_CATALOG: [GameAdCreative] = [
     GameAdCreative(id: "nike", brand: "Nike", tagline: "Just Do It", emoji: "👟", cpm: 55,
         targetSegment: "Sports Enthusiast · M 25–34",
         whyChosen: ["High sports engagement (87/100)", "Male 25–34 demo match", "Football affinity: 92%", "Won OpenRTB at $55 CPM"],
-        color: Color(hex: "#ff6b35"), appearsAt: 10, durationSec: 8),
+        color: Color(arenza: "#ff6b35"), appearsAt: 10, durationSec: 8),
     GameAdCreative(id: "pepsi", brand: "Pepsi", tagline: "Game Day Fuel", emoji: "🥤", cpm: 42,
         targetSegment: "Mass Market · All Adults",
         whyChosen: ["Game-day context match", "Food & beverage affinity", "Top-of-funnel brand awareness", "Won OpenRTB at $42 CPM"],
-        color: Color(hex: "#00c9b1"), appearsAt: 32, durationSec: 8),
+        color: Color(arenza: "#00c9b1"), appearsAt: 32, durationSec: 8),
     GameAdCreative(id: "draftkings", brand: "DraftKings", tagline: "Bet on the Action", emoji: "🎯", cpm: 68,
         targetSegment: "High-Engagement Bettors · 21+",
         whyChosen: ["Active prediction player", "Betting affinity signal", "21+ verified", "Won OpenRTB at $68 CPM — highest bidder"],
-        color: Color(hex: "#7c3aed"), appearsAt: 55, durationSec: 8),
+        color: Color(arenza: "#7c3aed"), appearsAt: 55, durationSec: 8),
     GameAdCreative(id: "statefarm", brand: "State Farm", tagline: "Like a Good Neighbor", emoji: "🏠", cpm: 38,
         targetSegment: "Homeowners · 30–50",
         whyChosen: ["Homeowner demographic signal", "Timeout moment — attention peak", "Premium viewer loyalty: A", "Won OpenRTB at $38 CPM"],
-        color: Color(hex: "#ffc107"), appearsAt: 70, durationSec: 8),
+        color: Color(arenza: "#ffc107"), appearsAt: 70, durationSec: 8),
 ]
 
 private struct GameEvent {

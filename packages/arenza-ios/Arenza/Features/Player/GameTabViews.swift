@@ -7,18 +7,18 @@ import SwiftUI
 // MARK: - Design Tokens
 
 private enum G {
-    static let bg       = Color(hex: "#0d0f14")
-    static let surface  = Color(hex: "#141720")
-    static let surface2 = Color(hex: "#1a1e2a")
+    static let bg       = Color(arenza: "#0d0f14")
+    static let surface  = Color(arenza: "#141720")
+    static let surface2 = Color(arenza: "#1a1e2a")
     static let border   = Color.white.opacity(0.08)
-    static let text     = Color(hex: "#f0f2ff")
-    static let muted    = Color(hex: "#8892b0")
-    static let faint    = Color(hex: "#4a5568")
-    static let orange   = Color(hex: "#ff6b35")
-    static let teal     = Color(hex: "#00c9b1")
-    static let gold     = Color(hex: "#ffc107")
-    static let green    = Color(hex: "#22c55e")
-    static let red      = Color(hex: "#ef4444")
+    static let text     = Color(arenza: "#f0f2ff")
+    static let muted    = Color(arenza: "#8892b0")
+    static let faint    = Color(arenza: "#4a5568")
+    static let orange   = Color(arenza: "#ff6b35")
+    static let teal     = Color(arenza: "#00c9b1")
+    static let gold     = Color(arenza: "#ffc107")
+    static let green    = Color(arenza: "#22c55e")
+    static let red      = Color(arenza: "#ef4444")
 }
 
 // MARK: - Bets Tab
@@ -238,7 +238,7 @@ struct BingoCellView: View {
         ZStack {
             RoundedRectangle(cornerRadius: 7)
                 .fill(cell.isFree
-                    ? LinearGradient(colors: [Color(hex: "#ff6b35"), Color(hex: "#00c9b1")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    ? LinearGradient(colors: [Color(arenza: "#ff6b35"), Color(arenza: "#00c9b1")], startPoint: .topLeading, endPoint: .bottomTrailing)
                     : cell.marked ? G.orange.opacity(0.2) : G.surface2
                 )
                 .overlay(RoundedRectangle(cornerRadius: 7).stroke(
@@ -292,15 +292,15 @@ struct FeedEntryRow: View {
 
     private var bgColor: Color {
         switch entry.type {
-        case .ad:         return Color(hex: "#ff6b35").opacity(0.08)
-        case .prediction: return Color(hex: "#00c9b1").opacity(0.08)
-        case .pod:        return Color(hex: "#22c55e").opacity(0.08)
+        case .ad:         return Color(arenza: "#ff6b35").opacity(0.08)
+        case .prediction: return Color(arenza: "#00c9b1").opacity(0.08)
+        case .pod:        return Color(arenza: "#22c55e").opacity(0.08)
         default:          return G.surface2
         }
     }
     private var borderColor: Color {
         switch entry.type {
-        case .ad:         return Color(hex: "#ff6b35").opacity(0.25)
+        case .ad:         return Color(arenza: "#ff6b35").opacity(0.25)
         case .pod:        return G.green.opacity(0.25)
         default:          return G.border
         }
@@ -339,10 +339,10 @@ struct ProfileTab: View {
     @ObservedObject var engine: GameEngine
 
     private let interests: [(label: String, pct: Double, color: Color)] = [
-        ("Football", 0.92, Color(hex: "#ff6b35")),
-        ("Basketball", 0.68, Color(hex: "#00c9b1")),
-        ("Baseball", 0.41, Color(hex: "#7c3aed")),
-        ("Soccer", 0.35, Color(hex: "#ffc107")),
+        ("Football", 0.92, Color(arenza: "#ff6b35")),
+        ("Basketball", 0.68, Color(arenza: "#00c9b1")),
+        ("Baseball", 0.41, Color(arenza: "#7c3aed")),
+        ("Soccer", 0.35, Color(arenza: "#ffc107")),
     ]
 
     var body: some View {
@@ -505,7 +505,7 @@ private extension View {
     func surfaceCard() -> some View {
         self
             .padding(12)
-            .background(Color(hex: "#1a1e2a"))
+            .background(Color(arenza: "#1a1e2a"))
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
