@@ -144,7 +144,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push' &&
-      vars.TESTFLIGHT_ENABLED == 'true'
+      contains(vars.TESTFLIGHT_ENABLED, 'true')
 
     defaults:
       run:
