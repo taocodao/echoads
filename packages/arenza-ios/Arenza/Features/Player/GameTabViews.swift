@@ -237,9 +237,17 @@ struct BingoCellView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 7)
-                .fill(cell.isFree
-                    ? LinearGradient(colors: [Color(arenza: "#ff6b35"), Color(arenza: "#00c9b1")], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    : cell.marked ? G.orange.opacity(0.2) : G.surface2
+                .fill(cell.marked || cell.isFree ? G.orange.opacity(0.2) : G.surface2)
+                .overlay(
+                    Group {
+                        if cell.isFree {
+                            RoundedRectangle(cornerRadius: 7)
+                                .fill(LinearGradient(
+                                    colors: [Color(arenza: "#ff6b35"), Color(arenza: "#00c9b1")],
+                                    startPoint: .topLeading, endPoint: .bottomTrailing
+                                ))
+                        }
+                    }
                 )
                 .overlay(RoundedRectangle(cornerRadius: 7).stroke(
                     cell.isFree ? Color.clear : cell.marked ? G.orange : G.border, lineWidth: 1
