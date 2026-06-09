@@ -318,14 +318,3 @@ final class GameEngine: ObservableObject {
     }
 }
 
-// MARK: - Color Hex Helper
-
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: .init(charactersIn: "#"))
-        let val = UInt64(hex, radix: 16) ?? 0
-        self.init(red: Double((val >> 16) & 0xff) / 255,
-                  green: Double((val >> 8) & 0xff) / 255,
-                  blue: Double(val & 0xff) / 255)
-    }
-}
