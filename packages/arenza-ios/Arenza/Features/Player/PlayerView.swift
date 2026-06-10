@@ -33,13 +33,17 @@ struct PlayerView: View {
     var body: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
-                // ── TOP: Video Panel ─────────────────────────────────────────
+                // ── TOP 35%: Video Panel ──────────────────────────────────────
                 videoPanel
-                    .frame(height: geo.size.height * 0.50)
+                    .frame(height: geo.size.height * 0.35)
 
-                // ── BOTTOM: Game Tabs ────────────────────────────────────────
+                // ── MIDDLE 30%: Interactive Ad Carousel ──────────────────────
+                InteractiveAdPanel(engine: game)
+                    .frame(height: geo.size.height * 0.30)
+
+                // ── BOTTOM 35%: Game Tabs ─────────────────────────────────────
                 gamePanel
-                    .frame(height: geo.size.height * 0.50)
+                    .frame(height: geo.size.height * 0.35)
             }
         }
         .background(Color(arenza: "#0d0f14"))
@@ -85,12 +89,6 @@ struct PlayerView: View {
             // Scoreboard overlay (top)
             scoreboardOverlay
 
-            // Ad L-bar overlay (bottom)
-            if let ad = game.activeAd {
-                adLBar(ad)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-
             // Points fly-up
             if let fly = game.flyText {
                 Text(fly)
@@ -104,7 +102,6 @@ struct PlayerView: View {
                     .id(fly)
             }
         }
-        .animation(.spring(response: 0.4), value: game.activeAd?.id)
         .animation(.easeInOut(duration: 0.3), value: game.flyText)
         .clipped()
     }
