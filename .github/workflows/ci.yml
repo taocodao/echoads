@@ -92,10 +92,6 @@ jobs:
         with:
           version: stable
 
-      - name: Install OpenZeppelin
-        working-directory: packages/contracts
-        run: forge install OpenZeppelin/openzeppelin-contracts --no-commit
-
       - name: Run contract tests
         working-directory: packages/contracts
         run: forge test -vv
