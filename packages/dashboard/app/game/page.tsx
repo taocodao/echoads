@@ -415,8 +415,8 @@ function ProfileTab({ lastAd, adsServed, revenue, points, elapsed }: {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, textAlign: 'center' }}>
           {[
             ['Ads Served', String(adsServed), T.orange],
-            ['Revenue', `$${totalRevenue.toFixed(3)}`, T.green],
-            ['Avg CPM', adsServed > 0 ? `$${(totalRevenue * 1000 / adsServed).toFixed(0)}` : '—', T.teal],
+            ['Revenue', `$${revenue.toFixed(3)}`, T.green],
+            ['Avg CPM', adsServed > 0 ? `$${(revenue * 1000 / adsServed).toFixed(0)}` : '—', T.teal],
           ].map(([label, val, color]) => (
             <div key={label}>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 18, fontWeight: 700, color }}>{val}</div>
