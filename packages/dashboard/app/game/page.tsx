@@ -610,32 +610,6 @@ function WebMoreLessAd({ mlPlayers, mlPicks, setMlPicks, mlSubmitted, setMlSubmi
     </div>
   );
 }
-pacing: '0.06em', marginBottom: 8 }}>💰 Session Revenue</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, textAlign: 'center' }}>
-          {[
-            ['Ads Served', String(adsServed), T.orange],
-            ['Revenue', `$${revenue.toFixed(3)}`, T.green],
-            ['Avg CPM', adsServed > 0 ? `$${(revenue * 1000 / adsServed).toFixed(0)}` : '—', T.teal],
-          ].map(([label, val, color]) => (
-            <div key={label}>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 18, fontWeight: 700, color }}>{val}</div>
-              <div style={{ fontSize: 10, color: T.faint }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Points summary */}
-      <div style={{ padding: 10, background: `${T.gold}11`, border: `1px solid ${T.gold}33`, borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <div style={{ fontSize: 10, color: T.muted }}>Your Points</div>
-          <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, color: T.gold, lineHeight: 1 }}>{points.toLocaleString()}</div>
-        </div>
-        <div style={{ fontSize: 11, color: T.muted, textAlign: 'right' }}>
-          <div>≈ ${(points / 200).toFixed(2)} prize value</div>
-          <div style={{ color: T.teal, marginTop: 2 }}>Top 12% this game</div>
-        </div>
-      </div>
     </div>
   );
 }
