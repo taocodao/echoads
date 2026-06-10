@@ -351,6 +351,11 @@ final class GameEngine: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in self?.flyText = nil }
     }
 
+    private func addFeed(_ entry: FeedEntry) {
+        feed.insert(entry, at: 0)
+        if feed.count > 50 { feed.removeLast() }
+    }
+
     // MARK: - Public Hooks for InteractiveAdEngine
 
     /// Called by ScratchAdCard and MoreLessAdCard to award points from the interactive ad panel.
