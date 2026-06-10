@@ -279,7 +279,7 @@ export default function SimulationPage() {
           }}>
             <div style={{ fontSize: '3rem' }}>🎬</div>
             <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#475569' }}>Ready to Demo</div>
-            <div style={{ fontSize: '0.85rem', color: '#334155' }}>Click "Run Full Demo" to start the 9-scene flywheel</div>
+            <div style={{ fontSize: '0.85rem', color: '#334155' }}>Click &quot;Run Full Demo&quot; to start the 9-scene flywheel</div>
           </div>
         )}
 

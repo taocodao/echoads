@@ -146,7 +146,7 @@ export default function NodesPage() {
       {/* Node grid */}
       {nodes.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: '#475569', fontSize: '0.9rem', background: 'rgba(15,23,42,0.5)', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.06)' }}>
-          No nodes running. Click "Start Sim" to spawn the DePIN fleet.
+          No nodes running. Click &quot;Start Sim&quot; to spawn the DePIN fleet.
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>

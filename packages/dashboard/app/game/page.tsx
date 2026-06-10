@@ -519,7 +519,7 @@ function WebScratchAd({ scratchRevealed, revealScratch, couponCode, copied, setC
     <div style={{ height: '100%', overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: T.orange }}>🎟️ Halftime Scratch</span>
-        <span style={{ fontSize: 9, color: T.orange, fontWeight: 700 }}>🍕 Domino's</span>
+        <span style={{ fontSize: 9, color: T.orange, fontWeight: 700 }}>🍕 Domino&apos;s</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
         {prizes.map((p, i) => (
@@ -607,9 +607,6 @@ function WebMoreLessAd({ mlPlayers, mlPicks, setMlPicks, mlSubmitted, setMlSubmi
           color: mlSubmitted ? T.green : pickCount >= 2 ? '#0d0f14' : T.faint, transition: 'all 0.2s',
         }}>{mlSubmitted ? '✅ Submitted!' : 'Submit Entry'}</button>
       </div>
-    </div>
-  );
-}
     </div>
   );
 }
