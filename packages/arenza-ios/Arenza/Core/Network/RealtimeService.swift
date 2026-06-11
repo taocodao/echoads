@@ -48,7 +48,8 @@ final class RealtimeService: ObservableObject {
 
         connectionState = .connecting
 
-        let urlString = "\(Constants.wsBaseURL)/game/\(gameId)?userId=\(userId)"
+        let wsBaseURL = ProcessInfo.processInfo.environment["ARENZA_WS_URL"] ?? "wss://realtime.arenza.app/ws"
+        let urlString = "\(wsBaseURL)/game/\(gameId)?userId=\(userId)"
         guard let url = URL(string: urlString) else {
             print("[WS] Invalid URL: \(urlString)")
             return
@@ -317,13 +318,4 @@ struct ScratchCardReadyEvent: Codable {
     let sponsorName: String
 }
 
-// MARK: - Constants Extension
-
-extension Constants {
-    /// WebSocket base URL for real-time game events.
-    /// Overridable via ARENZA_WS_URL environment variable.
-    static var wsBaseURL: String {
-        ProcessInfo.processInfo.environment["ARENZA_WS_URL"]
-            ?? "wss://realtime.arenza.app/ws"
-    }
-}
+// Removed Constants extension because Constants isn't available in this module.
