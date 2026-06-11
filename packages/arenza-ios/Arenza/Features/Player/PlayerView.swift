@@ -1,6 +1,6 @@
-// PlayerView.swift — Arenza V2
-// Layout: Top 40% video (PlayerLayerView — tap-to-play/pause)
-//          Bottom 60% unified tabs (🎯 Predict | 🎲 Bingo | 🎟 Scratch | 📊 M/L | 👤 Me)
+﻿// PlayerView.swift â€” Arenza V2
+// Layout: Top 40% video (PlayerLayerView â€” tap-to-play/pause)
+//          Bottom 60% unified tabs (ðŸŽ¯ Predict | ðŸŽ² Bingo | ðŸŽŸ Scratch | ðŸ“Š M/L | ðŸ‘¤ Me)
 // Features: landscape fullscreen toggle, share/refer button, audio-session fix.
 
 import SwiftUI
@@ -64,11 +64,11 @@ struct PlayerView: View {
     @State private var showShareToast = false
 
     enum UnifiedTab: String, CaseIterable {
-        case predict  = "🎯 Predict"
-        case bingo    = "🎲 Bingo"
-        case spin     = "🎰 Spin"
-        case scratch  = "🎟 Scratch"
-        case me       = "👤 Me"
+        case predict  = "ðŸŽ¯ Predict"
+        case bingo    = "ðŸŽ² Bingo"
+        case spin     = "ðŸŽ° Spin"
+        case scratch  = "ðŸŽŸ Scratch"
+        case me       = "ðŸ‘¤ Me"
 
         var adFormat: InteractiveAdEngine.AdFormat? {
             switch self {
@@ -122,11 +122,11 @@ struct PlayerView: View {
     private var portraitLayout: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
-                // ── TOP 40%: Video Panel ──────────────────────────────────────
+                // â”€â”€ TOP 40%: Video Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 videoPanel
                     .frame(height: geo.size.height * 0.40)
 
-                // ── BOTTOM 60%: Unified Tabs ──────────────────────────────────
+                // â”€â”€ BOTTOM 60%: Unified Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 unifiedTabPanel
                     .frame(height: geo.size.height * 0.60)
             }
@@ -176,13 +176,13 @@ struct PlayerView: View {
                 Spacer()
                 // Scoreboard in fullscreen
                 HStack(spacing: 10) {
-                    Text("🦅 \(game.homeScore)")
+                    Text("ðŸ¦… \(game.homeScore)")
                         .font(.system(size: 16, weight: .black, design: .monospaced))
                         .foregroundColor(Color(arenza: "#ff6b35"))
-                    Text("Q\(game.quarter) · \(game.clockDisplay)")
+                    Text("Q\(game.quarter) Â· \(game.clockDisplay)")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white.opacity(0.7))
-                    Text("\(game.awayScore) 🐻")
+                    Text("\(game.awayScore) ðŸ»")
                         .font(.system(size: 16, weight: .black, design: .monospaced))
                         .foregroundColor(Color(arenza: "#00c9b1"))
                 }
@@ -211,7 +211,7 @@ struct PlayerView: View {
         ZStack(alignment: .bottom) {
             Color.black
 
-            // Video layer — continuous playback, no tap gesture
+            // Video layer â€” continuous playback, no tap gesture
             if let player = vm.player {
                 PlayerLayerView(player: player)
                     .ignoresSafeArea(edges: .top)
@@ -221,7 +221,7 @@ struct PlayerView: View {
             if vm.isLoading {
                 VStack(spacing: 12) {
                     ProgressView().tint(.white).scaleEffect(1.2)
-                    Text("Connecting to stream…")
+                    Text("Connecting to streamâ€¦")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(0.6))
                 }
@@ -236,13 +236,13 @@ struct PlayerView: View {
                 }
             }
 
-            // Minimal controls — dismiss + fullscreen only
+            // Minimal controls â€” dismiss + fullscreen only
             videoControlsOverlay
         }
         .clipped()
     }
 
-    // Minimal video controls — dismiss button + fullscreen toggle
+    // Minimal video controls â€” dismiss button + fullscreen toggle
     private var videoControlsOverlay: some View {
         VStack {
             HStack(alignment: .center, spacing: 0) {
@@ -269,7 +269,7 @@ struct PlayerView: View {
 
                 Spacer()
 
-                // Fullscreen toggle � requires AZT unlock if not already paid
+                // Fullscreen toggle — requires AZT unlock if not already paid
                 Button {
                     if landscapeUnlocked {
                         withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
@@ -352,7 +352,7 @@ struct PlayerView: View {
 
             // Points badge
             VStack(spacing: 1) {
-                Text("⭐")
+                Text("â­")
                     .font(.system(size: 11))
                 Text("\(game.points.formatted())")
                     .font(.system(size: 10, weight: .black, design: .monospaced))
@@ -440,7 +440,7 @@ struct PlayerView: View {
     // MARK: - Share / Refer (Phase 3)
 
     private func shareGame() {
-        let text = "I'm watching Eagles vs Bears LIVE on Arenza! Join me and earn 500 bonus points 🏈🔥"
+        let text = "I'm watching Eagles vs Bears LIVE on Arenza! Join me and earn 500 bonus points ðŸˆðŸ”¥"
         let url = URL(string: "https://arenza.tv/join?ref=demo-user")!
         let ac = UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -452,7 +452,7 @@ struct PlayerView: View {
     private var shareToast: some View {
         Group {
             if showShareToast {
-                Text("🔗 Link copied!")
+                Text("ðŸ”— Link copied!")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 16).padding(.vertical, 10)
