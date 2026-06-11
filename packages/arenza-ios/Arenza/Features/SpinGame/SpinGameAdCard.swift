@@ -66,57 +66,63 @@ struct SpinGameAdCard: View {
         let biz = spinEngine.currentBusiness
         return HStack(spacing: 8) {
             PulsingDot(color: Color(arenza: biz.brandColor))
-
-            Text(biz.emoji)
-                .font(.system(size: 14))
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(biz.name)
-                    .font(.system(size: 11, weight: .black))
-                    .foregroundColor(Color(arenza: biz.brandColor))
-                Text(biz.tagline)
-                    .font(.system(size: 9))
-                    .foregroundColor(Color(arenza: "#8892b0"))
-            }
-
+            Text(biz.emoji).font(.system(size: 14))
+            sponsorHeaderTitles(biz: biz)
             Spacer()
-
-            // Spin/Scratch toggle
-            HStack(spacing: 0) {
-                modeButton(label: "🎰 Spin", active: !showScratch) {
-                    withAnimation(.easeInOut(duration: 0.3)) { showScratch = false }
-                }
-                modeButton(label: "🎟 Scratch", active: showScratch) {
-                    withAnimation(.easeInOut(duration: 0.3)) { showScratch = true }
-                }
-            }
-            .background(Color(arenza: "#141720"))
-            .clipShape(Capsule())
-
-            // Spins remaining pips
-            HStack(spacing: 3) {
-                ForEach(0..<spinEngine.maxSpins, id: \.self) { i in
-                    Circle()
-                        .fill(i < spinEngine.spinsRemaining
-                              ? Color(arenza: biz.brandColor)
-                              : Color(arenza: "#2a2a3a"))
-                        .frame(width: 6, height: 6)
-                }
-            }
+            sponsorHeaderToggles
+            sponsorHeaderPips(biz: biz)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color(arenza: biz.brandColor).opacity(0.18),
-                    Color(arenza: "#0d0a15")
-                ],
-                startPoint: .leading, endPoint: .trailing
-            )
-        )
+        .background(sponsorHeaderBackground(biz: biz))
         .overlay(Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1), alignment: .bottom)
         .animation(.easeInOut(duration: 0.4), value: spinEngine.businessIndex)
+    }
+
+    private func sponsorHeaderTitles(biz: SponsorBusiness) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(biz.name)
+                .font(.system(size: 11, weight: .black))
+                .foregroundColor(Color(arenza: biz.brandColor))
+            Text(biz.tagline)
+                .font(.system(size: 9))
+                .foregroundColor(Color(arenza: "#8892b0"))
+        }
+    }
+
+    private var sponsorHeaderToggles: some View {
+        HStack(spacing: 0) {
+            modeButton(label: "🎰 Spin", active: !showScratch) {
+                withAnimation(.easeInOut(duration: 0.3)) { showScratch = false }
+            }
+            modeButton(label: "🎟 Scratch", active: showScratch) {
+                withAnimation(.easeInOut(duration: 0.3)) { showScratch = true }
+            }
+        }
+        .background(Color(arenza: "#141720"))
+        .clipShape(Capsule())
+    }
+
+    private func sponsorHeaderPips(biz: SponsorBusiness) -> some View {
+        HStack(spacing: 3) {
+            ForEach(0..<spinEngine.maxSpins, id: \.self) { i in
+                Circle()
+                    .fill(i < spinEngine.spinsRemaining
+                          ? Color(arenza: biz.brandColor)
+                          : Color(arenza: "#2a2a3a"))
+                    .frame(width: 6, height: 6)
+            }
+        }
+    }
+
+    private func sponsorHeaderBackground(biz: SponsorBusiness) -> some View {
+        LinearGradient(
+            colors: [
+                Color(arenza: biz.brandColor).opacity(0.18),
+                Color(arenza: "#0d0a15")
+            ],
+            startPoint: .leading, endPoint: .trailing
+        )
     }
 
     private func modeButton(label: String, active: Bool, action: @escaping () -> Void) -> some View {
@@ -135,69 +141,76 @@ struct SpinGameAdCard: View {
 
     private var sponsorSwitchBar: some View {
         VStack(spacing: 4) {
-            // Progress bar (time to next sponsor)
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Rectangle().fill(Color.white.opacity(0.05)).frame(height: 2)
-                    Rectangle()
-                        .fill(Color(arenza: spinEngine.currentBusiness.brandColor).opacity(0.7))
-                        .frame(width: geo.size.width * spinEngine.autoRotateProgress, height: 2)
-                        .animation(.linear(duration: 0.1), value: spinEngine.autoRotateProgress)
-                }
-            }
-            .frame(height: 2)
-
-            // Sponsor dots
-            HStack(spacing: 8) {
-                ForEach(Array(SponsorBusiness.all.enumerated()), id: \.offset) { i, biz in
-                    Button {
-                        spinEngine.selectSponsor(i)
-                        adEngine.userBeganInteraction(pauseFor: 30)
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(biz.emoji).font(.system(size: 10))
-                            if i == spinEngine.businessIndex {
-                                Text(biz.name)
-                                    .font(.system(size: 9, weight: .bold))
-                                    .foregroundColor(Color(arenza: biz.brandColor))
-                            }
-                        }
-                        .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(
-                            i == spinEngine.businessIndex
-                                ? Color(arenza: biz.brandColor).opacity(0.18)
-                                : Color.clear
-                        )
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule().stroke(
-                                i == spinEngine.businessIndex
-                                    ? Color(arenza: biz.brandColor).opacity(0.4)
-                                    : Color.clear,
-                                lineWidth: 1
-                            )
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-                Spacer()
-                // Wallet shortcut
-                HStack(spacing: 3) {
-                    Image(systemName: "qrcode")
-                        .font(.system(size: 9, weight: .bold))
-                    Text("\(QRWalletService.shared.activeRewards.count)")
-                        .font(.system(size: 9, weight: .black, design: .monospaced))
-                }
-                .foregroundColor(
-                    QRWalletService.shared.activeRewards.isEmpty
-                        ? Color(arenza: "#4a5568")
-                        : Color(arenza: "#00c9b1")
-                )
-            }
-            .padding(.horizontal, 10)
+            sponsorProgressBar
+            sponsorDotsRow
         }
         .padding(.vertical, 4)
         .background(Color(arenza: "#141720"))
+    }
+
+    private var sponsorProgressBar: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Rectangle().fill(Color.white.opacity(0.05)).frame(height: 2)
+                Rectangle()
+                    .fill(Color(arenza: spinEngine.currentBusiness.brandColor).opacity(0.7))
+                    .frame(width: geo.size.width * spinEngine.autoRotateProgress, height: 2)
+                    .animation(.linear(duration: 0.1), value: spinEngine.autoRotateProgress)
+            }
+        }
+        .frame(height: 2)
+    }
+
+    private var sponsorDotsRow: some View {
+        HStack(spacing: 8) {
+            ForEach(Array(SponsorBusiness.all.enumerated()), id: \.offset) { i, biz in
+                Button {
+                    spinEngine.selectSponsor(i)
+                    adEngine.userBeganInteraction(pauseFor: 30)
+                } label: {
+                    sponsorDotLabel(i: i, biz: biz)
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer()
+            walletShortcut
+        }
+        .padding(.horizontal, 10)
+    }
+
+    private func sponsorDotLabel(i: Int, biz: SponsorBusiness) -> some View {
+        let isSelected = (i == spinEngine.businessIndex)
+        return HStack(spacing: 4) {
+            Text(biz.emoji).font(.system(size: 10))
+            if isSelected {
+                Text(biz.name)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(Color(arenza: biz.brandColor))
+            }
+        }
+        .padding(.horizontal, 8).padding(.vertical, 3)
+        .background(isSelected ? Color(arenza: biz.brandColor).opacity(0.18) : Color.clear)
+        .clipShape(Capsule())
+        .overlay(
+            Capsule().stroke(
+                isSelected ? Color(arenza: biz.brandColor).opacity(0.4) : Color.clear,
+                lineWidth: 1
+            )
+        )
+    }
+
+    private var walletShortcut: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "qrcode")
+                .font(.system(size: 9, weight: .bold))
+            Text("\(QRWalletService.shared.activeRewards.count)")
+                .font(.system(size: 9, weight: .black, design: .monospaced))
+        }
+        .foregroundColor(
+            QRWalletService.shared.activeRewards.isEmpty
+                ? Color(arenza: "#4a5568")
+                : Color(arenza: "#00c9b1")
+        )
     }
 }
 
@@ -208,87 +221,102 @@ struct SpinWheelPanel: View {
     @ObservedObject var gameEngine: GameEngine
 
     var body: some View {
-        let biz = spinEngine.currentBusiness
         ZStack {
-            // Sponsor gradient background
-            LinearGradient(
-                colors: [
-                    Color(arenza: biz.brandColor).opacity(0.12),
-                    Color(arenza: "#0d0f14")
-                ],
-                startPoint: .top, endPoint: .bottom
-            )
-
+            sponsorGradient
             VStack(spacing: 8) {
-                // Wheel
-                ZStack {
-                    SpinWheelView(
-                        segments: biz.spinConfig.segments,
-                        brandColor: biz.brandColor,
-                        targetIndex: spinEngine.spinResultSegmentIndex,
-                        isSpinning: spinEngine.isSpinning
-                    )
-                    .frame(width: 180, height: 180)
-
-                    // Center hub
-                    Circle()
-                        .fill(Color(arenza: "#0d0f14"))
-                        .frame(width: 36, height: 36)
-                    Text(biz.emoji)
-                        .font(.system(size: 20))
-                }
-
-                // Result label
-                if let idx = spinEngine.spinResultSegmentIndex {
-                    let seg = biz.spinConfig.segments[idx]
-                    Text(seg.isWin ? "\(seg.emoji) \(seg.label)!" : "\(seg.emoji) \(seg.label)")
-                        .font(.system(size: 13, weight: .black))
-                        .foregroundColor(seg.isWin ? Color(arenza: biz.brandColor) : Color(arenza: "#8892b0"))
-                        .transition(.scale.combined(with: .opacity))
-                } else {
-                    Text("Tap SPIN to play")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color(arenza: "#8892b0"))
-                }
-
-                // Spin button
-                Button {
-                    spinEngine.spin()
-                    gameEngine.awardPointsPublic(0, label: "")
-                } label: {
-                    HStack(spacing: 6) {
-                        if spinEngine.isSpinning {
-                            ProgressView()
-                                .tint(.white)
-                                .scaleEffect(0.8)
-                            Text("Spinning...")
-                                .font(.system(size: 13, weight: .black))
-                        } else if spinEngine.spinsRemaining == 0 {
-                            Image(systemName: "clock.arrow.circlepath")
-                            Text("Come back tomorrow")
-                                .font(.system(size: 12, weight: .bold))
-                        } else {
-                            Text("🎰 SPIN (\(spinEngine.spinsRemaining) left)")
-                                .font(.system(size: 13, weight: .black))
-                        }
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        spinEngine.canSpin
-                            ? Color(arenza: biz.brandColor)
-                            : Color(arenza: "#2a2a3a")
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .buttonStyle(.plain)
-                .disabled(!spinEngine.canSpin)
-                .padding(.horizontal, 24)
+                wheelContainer
+                resultLabel
+                spinButton
             }
             .padding(.vertical, 8)
         }
-        .animation(.easeInOut(duration: 0.4), value: biz.id)
+        .animation(.easeInOut(duration: 0.4), value: spinEngine.currentBusiness.id)
+    }
+
+    private var sponsorGradient: some View {
+        LinearGradient(
+            colors: [
+                Color(arenza: spinEngine.currentBusiness.brandColor).opacity(0.12),
+                Color(arenza: "#0d0f14")
+            ],
+            startPoint: .top, endPoint: .bottom
+        )
+    }
+
+    private var wheelContainer: some View {
+        let biz = spinEngine.currentBusiness
+        return ZStack {
+            SpinWheelView(
+                segments: biz.spinConfig.segments,
+                brandColor: biz.brandColor,
+                targetIndex: spinEngine.spinResultSegmentIndex,
+                isSpinning: spinEngine.isSpinning
+            )
+            .frame(width: 180, height: 180)
+
+            Circle()
+                .fill(Color(arenza: "#0d0f14"))
+                .frame(width: 36, height: 36)
+            Text(biz.emoji)
+                .font(.system(size: 20))
+        }
+    }
+
+    @ViewBuilder
+    private var resultLabel: some View {
+        let biz = spinEngine.currentBusiness
+        if let idx = spinEngine.spinResultSegmentIndex {
+            let seg = biz.spinConfig.segments[idx]
+            Text(seg.isWin ? "\(seg.emoji) \(seg.label)!" : "\(seg.emoji) \(seg.label)")
+                .font(.system(size: 13, weight: .black))
+                .foregroundColor(seg.isWin ? Color(arenza: biz.brandColor) : Color(arenza: "#8892b0"))
+                .transition(.scale.combined(with: .opacity))
+        } else {
+            Text("Tap SPIN to play")
+                .font(.system(size: 11))
+                .foregroundColor(Color(arenza: "#8892b0"))
+        }
+    }
+
+    private var spinButton: some View {
+        Button {
+            spinEngine.spin()
+            gameEngine.awardPointsPublic(0, label: "")
+        } label: {
+            spinButtonLabel
+        }
+        .buttonStyle(.plain)
+        .disabled(!spinEngine.canSpin)
+        .padding(.horizontal, 24)
+    }
+
+    private var spinButtonLabel: some View {
+        let biz = spinEngine.currentBusiness
+        return HStack(spacing: 6) {
+            if spinEngine.isSpinning {
+                ProgressView()
+                    .tint(.white)
+                    .scaleEffect(0.8)
+                Text("Spinning...")
+                    .font(.system(size: 13, weight: .black))
+            } else if spinEngine.spinsRemaining == 0 {
+                Image(systemName: "clock.arrow.circlepath")
+                Text("Come back tomorrow")
+                    .font(.system(size: 12, weight: .bold))
+            } else {
+                Text("🎰 SPIN (\(spinEngine.spinsRemaining) left)")
+                    .font(.system(size: 13, weight: .black))
+            }
+        }
+        .foregroundColor(.white)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(
+            spinEngine.canSpin
+                ? Color(arenza: biz.brandColor)
+                : Color(arenza: "#2a2a3a")
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -305,85 +333,85 @@ struct SpinWheelView: View {
 
     var body: some View {
         ZStack {
-            // Draw wheel segments
-            Canvas { ctx, size in
-                let center = CGPoint(x: size.width / 2, y: size.height / 2)
-                let radius = min(size.width, size.height) / 2 - 2
-                let total = segments.count
-                let sliceAngle = 2 * Double.pi / Double(total)
-
-                for (i, seg) in segments.enumerated() {
-                    let start = Double(i) * sliceAngle - Double.pi / 2
-                    let end   = start + sliceAngle
-
-                    var path = Path()
-                    path.move(to: center)
-                    path.addArc(center: center, radius: radius,
-                                startAngle: .radians(start), endAngle: .radians(end),
-                                clockwise: false)
-                    path.closeSubpath()
-
-                    ctx.fill(path, with: .color(Color(arenza: seg.color).opacity(0.9)))
-
-                    // Segment border
-                    ctx.stroke(path, with: .color(.white.opacity(0.15)), lineWidth: 1)
-                }
-
-                // Outer ring
-                let outerPath = Path(ellipseIn: CGRect(
-                    x: center.x - radius, y: center.y - radius,
-                    width: radius * 2, height: radius * 2
-                ))
-                ctx.stroke(outerPath, with: .color(Color(arenza: brandColor).opacity(0.5)), lineWidth: 3)
-            }
-            .rotationEffect(.degrees(rotation))
-            .animation(
-                isSpinning
-                    ? .timingCurve(0.05, 0.9, 0.1, 1.0, duration: 4.5)
-                    : .easeOut(duration: 0.3),
-                value: rotation
-            )
-
-            // Emoji labels on segments (rendered separately)
-            ForEach(Array(segments.enumerated()), id: \.offset) { i, seg in
-                let angle = Double(i) * (360.0 / Double(segments.count)) - 90 + (180.0 / Double(segments.count))
-                let radius: CGFloat = 58
-                let x = cos(angle * .pi / 180) * radius
-                let y = sin(angle * .pi / 180) * radius
-
-                Text(seg.emoji)
-                    .font(.system(size: 14))
-                    .rotationEffect(.degrees(rotation + angle + 90))
-                    .offset(x: x, y: y)
-                    .animation(
-                        isSpinning ? .timingCurve(0.05, 0.9, 0.1, 1.0, duration: 4.5) : .easeOut(duration: 0.3),
-                        value: rotation
-                    )
-            }
-
-            // Pointer arrow at top
-            VStack {
-                Image(systemName: "arrowtriangle.down.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(.white)
-                    .shadow(color: Color(arenza: brandColor), radius: 4)
-                Spacer()
-            }
+            wheelCanvas
+            emojiOverlay
+            pointerArrow
         }
-        .onChange(of: isSpinning) { spinning in
+        .onChange(of: isSpinning, initial: false) { _, spinning in
             if spinning {
-                // 4+ full rotations + random extra
                 let extraSpins = Double.random(in: 3...5) * 360
                 rotation += extraSpins + 1440
             }
         }
-        .onChange(of: targetIndex) { idx in
+        .onChange(of: targetIndex, initial: false) { _, idx in
             guard let idx, !isSpinning else { return }
             let sliceDeg = 360.0 / Double(segments.count)
-            // Snap to segment center
             let targetDeg = -(Double(idx) * sliceDeg) - sliceDeg / 2
             let turns = (rotation / 360).rounded(.down)
             rotation = turns * 360 + targetDeg
+        }
+    }
+
+    private var wheelCanvas: some View {
+        Canvas { ctx, size in
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let radius = min(size.width, size.height) / 2 - 2
+            let total = segments.count
+            let sliceAngle = 2 * Double.pi / Double(total)
+
+            for (i, seg) in segments.enumerated() {
+                let start = Double(i) * sliceAngle - Double.pi / 2
+                let end   = start + sliceAngle
+
+                var path = Path()
+                path.move(to: center)
+                path.addArc(center: center, radius: radius,
+                            startAngle: .radians(start), endAngle: .radians(end),
+                            clockwise: false)
+                path.closeSubpath()
+
+                ctx.fill(path, with: .color(Color(arenza: seg.color).opacity(0.9)))
+                ctx.stroke(path, with: .color(.white.opacity(0.15)), lineWidth: 1)
+            }
+
+            let outerPath = Path(ellipseIn: CGRect(
+                x: center.x - radius, y: center.y - radius,
+                width: radius * 2, height: radius * 2
+            ))
+            ctx.stroke(outerPath, with: .color(Color(arenza: brandColor).opacity(0.5)), lineWidth: 3)
+        }
+        .rotationEffect(.degrees(rotation))
+        .animation(
+            isSpinning ? .timingCurve(0.05, 0.9, 0.1, 1.0, duration: 4.5) : .easeOut(duration: 0.3),
+            value: rotation
+        )
+    }
+
+    private var emojiOverlay: some View {
+        ForEach(Array(segments.enumerated()), id: \.offset) { i, seg in
+            let angle = Double(i) * (360.0 / Double(segments.count)) - 90 + (180.0 / Double(segments.count))
+            let radius: CGFloat = 58
+            let x = cos(angle * .pi / 180) * radius
+            let y = sin(angle * .pi / 180) * radius
+
+            Text(seg.emoji)
+                .font(.system(size: 14))
+                .rotationEffect(.degrees(rotation + angle + 90))
+                .offset(x: x, y: y)
+                .animation(
+                    isSpinning ? .timingCurve(0.05, 0.9, 0.1, 1.0, duration: 4.5) : .easeOut(duration: 0.3),
+                    value: rotation
+                )
+        }
+    }
+
+    private var pointerArrow: some View {
+        VStack {
+            Image(systemName: "arrowtriangle.down.fill")
+                .font(.system(size: 16))
+                .foregroundColor(.white)
+                .shadow(color: Color(arenza: brandColor), radius: 4)
+            Spacer()
         }
     }
 }
@@ -394,60 +422,73 @@ struct ScratchGamePanel: View {
     @ObservedObject var spinEngine: SpinGameEngine
 
     var body: some View {
-        let biz = spinEngine.currentBusiness
         ZStack {
-            LinearGradient(
-                colors: [Color(arenza: biz.brandColor).opacity(0.1), Color(arenza: "#0d0f14")],
-                startPoint: .top, endPoint: .bottom
-            )
-
+            scratchGradient
             VStack(spacing: 10) {
-                Text("🎟 Scratch & Win")
-                    .font(.system(size: 13, weight: .black))
-                    .foregroundColor(Color(arenza: biz.brandColor))
-
-                Text("\(biz.emoji) \(biz.name)")
-                    .font(.system(size: 10))
-                    .foregroundColor(Color(arenza: "#8892b0"))
-
-                // Scratch card
-                SpinScratchCardView(
-                    business: biz,
-                    isRevealed: spinEngine.scratchRevealed,
-                    reward: spinEngine.scratchReward,
-                    onReveal: {
-                        spinEngine.revealScratch()
-                        // Save reward automatically
-                        if let r = spinEngine.scratchReward {
-                            spinEngine.saveRewardToWallet(r)
-                        }
-                    }
-                )
-                .frame(height: 90)
-                .padding(.horizontal, 24)
-
-                // Status
-                if spinEngine.scratchRevealed, let reward = spinEngine.scratchReward {
-                    HStack(spacing: 6) {
-                        Text("🎉")
-                        Text("\(reward.rewardLabel) saved to Wallet!")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Color(arenza: "#22c55e"))
-                    }
-                    .transition(.scale.combined(with: .opacity))
-                } else if spinEngine.spinsRemaining == 0 {
-                    Text("No plays remaining today")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color(arenza: "#4a5568"))
-                } else {
-                    Text("Swipe to scratch your card")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color(arenza: "#8892b0"))
-                }
+                scratchHeader
+                scratchCard
+                scratchStatus
             }
             .padding(.vertical, 10)
         }
-        .animation(.easeInOut(duration: 0.4), value: biz.id)
+        .animation(.easeInOut(duration: 0.4), value: spinEngine.currentBusiness.id)
+    }
+
+    private var scratchGradient: some View {
+        LinearGradient(
+            colors: [Color(arenza: spinEngine.currentBusiness.brandColor).opacity(0.1), Color(arenza: "#0d0f14")],
+            startPoint: .top, endPoint: .bottom
+        )
+    }
+
+    private var scratchHeader: some View {
+        let biz = spinEngine.currentBusiness
+        return VStack(spacing: 2) {
+            Text("🎟 Scratch & Win")
+                .font(.system(size: 13, weight: .black))
+                .foregroundColor(Color(arenza: biz.brandColor))
+
+            Text("\(biz.emoji) \(biz.name)")
+                .font(.system(size: 10))
+                .foregroundColor(Color(arenza: "#8892b0"))
+        }
+    }
+
+    private var scratchCard: some View {
+        SpinScratchCardView(
+            business: spinEngine.currentBusiness,
+            isRevealed: spinEngine.scratchRevealed,
+            reward: spinEngine.scratchReward,
+            onReveal: {
+                spinEngine.revealScratch()
+                if let r = spinEngine.scratchReward {
+                    spinEngine.saveRewardToWallet(r)
+                }
+            }
+        )
+        .frame(height: 90)
+        .padding(.horizontal, 24)
+    }
+
+    @ViewBuilder
+    private var scratchStatus: some View {
+        if spinEngine.scratchRevealed, let reward = spinEngine.scratchReward {
+            HStack(spacing: 6) {
+                Text("🎉")
+                Text("\(reward.rewardLabel) saved to Wallet!")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(arenza: "#22c55e"))
+            }
+            .transition(.scale.combined(with: .opacity))
+        } else if spinEngine.spinsRemaining == 0 {
+            Text("No plays remaining today")
+                .font(.system(size: 10))
+                .foregroundColor(Color(arenza: "#4a5568"))
+        } else {
+            Text("Swipe to scratch your card")
+                .font(.system(size: 10))
+                .foregroundColor(Color(arenza: "#8892b0"))
+        }
     }
 }
 
