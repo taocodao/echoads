@@ -238,6 +238,8 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID != '' && secrets.APPLE_TEAM_ID || '5R8WY2Q734' }}
           ASC_APP_ID: ${{ secrets.ASC_APP_ID || '6777539402' }}
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 10
         run: bundle exec fastlane beta
 
       - name: Print Fastlane Gym logs on failure
