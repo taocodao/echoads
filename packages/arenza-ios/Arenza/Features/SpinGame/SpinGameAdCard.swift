@@ -487,7 +487,7 @@ struct SpinScratchCardView: View {
                     Canvas { ctx, size in
                         // Base scratch surface
                         ctx.fill(
-                            Path(RoundedRectangle(cornerRadius: 12).path(in: CGRect(origin: .zero, size: size))),
+                            RoundedRectangle(cornerRadius: 12).path(in: CGRect(origin: .zero, size: size)),
                             with: .color(Color(arenza: business.brandColorSecondary).opacity(0.85))
                         )
 
