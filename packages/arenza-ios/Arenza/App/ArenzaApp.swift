@@ -4,10 +4,13 @@
 import SwiftUI
 import BackgroundTasks
 import AVFoundation
+import UserNotifications
 
 @main
 struct ArenzaApp: App {
     @StateObject private var env = AppEnvironment.shared
+    @StateObject private var notifications = NotificationService.shared
+    @StateObject private var realtime = RealtimeService.shared
 
     init() {
         // Configure audio session BEFORE any AVPlayer is created.
@@ -17,6 +20,10 @@ struct ArenzaApp: App {
 
         // Register background task handlers on launch
         HouseAdBGTask.register()
+
+        // Phase 5: Register push notification categories
+        NotificationService.shared.registerCategories()
+        UNUserNotificationCenter.current().delegate = NotificationService.shared
     }
 
     private func configureAudioSession() {
@@ -36,11 +43,17 @@ struct ArenzaApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(env)
+                .environmentObject(notifications)
+                .environmentObject(realtime)
                 .preferredColorScheme(.dark)
                 .onAppear {
                     // Warm up engines on first appear
                     Task { await HouseAdCache.shared.refresh() }
                     HouseAdBGTask.schedule()
+
+                    // Phase 5: Request push notification permission
+                    Task { await notifications.requestAuthorization() }
+                    notifications.scheduleDailyCheckInReminder()
                 }
         }
     }
@@ -74,6 +87,12 @@ struct ContentView: View {
             MarketplaceView()
                 .tabItem {
                     Label("Shop", systemImage: "storefront")
+                }
+
+            // Phase 4: Sponsor Campaign Hub
+            SponsorCampaignView()
+                .tabItem {
+                    Label("Sponsors", systemImage: "megaphone.fill")
                 }
 
             EarningsView()

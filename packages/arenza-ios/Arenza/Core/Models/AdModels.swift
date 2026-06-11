@@ -105,6 +105,23 @@ enum GameMoment: String, Codable, CaseIterable {
             return false
         }
     }
+
+    /// Human-readable label for campaign config display
+    var displayLabel: String {
+        switch self {
+        case .goal:         return "Goal"
+        case .save:         return "Save"
+        case .celebration:  return "Celebration"
+        case .foul:         return "Foul"
+        case .halftime:     return "Halftime"
+        case .timeout:      return "Timeout"
+        case .preGame:      return "Pre-Game"
+        case .postGame:     return "Post-Game"
+        case .quarterBreak: return "Quarter Break"
+        case .periodBreak:  return "Period Break"
+        case .neutral:      return "Neutral"
+        }
+    }
 }
 
 // MARK: - Ad Event Types (for SignalCollector)
