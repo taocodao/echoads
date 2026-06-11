@@ -417,6 +417,11 @@ struct MemberCardFullScreen: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
 
+                    // Apple Wallet
+                    AddToWalletButton {
+                        await WalletPassGenerator.shared.addMemberCard(card)
+                    }
+
                     Spacer()
                 }
                 .padding(.top, 20)
@@ -519,6 +524,11 @@ struct RewardDetailSheet: View {
                         .foregroundColor(Color(arenza: "#8892b0"))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
+
+                    // Apple Wallet integration
+                    AddToWalletButton {
+                        await WalletPassGenerator.shared.addReward(reward)
+                    }
 
                     Spacer()
                 }

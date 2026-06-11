@@ -35,9 +35,16 @@ struct SpinGameAdCard: View {
                 VStack(spacing: 0) {
                     sponsorInfoCard
                     activePanel
+                    // Phase 2: Game Event Trigger Panel (demo — fires bonus spin windows)
+                    GameEventTriggerPanel()
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
                 }
             }
             sponsorSwitchBar
+        }
+        .onAppear {
+            ABTestingService.shared.trackImpression(experiment: .gameFormat)
         }
     }
 
