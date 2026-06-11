@@ -389,19 +389,13 @@ struct SpinWheelView: View {
 
     private var emojiOverlay: some View {
         ForEach(Array(segments.enumerated()), id: \.offset) { i, seg in
-            let angle = Double(i) * (360.0 / Double(segments.count)) - 90 + (180.0 / Double(segments.count))
-            let radius: CGFloat = 58
-            let x = cos(angle * .pi / 180) * radius
-            let y = sin(angle * .pi / 180) * radius
-
-            Text(seg.emoji)
-                .font(.system(size: 14))
-                .rotationEffect(.degrees(rotation + angle + 90))
-                .offset(x: x, y: y)
-                .animation(
-                    isSpinning ? .timingCurve(0.05, 0.9, 0.1, 1.0, duration: 4.5) : .easeOut(duration: 0.3),
-                    value: rotation
-                )
+            EmojiSegmentView(
+                segment: seg,
+                index: i,
+                totalCount: segments.count,
+                rotation: rotation,
+                isSpinning: isSpinning
+            )
         }
     }
 
@@ -765,5 +759,39 @@ struct RewardRevealModal: View {
         let m = Int(t) / 60
         let s = Int(t) % 60
         return String(format: "%d:%02d", m, s)
+    }
+}
+
+// MARK: - Emoji Segment View
+struct EmojiSegmentView: View {
+    let segment: SpinWheelSegment
+    let index: Int
+    let totalCount: Int
+    let rotation: Double
+    let isSpinning: Bool
+    
+    var angle: Double {
+        Double(index) * (360.0 / Double(totalCount)) - 90 + (180.0 / Double(totalCount))
+    }
+    
+    var radius: CGFloat { 58 }
+    
+    var xOffset: CGFloat {
+        cos(angle * .pi / 180) * radius
+    }
+    
+    var yOffset: CGFloat {
+        sin(angle * .pi / 180) * radius
+    }
+    
+    var body: some View {
+        Text(segment.emoji)
+            .font(.system(size: 14))
+            .rotationEffect(.degrees(rotation + angle + 90))
+            .offset(x: xOffset, y: yOffset)
+            .animation(
+                isSpinning ? .timingCurve(0.05, 0.9, 0.1, 1.0, duration: 4.5) : .easeOut(duration: 0.3),
+                value: rotation
+            )
     }
 }
