@@ -14,6 +14,8 @@ struct SpinGameAdCard: View {
     @StateObject private var wallet = QRWalletService.shared
 
     @State private var showScratch = false
+    @State private var showShareToast = false
+    @State private var shareToastMessage = ""
 
     var body: some View {
         mainContent
@@ -23,6 +25,7 @@ struct SpinGameAdCard: View {
             .sheet(isPresented: $spinEngine.showRewardModal) {
                 rewardSheet
             }
+            .overlay(shareToastOverlay, alignment: .top)
     }
 
     private var mainContent: some View {
@@ -59,10 +62,46 @@ struct SpinGameAdCard: View {
         RewardRevealModal(reward: spinEngine.latestReward, onSave: {
             if let r = spinEngine.latestReward {
                 spinEngine.saveRewardToWallet(r)
-                engine.awardPointsPublic(100, label: "Sponsor reward earned! 🎉")
+                // Award AZT points based on reward type
+                let pts = rewardPoints(for: r)
+                engine.awardPointsPublic(pts, label: "\(r.rewardLabel) 🎰")
+                PredictionEngine.shared.wallet.earn(pts, source: .spinGame, sponsorId: r.sponsorId)
+                PredictionEngine.shared.saveWallet()
             }
             spinEngine.showRewardModal = false
         }, onDismiss: { spinEngine.showRewardModal = false })
+    }
+
+    private func rewardPoints(for reward: SpinReward) -> Int {
+        switch reward.rewardType {
+        case .freeItem:       return 150
+        case .percentOff:     return 100
+        case .fixedDiscount:  return 120
+        case .bonusPoints:    return 200
+        case .mystery:        return 175
+        case .tryAgain:       return 10
+        }
+    }
+
+    private var shareToastOverlay: some View {
+        Group {
+            if showShareToast {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(Color(arenza: "#00c9b1"))
+                    Text(shareToastMessage)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(Color(arenza: "#141720"))
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(Color(arenza: "#00c9b1").opacity(0.4), lineWidth: 1))
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.35), value: showShareToast)
     }
 
     // MARK: - Sponsor Header
@@ -193,6 +232,28 @@ struct SpinGameAdCard: View {
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(Color(arenza: biz.brandColor))
             }
+
+            // Share button — earn +50 AZT for sharing sponsor info
+            Button {
+                shareSponsor(biz)
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text("Share & Earn +50 AZT")
+                        .font(.system(size: 10, weight: .bold))
+                }
+                .foregroundColor(Color(arenza: biz.brandColor))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+                .background(Color(arenza: biz.brandColor).opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(arenza: biz.brandColor).opacity(0.3), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -208,6 +269,29 @@ struct SpinGameAdCard: View {
         .overlay(Rectangle().fill(Color.white.opacity(0.04)).frame(height: 1), alignment: .bottom)
         .animation(.easeInOut(duration: 0.4), value: spinEngine.businessIndex)
     }
+
+    private func shareSponsor(_ biz: SponsorBusiness) {
+        let text = "\(biz.emoji) Check out \(biz.name)! \(biz.tagline)\n\(biz.websiteURL)\n\nFound on Arenza Sports — download the app to watch, play & win rewards! 🏈"
+        let ac = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            // Award points before presenting share sheet
+            PredictionEngine.shared.wallet.earn(50, source: .businessShare, sponsorId: biz.id)
+            PredictionEngine.shared.saveWallet()
+            engine.awardPointsPublic(50, label: "Shared \(biz.name)! +50 AZT 📤")
+            showShareToastFor("Shared \(biz.name) · +50 AZT earned!")
+            rootVC.present(ac, animated: true)
+        }
+    }
+
+    private func showShareToastFor(_ message: String) {
+        shareToastMessage = message
+        withAnimation { showShareToast = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation { showShareToast = false }
+        }
+    }
+
 
     private func sponsorInfoPill(icon: String, text: String) -> some View {
         HStack(spacing: 3) {

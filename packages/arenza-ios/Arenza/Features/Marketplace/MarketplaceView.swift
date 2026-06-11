@@ -15,6 +15,7 @@ struct MarketplaceView: View {
     @StateObject private var vm = MarketplaceViewModel()
     @ObservedObject private var engine = PredictionEngine.shared
     @ObservedObject private var geo = LocalizationEngine.shared
+    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
@@ -22,31 +23,56 @@ struct MarketplaceView: View {
                 // AZT balance header
                 aztBalanceHeader
 
+                // Search bar
+                searchBar
+
                 // Stadium Mode banner
                 if geo.isAtStadium, let stadium = geo.nearbyStadium {
                     stadiumBanner(stadium: stadium)
                 }
 
-                // Browse mode picker
-                Picker("", selection: $vm.browseMode) {
-                    Text("Near Me").tag(BrowseMode.nearMe)
-                    Text("For You").tag(BrowseMode.forYou)
-                    Text("Browse All").tag(BrowseMode.browseAll)
+                // Browse mode picker (hidden when searching)
+                if searchText.isEmpty {
+                    Picker("", selection: $vm.browseMode) {
+                        Text("Near Me").tag(BrowseMode.nearMe)
+                        Text("For You").tag(BrowseMode.forYou)
+                        Text("Browse All").tag(BrowseMode.browseAll)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
 
                 // Category filter chips (Browse All mode)
-                if vm.browseMode == .browseAll {
+                if vm.browseMode == .browseAll && searchText.isEmpty {
                     categoryChips
                 }
 
                 // Offer list
-                if vm.filteredOffers.isEmpty {
-                    emptyState
-                } else {
-                    offerList
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        // Sponsor businesses section
+                        sponsorBusinessesSection
+
+                        // Regular offers
+                        if !vm.filteredOffers.filter({ searchText.isEmpty || $0.sponsorName.localizedCaseInsensitiveContains(searchText) || $0.offerTitle.localizedCaseInsensitiveContains(searchText) }).isEmpty {
+                            sectionHeader("Sponsor Offers")
+                            LazyVStack(spacing: 12) {
+                                ForEach(vm.filteredOffers.filter { searchText.isEmpty || $0.sponsorName.localizedCaseInsensitiveContains(searchText) || $0.offerTitle.localizedCaseInsensitiveContains(searchText) }) { offer in
+                                    SponsorOfferCard(
+                                        offer: offer,
+                                        userBalance: engine.wallet.aztBalance,
+                                        onTap: { vm.selectedOffer = offer },
+                                        onImpression: { vm.logImpression(offer: offer) }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 16)
+                        } else if searchText.isEmpty && vm.filteredOffers.isEmpty {
+                            emptyState
+                        }
+                    }
                 }
             }
             .navigationTitle("Marketplace")
@@ -62,6 +88,68 @@ struct MarketplaceView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Search Bar
+
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 14))
+                .foregroundColor(.white.opacity(0.4))
+            TextField("Search businesses, offers...", text: $searchText)
+                .font(.system(size: 14))
+                .foregroundColor(.white)
+                .autocorrectionDisabled()
+            if !searchText.isEmpty {
+                Button { searchText = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.white.opacity(0.4))
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 4)
+    }
+
+    // MARK: - Sponsor Businesses Section (gamified sponsors)
+
+    private var sponsorBusinessesSection: some View {
+        let filtered = SponsorBusiness.all.filter {
+            searchText.isEmpty ||
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.tagline.localizedCaseInsensitiveContains(searchText) ||
+            $0.category.rawValue.localizedCaseInsensitiveContains(searchText)
+        }
+        return Group {
+            if !filtered.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    sectionHeader("🎰 Gamified Sponsors — Apply Your Points")
+                    ForEach(filtered, id: \.id) { biz in
+                        SponsorBusinessMarketplaceCard(
+                            business: biz,
+                            userBalance: engine.wallet.aztBalance
+                        )
+                    }
+                }
+                .padding(.bottom, 8)
+            }
+        }
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 12, weight: .black))
+            .foregroundColor(.white.opacity(0.5))
+            .tracking(0.5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
     }
 
     // MARK: - Stadium Mode Banner

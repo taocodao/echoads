@@ -55,6 +55,10 @@ struct PlayerView: View {
     @State private var fullscreenControlsVisible = true
     @State private var controlsHideTimer: Timer? = nil
 
+    // Landscape unlock (costs 100 AZT per session)
+    @State private var landscapeUnlocked = false
+    @State private var showLandscapeUnlockAlert = false
+    private let landscapeUnlockCost = 100
 
     // Toast (Phase 3)
     @State private var showShareToast = false
@@ -265,16 +269,44 @@ struct PlayerView: View {
 
                 Spacer()
 
-                // Fullscreen toggle button
+                // Fullscreen toggle — requires AZT unlock if not already paid
                 Button {
-                    withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
+                    if landscapeUnlocked {
+                        withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
+                    } else {
+                        showLandscapeUnlockAlert = true
+                    }
                 } label: {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 30, height: 30)
-                        .background(Color.black.opacity(0.55))
-                        .clipShape(Circle())
+                    ZStack(alignment: .bottomTrailing) {
+                        Image(systemName: landscapeUnlocked ? "arrow.up.left.and.arrow.down.right" : "lock.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(landscapeUnlocked ? .white : Color(arenza: "#ffc107"))
+                            .frame(width: 30, height: 30)
+                            .background(Color.black.opacity(0.55))
+                            .clipShape(Circle())
+                        if !landscapeUnlocked {
+                            Text("\(landscapeUnlockCost)")
+                                .font(.system(size: 6, weight: .black))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 3).padding(.vertical, 1)
+                                .background(Color(arenza: "#ffc107"))
+                                .clipShape(Capsule())
+                                .offset(x: 4, y: 4)
+                        }
+                    }
+                }
+                .alert("Unlock Fullscreen", isPresented: $showLandscapeUnlockAlert) {
+                    Button("Spend \(landscapeUnlockCost) AZT") {
+                        let ok = PredictionEngine.shared.wallet.spend(landscapeUnlockCost, source: .landscapeUnlock)
+                        if ok {
+                            PredictionEngine.shared.saveWallet()
+                            landscapeUnlocked = true
+                            withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Watch in landscape fullscreen for this session.\nCost: \(landscapeUnlockCost) AZT\nBalance: \(PredictionEngine.shared.wallet.aztBalance) AZT\n\nEarn AZT by playing games and sharing sponsors.")
                 }
             }
             .padding(.horizontal, 14)

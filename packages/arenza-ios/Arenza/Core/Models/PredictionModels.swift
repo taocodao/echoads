@@ -100,8 +100,11 @@ enum AZTSource: String, Codable {
     case streakBonus    = "streak_bonus"
     case referral       = "referral"
     case socialShare    = "social_share"
-    case redemption     = "redemption"      // negative (spend)
-    case expired        = "expired"         // negative (auto-expire)
+    case spinGame       = "spin_game"        // spin/scratch reward
+    case businessShare  = "business_share"   // shared sponsor info
+    case redemption     = "redemption"       // negative (spend)
+    case landscapeUnlock = "landscape_unlock" // negative (spend for fullscreen)
+    case expired        = "expired"          // negative (auto-expire)
 }
 
 // MARK: - Rewards Wallet
