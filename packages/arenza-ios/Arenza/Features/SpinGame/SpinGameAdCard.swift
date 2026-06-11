@@ -276,8 +276,10 @@ struct SpinGameAdCard: View {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
             // Award points before presenting share sheet
-            PredictionEngine.shared.wallet.earn(50, source: .businessShare, sponsorId: biz.id)
-            PredictionEngine.shared.saveWallet()
+            Task { @MainActor in
+                PredictionEngine.shared.wallet.earn(50, source: .businessShare, sponsorId: biz.id)
+                PredictionEngine.shared.saveWallet()
+            }
             engine.awardPointsPublic(50, label: "Shared \(biz.name)! +50 AZT 📤")
             showShareToastFor("Shared \(biz.name) · +50 AZT earned!")
             rootVC.present(ac, animated: true)

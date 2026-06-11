@@ -297,11 +297,13 @@ struct PlayerView: View {
                 }
                 .alert("Unlock Fullscreen", isPresented: $showLandscapeUnlockAlert) {
                     Button("Spend \(landscapeUnlockCost) AZT") {
-                        let ok = PredictionEngine.shared.wallet.spend(landscapeUnlockCost, source: .landscapeUnlock)
-                        if ok {
-                            PredictionEngine.shared.saveWallet()
-                            landscapeUnlocked = true
-                            withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
+                        Task { @MainActor in
+                            let ok = PredictionEngine.shared.wallet.spend(landscapeUnlockCost, source: .landscapeUnlock)
+                            if ok {
+                                PredictionEngine.shared.saveWallet()
+                                landscapeUnlocked = true
+                                withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
+                            }
                         }
                     }
                     Button("Cancel", role: .cancel) {}
