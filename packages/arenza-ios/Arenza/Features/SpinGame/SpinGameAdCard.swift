@@ -16,35 +16,48 @@ struct SpinGameAdCard: View {
     @State private var showScratch = false
 
     var body: some View {
+        mainContent
+            .background(Color(arenza: "#0d0f14"))
+            .onAppear { spinEngine.startRotation() }
+            .onDisappear { spinEngine.stopRotation() }
+            .sheet(isPresented: $spinEngine.showRewardModal) {
+                rewardSheet
+            }
+    }
+
+    private var mainContent: some View {
         VStack(spacing: 0) {
             sponsorHeader
-            if showScratch {
-                ScratchGamePanel(spinEngine: spinEngine)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
-            } else {
-                SpinWheelPanel(spinEngine: spinEngine, gameEngine: engine)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .opacity),
-                        removal: .move(edge: .trailing).combined(with: .opacity)
-                    ))
-            }
+            activePanel
             sponsorSwitchBar
         }
-        .background(Color(arenza: "#0d0f14"))
-        .onAppear { spinEngine.startRotation() }
-        .onDisappear { spinEngine.stopRotation() }
-        .sheet(isPresented: $spinEngine.showRewardModal) {
-            RewardRevealModal(reward: spinEngine.latestReward, onSave: {
-                if let r = spinEngine.latestReward {
-                    spinEngine.saveRewardToWallet(r)
-                    engine.awardPointsPublic(100, label: "Sponsor reward earned! 🎉")
-                }
-                spinEngine.showRewardModal = false
-            }, onDismiss: { spinEngine.showRewardModal = false })
+    }
+
+    @ViewBuilder
+    private var activePanel: some View {
+        if showScratch {
+            ScratchGamePanel(spinEngine: spinEngine)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
+        } else {
+            SpinWheelPanel(spinEngine: spinEngine, gameEngine: engine)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .leading).combined(with: .opacity),
+                    removal: .move(edge: .trailing).combined(with: .opacity)
+                ))
         }
+    }
+
+    private var rewardSheet: some View {
+        RewardRevealModal(reward: spinEngine.latestReward, onSave: {
+            if let r = spinEngine.latestReward {
+                spinEngine.saveRewardToWallet(r)
+                engine.awardPointsPublic(100, label: "Sponsor reward earned! 🎉")
+            }
+            spinEngine.showRewardModal = false
+        }, onDismiss: { spinEngine.showRewardModal = false })
     }
 
     // MARK: - Sponsor Header
@@ -452,89 +465,98 @@ struct SpinScratchCardView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // Layer 1: Reward content (underneath)
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(LinearGradient(
-                        colors: [
-                            Color(arenza: business.brandColor).opacity(0.3),
-                            Color(arenza: "#141720")
-                        ],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    ))
-
-                if let reward {
-                    VStack(spacing: 4) {
-                        Text(reward.rewardValue)
-                            .font(.system(size: 22, weight: .black))
-                            .foregroundColor(Color(arenza: business.brandColor))
-                        Text(reward.rewardLabel)
-                            .font(.system(size: 9, weight: .medium))
-                            .foregroundColor(Color(arenza: "#c0c8e0"))
-                            .multilineTextAlignment(.center)
-                        Text(reward.rewardCode)
-                            .font(.system(size: 9, design: .monospaced))
-                            .foregroundColor(Color(arenza: "#8892b0"))
-                    }
-                    .padding(8)
-                } else {
-                    Text("Scratch to reveal")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color(arenza: "#8892b0"))
-                }
-
-                // Layer 2: Scratch overlay (hidden when revealed)
+                backgroundLayer
+                contentLayer
                 if !isRevealed {
-                    Canvas { ctx, size in
-                        // Base scratch surface
-                        ctx.fill(
-                            RoundedRectangle(cornerRadius: 12).path(in: CGRect(origin: .zero, size: size)),
-                            with: .color(Color(arenza: business.brandColorSecondary).opacity(0.85))
-                        )
-
-                        // Scratch texture pattern
-                        for row in stride(from: 0, to: Int(size.height), by: 8) {
-                            for col in stride(from: 0, to: Int(size.width), by: 12) {
-                                ctx.fill(
-                                    Path(CGRect(x: col, y: row, width: 6, height: 2)),
-                                    with: .color(.white.opacity(0.06))
-                                )
-                            }
-                        }
-
-                        // "SCRATCH HERE" text
-                        ctx.draw(
-                            Text("✦ SCRATCH HERE ✦")
-                                .font(.system(size: 11, weight: .black))
-                                .foregroundColor(.white.opacity(0.6)),
-                            at: CGPoint(x: size.width / 2, y: size.height / 2)
-                        )
-
-                        // Clear scratched paths
-                        ctx.blendMode = .clear
-                        for pt in scratchedPoints {
-                            ctx.fill(
-                                Path(ellipseIn: CGRect(x: pt.x - 22, y: pt.y - 22, width: 44, height: 44)),
-                                with: .color(.white)
-                            )
-                        }
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { val in
-                                scratchedPoints.append(val.location)
-                                // Auto-reveal at ~50% scratched
-                                let area = geo.size.width * geo.size.height
-                                let scratched = Double(scratchedPoints.count) * (44 * 44)
-                                if !hasTriggered && scratched / area > 0.45 {
-                                    hasTriggered = true
-                                    withAnimation(.easeOut(duration: 0.4)) { onReveal() }
-                                }
-                            }
-                    )
+                    scratchLayer(in: geo.size)
                 }
             }
         }
+    }
+
+    private var backgroundLayer: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(LinearGradient(
+                colors: [
+                    Color(arenza: business.brandColor).opacity(0.3),
+                    Color(arenza: "#141720")
+                ],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            ))
+    }
+
+    @ViewBuilder
+    private var contentLayer: some View {
+        if let reward {
+            VStack(spacing: 4) {
+                Text(reward.rewardValue)
+                    .font(.system(size: 22, weight: .black))
+                    .foregroundColor(Color(arenza: business.brandColor))
+                Text(reward.rewardLabel)
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(Color(arenza: "#c0c8e0"))
+                    .multilineTextAlignment(.center)
+                Text(reward.rewardCode)
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundColor(Color(arenza: "#8892b0"))
+            }
+            .padding(8)
+        } else {
+            Text("Scratch to reveal")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(arenza: "#8892b0"))
+        }
+    }
+
+    private func scratchLayer(in size: CGSize) -> some View {
+        Canvas { ctx, canvasSize in
+            // Base scratch surface
+            ctx.fill(
+                RoundedRectangle(cornerRadius: 12).path(in: CGRect(origin: .zero, size: canvasSize)),
+                with: .color(Color(arenza: business.brandColorSecondary).opacity(0.85))
+            )
+
+            // Scratch texture pattern
+            for row in stride(from: 0, to: Int(canvasSize.height), by: 8) {
+                for col in stride(from: 0, to: Int(canvasSize.width), by: 12) {
+                    ctx.fill(
+                        Path(CGRect(x: col, y: row, width: 6, height: 2)),
+                        with: .color(.white.opacity(0.06))
+                    )
+                }
+            }
+
+            // "SCRATCH HERE" text
+            ctx.draw(
+                Text("✦ SCRATCH HERE ✦")
+                    .font(.system(size: 11, weight: .black))
+                    .foregroundColor(.white.opacity(0.6)),
+                at: CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
+            )
+
+            // Clear scratched paths
+            ctx.blendMode = .clear
+            for pt in scratchedPoints {
+                ctx.fill(
+                    Path(ellipseIn: CGRect(x: pt.x - 22, y: pt.y - 22, width: 44, height: 44)),
+                    with: .color(.white)
+                )
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { val in
+                    scratchedPoints.append(val.location)
+                    // Auto-reveal at ~50% scratched
+                    let area = size.width * size.height
+                    let scratched = Double(scratchedPoints.count) * (44 * 44)
+                    if !hasTriggered && scratched / area > 0.45 {
+                        hasTriggered = true
+                        withAnimation(.easeOut(duration: 0.4)) { onReveal() }
+                    }
+                }
+        )
     }
 }
 
@@ -556,112 +578,7 @@ struct RewardRevealModal: View {
 
                 if let reward {
                     ScrollView {
-                        VStack(spacing: 20) {
-                            // Confetti header
-                            Text(showConfetti ? "🎉🎊🎉" : reward.sponsorEmoji)
-                                .font(.system(size: 40))
-                                .scaleEffect(showConfetti ? 1.3 : 1.0)
-                                .animation(.spring(response: 0.4, dampingFraction: 0.5), value: showConfetti)
-
-                            Text("You Won!")
-                                .font(.system(size: 28, weight: .black))
-                                .foregroundColor(.white)
-
-                            // Reward card
-                            VStack(spacing: 12) {
-                                Text(reward.rewardValue)
-                                    .font(.system(size: 36, weight: .black))
-                                    .foregroundColor(Color(arenza: reward.sponsorBrandColor))
-
-                                Text(reward.rewardLabel)
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(Color(arenza: "#c0c8e0"))
-                                    .multilineTextAlignment(.center)
-
-                                Divider().background(Color.white.opacity(0.1))
-
-                                // QR Code
-                                QRCodeView(
-                                    payload: reward.qrPayload,
-                                    size: 160,
-                                    foreground: .black,
-                                    background: .white
-                                )
-
-                                // Reward code
-                                HStack {
-                                    Text(reward.rewardCode)
-                                        .font(.system(size: 14, weight: .black, design: .monospaced))
-                                        .foregroundColor(Color(arenza: reward.sponsorBrandColor))
-                                    Button {
-                                        UIPasteboard.general.string = reward.rewardCode
-                                    } label: {
-                                        Image(systemName: "doc.on.doc")
-                                            .font(.system(size: 12))
-                                            .foregroundColor(Color(arenza: "#8892b0"))
-                                    }
-                                }
-
-                                // Countdown
-                                if reward.isValid {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "clock.fill")
-                                            .font(.system(size: 11))
-                                        Text("Expires in \(formatCountdown(timeRemaining))")
-                                            .font(.system(size: 11, weight: .bold))
-                                    }
-                                    .foregroundColor(
-                                        timeRemaining < 60
-                                            ? Color(arenza: "#ef4444")
-                                            : Color(arenza: "#8892b0")
-                                    )
-                                }
-
-                                // Sponsor info
-                                HStack(spacing: 6) {
-                                    Text(reward.sponsorEmoji)
-                                    Text(reward.sponsorName)
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(Color(arenza: "#8892b0"))
-                                    Text("·")
-                                        .foregroundColor(Color(arenza: "#4a5568"))
-                                    Text(reward.sponsorWebsiteURL)
-                                        .font(.system(size: 10))
-                                        .foregroundColor(Color(arenza: "#4a5568"))
-                                }
-                            }
-                            .padding(20)
-                            .background(Color(arenza: "#141720"))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color(arenza: reward.sponsorBrandColor).opacity(0.3), lineWidth: 1)
-                            )
-                            .padding(.horizontal, 24)
-
-                            // CTA Buttons
-                            VStack(spacing: 10) {
-                                Button(action: onSave) {
-                                    Label("Save to QR Wallet", systemImage: "qrcode")
-                                        .font(.system(size: 14, weight: .black))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 14)
-                                        .background(Color(arenza: reward.sponsorBrandColor))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                }
-                                .buttonStyle(.plain)
-
-                                Button(action: onDismiss) {
-                                    Text("Use Later")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(Color(arenza: "#8892b0"))
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .padding(.horizontal, 24)
-                        }
-                        .padding(.vertical, 24)
+                        mainRewardContent(reward: reward)
                     }
                 }
             }
@@ -687,6 +604,120 @@ struct RewardRevealModal: View {
         .onDisappear {
             countdownTimer?.invalidate()
         }
+    }
+
+    private func mainRewardContent(reward: SpinReward) -> some View {
+        VStack(spacing: 20) {
+            // Confetti header
+            Text(showConfetti ? "🎉🎊🎉" : reward.sponsorEmoji)
+                .font(.system(size: 40))
+                .scaleEffect(showConfetti ? 1.3 : 1.0)
+                .animation(.spring(response: 0.4, dampingFraction: 0.5), value: showConfetti)
+
+            Text("You Won!")
+                .font(.system(size: 28, weight: .black))
+                .foregroundColor(.white)
+
+            rewardCard(reward: reward)
+            ctaButtons()
+        }
+        .padding(.vertical, 24)
+    }
+
+    private func rewardCard(reward: SpinReward) -> some View {
+        VStack(spacing: 12) {
+            Text(reward.rewardValue)
+                .font(.system(size: 36, weight: .black))
+                .foregroundColor(Color(arenza: reward.sponsorBrandColor))
+
+            Text(reward.rewardLabel)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(Color(arenza: "#c0c8e0"))
+                .multilineTextAlignment(.center)
+
+            Divider().background(Color.white.opacity(0.1))
+
+            // QR Code
+            QRCodeView(
+                payload: reward.qrPayload,
+                size: 160,
+                foreground: .black,
+                background: .white
+            )
+
+            // Reward code
+            HStack {
+                Text(reward.rewardCode)
+                    .font(.system(size: 14, weight: .black, design: .monospaced))
+                    .foregroundColor(Color(arenza: reward.sponsorBrandColor))
+                Button {
+                    UIPasteboard.general.string = reward.rewardCode
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(arenza: "#8892b0"))
+                }
+            }
+
+            // Countdown
+            if reward.isValid {
+                HStack(spacing: 4) {
+                    Image(systemName: "clock.fill")
+                        .font(.system(size: 11))
+                    Text("Expires in \(formatCountdown(timeRemaining))")
+                        .font(.system(size: 11, weight: .bold))
+                }
+                .foregroundColor(
+                    timeRemaining < 60
+                        ? Color(arenza: "#ef4444")
+                        : Color(arenza: "#8892b0")
+                )
+            }
+
+            // Sponsor info
+            HStack(spacing: 6) {
+                Text(reward.sponsorEmoji)
+                Text(reward.sponsorName)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(arenza: "#8892b0"))
+                Text("·")
+                    .foregroundColor(Color(arenza: "#4a5568"))
+                Text(reward.sponsorWebsiteURL)
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(arenza: "#4a5568"))
+            }
+        }
+        .padding(20)
+        .background(Color(arenza: "#141720"))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(arenza: reward.sponsorBrandColor).opacity(0.3), lineWidth: 1)
+        )
+        .padding(.horizontal, 24)
+    }
+
+    private func ctaButtons() -> some View {
+        VStack(spacing: 10) {
+            Button(action: onSave) {
+                Label("Save to QR Wallet", systemImage: "qrcode")
+                    .font(.system(size: 14, weight: .black))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color(arenza: reward?.sponsorBrandColor ?? "#ffffff"))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+
+            Button(action: onDismiss) {
+                Text("Use Later")
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(arenza: "#8892b0"))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 24)
     }
 
     private func formatCountdown(_ t: TimeInterval) -> String {
