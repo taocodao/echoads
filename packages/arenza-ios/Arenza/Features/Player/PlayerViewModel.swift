@@ -61,10 +61,15 @@ final class PlayerViewModel: ObservableObject {
         // .playback category: audio plays through silent switch + survives
         // interruptions (phone calls, Siri). Without this it defaults to
         // .soloAmbient which mutes on the ring/silent switch.
+        // .mixWithOthers: prevents game sound effects or UI interactions
+        // from interrupting the video audio track.
         // ──────────────────────────────────────────────────────────────────
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-            try AVAudioSession.sharedInstance().setActive(true)
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
+            try session.setActive(true, options: .notifyOthersOnDeactivation)
+            // Force speaker output on physical devices (prevents silent mode from muting)
+            try session.overrideOutputAudioPort(.speaker)
         } catch {
             print("[Audio] Failed to set audio session: \(error)")
         }
@@ -243,6 +248,44 @@ final class PlayerViewModel: ObservableObject {
             @unknown default:
                 break
             }
+        }
+
+        // Phase 2 Fix A — resume after Bluetooth disconnect / headphone unplug
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak player] notification in
+            guard let info = notification.userInfo,
+                  let reasonValue = info[AVAudioSessionRouteChangeReasonKey] as? UInt,
+                  let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue),
+                  reason == .oldDeviceUnavailable else { return }
+            try? AVAudioSession.sharedInstance().setActive(true)
+            player?.play()
+            print("[Audio] Route change (device unavailable) — resumed")
+        }
+
+        // Phase 2 Fix B — rebuild session after rare iOS media-services reset
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.mediaServicesWereResetNotification,
+            object: nil,
+            queue: .main
+        ) { [weak player] _ in
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+            try? AVAudioSession.sharedInstance().setActive(true)
+            player?.play()
+            print("[Audio] Media services reset — session rebuilt, resumed")
+        }
+
+        // Phase 2 Fix C — re-activate session when app returns from background
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak player] _ in
+            try? AVAudioSession.sharedInstance().setActive(true)
+            player?.play()
+            print("[Audio] Foreground re-entry — session re-activated, resumed")
         }
     }
 

@@ -24,16 +24,10 @@ final class SpinGameEngine: ObservableObject {
     @Published var scratchRevealed: Bool = false
     @Published var scratchReward: SpinReward? = nil
 
-    // Rotation
-    @Published var autoRotateProgress: Double = 0  // 0.0–1.0 for progress bar
 
     var maxSpins: Int { currentBusiness.spinConfig.maxDailySpins }
     var spinsRemaining: Int { max(0, maxSpins - spinsUsedToday) }
     var canSpin: Bool { spinsRemaining > 0 && !isSpinning }
-
-    private var rotationTimer: Timer?
-    private var progressTimer: Timer?
-    private let rotationInterval: TimeInterval = 30  // seconds per sponsor
 
     // MARK: - Init
 
@@ -41,37 +35,14 @@ final class SpinGameEngine: ObservableObject {
         resetDailyIfNeeded()
     }
 
-    // MARK: - Sponsor Auto-Rotation
+    // MARK: - Sponsor Selection (manual only — no auto-cycling)
 
     func startRotation() {
-        guard rotationTimer == nil else { return }
-        autoRotateProgress = 0
-        startProgressTick()
-
-        rotationTimer = Timer.scheduledTimer(withTimeInterval: rotationInterval, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.advanceSponsor()
-            }
-        }
-        RunLoop.main.add(rotationTimer!, forMode: .common)
+        // No-op: auto-rotation disabled. User selects sponsors manually.
     }
 
     func stopRotation() {
-        rotationTimer?.invalidate(); rotationTimer = nil
-        progressTimer?.invalidate(); progressTimer = nil
-    }
-
-    private func startProgressTick() {
-        progressTimer?.invalidate()
-        autoRotateProgress = 0
-        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                self.autoRotateProgress += 0.1 / self.rotationInterval
-                if self.autoRotateProgress >= 1.0 { self.autoRotateProgress = 0 }
-            }
-        }
-        RunLoop.main.add(progressTimer!, forMode: .common)
+        // No-op: no timers to invalidate.
     }
 
     func advanceSponsor() {
@@ -80,7 +51,6 @@ final class SpinGameEngine: ObservableObject {
             currentBusiness = SponsorBusiness.all[businessIndex]
         }
         resetSpinState()
-        autoRotateProgress = 0
     }
 
     func selectSponsor(_ index: Int) {
@@ -90,7 +60,6 @@ final class SpinGameEngine: ObservableObject {
             currentBusiness = SponsorBusiness.all[index]
         }
         resetSpinState()
-        autoRotateProgress = 0
     }
 
     private func resetSpinState() {

@@ -31,8 +31,11 @@ struct ArenzaApp: App {
             let session = AVAudioSession.sharedInstance()
             // .playback: allows video+audio even when silent switch is on
             // .moviePlayback: optimised mode for video content
-            try session.setCategory(.playback, mode: .moviePlayback, options: [.allowAirPlay])
-            try session.setActive(true)
+            // .mixWithOthers: game interactions won't interrupt audio
+            try session.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers, .allowAirPlay])
+            try session.setActive(true, options: .notifyOthersOnDeactivation)
+            // Force speaker on physical devices
+            try session.overrideOutputAudioPort(.speaker)
         } catch {
             // Non-fatal — log and continue. Video may still play without audio on some devices.
             print("[Audio] AVAudioSession setup failed: \(error.localizedDescription)")

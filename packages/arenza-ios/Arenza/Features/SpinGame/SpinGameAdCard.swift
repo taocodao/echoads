@@ -28,7 +28,12 @@ struct SpinGameAdCard: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             sponsorHeader
-            activePanel
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    sponsorInfoCard
+                    activePanel
+                }
+            }
             sponsorSwitchBar
         }
     }
@@ -66,14 +71,15 @@ struct SpinGameAdCard: View {
         let biz = spinEngine.currentBusiness
         return HStack(spacing: 8) {
             PulsingDot(color: Color(arenza: biz.brandColor))
-            Text(biz.emoji).font(.system(size: 14))
-            sponsorHeaderTitles(biz: biz)
+            Text("SPONSORED")
+                .font(.system(size: 8, weight: .black))
+                .foregroundColor(Color(arenza: "#8892b0"))
+                .tracking(1.2)
             Spacer()
-            sponsorHeaderToggles
             sponsorHeaderPips(biz: biz)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
         .background(sponsorHeaderBackground(biz: biz))
         .overlay(Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1), alignment: .bottom)
         .animation(.easeInOut(duration: 0.4), value: spinEngine.businessIndex)
@@ -137,31 +143,87 @@ struct SpinGameAdCard: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Sponsor Switch Bar
+    // MARK: - Sponsor Info Card (business details for the viewer)
 
-    private var sponsorSwitchBar: some View {
-        VStack(spacing: 4) {
-            sponsorProgressBar
-            sponsorDotsRow
-        }
-        .padding(.vertical, 4)
-        .background(Color(arenza: "#141720"))
-    }
+    private var sponsorInfoCard: some View {
+        let biz = spinEngine.currentBusiness
+        return VStack(alignment: .leading, spacing: 8) {
+            // Business description
+            HStack(alignment: .top, spacing: 10) {
+                // Logo circle
+                ZStack {
+                    Circle()
+                        .fill(Color(arenza: biz.brandColor).opacity(0.2))
+                        .frame(width: 44, height: 44)
+                    Text(biz.emoji)
+                        .font(.system(size: 22))
+                }
 
-    private var sponsorProgressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Rectangle().fill(Color.white.opacity(0.05)).frame(height: 2)
-                Rectangle()
-                    .fill(Color(arenza: spinEngine.currentBusiness.brandColor).opacity(0.7))
-                    .frame(width: geo.size.width * spinEngine.autoRotateProgress, height: 2)
-                    .animation(.linear(duration: 0.1), value: spinEngine.autoRotateProgress)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(biz.name)
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundColor(.white)
+                    Text(biz.tagline)
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(arenza: biz.brandColor))
+                    Text(biz.category.rawValue.uppercased())
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(Color(arenza: "#8892b0"))
+                        .tracking(1)
+                }
+
+                Spacer()
+
+                // Game mode toggle
+                sponsorHeaderToggles
+            }
+
+            // Quick-info row: address, phone, website
+            HStack(spacing: 14) {
+                sponsorInfoPill(icon: "mappin.circle.fill", text: biz.address.components(separatedBy: ",").first ?? biz.address)
+                sponsorInfoPill(icon: "phone.fill", text: biz.phoneNumber)
+            }
+
+            // Website link
+            HStack(spacing: 4) {
+                Image(systemName: "globe")
+                    .font(.system(size: 9))
+                    .foregroundColor(Color(arenza: biz.brandColor))
+                Text(biz.websiteURL.replacingOccurrences(of: "https://", with: ""))
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(Color(arenza: biz.brandColor))
             }
         }
-        .frame(height: 2)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(arenza: biz.brandColor).opacity(0.08),
+                    Color(arenza: "#0d0f14")
+                ],
+                startPoint: .top, endPoint: .bottom
+            )
+        )
+        .overlay(Rectangle().fill(Color.white.opacity(0.04)).frame(height: 1), alignment: .bottom)
+        .animation(.easeInOut(duration: 0.4), value: spinEngine.businessIndex)
     }
 
-    private var sponsorDotsRow: some View {
+    private func sponsorInfoPill(icon: String, text: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: icon)
+                .font(.system(size: 8))
+                .foregroundColor(Color(arenza: "#8892b0"))
+            Text(text)
+                .font(.system(size: 9))
+                .foregroundColor(Color(arenza: "#8892b0"))
+                .lineLimit(1)
+        }
+    }
+
+    // MARK: - Sponsor Switch Bar (manual selector)
+
+    private var sponsorSwitchBar: some View {
         HStack(spacing: 8) {
             ForEach(Array(SponsorBusiness.all.enumerated()), id: \.offset) { i, biz in
                 Button {
@@ -176,6 +238,8 @@ struct SpinGameAdCard: View {
             walletShortcut
         }
         .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color(arenza: "#141720"))
     }
 
     private func sponsorDotLabel(i: Int, biz: SponsorBusiness) -> some View {

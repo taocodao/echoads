@@ -55,8 +55,6 @@ struct PlayerView: View {
     @State private var fullscreenControlsVisible = true
     @State private var controlsHideTimer: Timer? = nil
 
-    // Play/pause display feedback (Phase 4)
-    @State private var showPauseIcon = false
 
     // Toast (Phase 3)
     @State private var showShareToast = false
@@ -141,7 +139,6 @@ struct PlayerView: View {
                 PlayerLayerView(player: player)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        togglePlayPause()
                         showFullscreenControls()
                     }
             }
@@ -149,7 +146,6 @@ struct PlayerView: View {
                 fullscreenOverlay
                     .transition(.opacity)
             }
-            pauseIconOverlay
         }
         .animation(.easeInOut(duration: 0.25), value: fullscreenControlsVisible)
         .onAppear {
@@ -211,11 +207,10 @@ struct PlayerView: View {
         ZStack(alignment: .bottom) {
             Color.black
 
-            // Video layer — tap to play/pause (Phase 4)
+            // Video layer — continuous playback, no tap gesture
             if let player = vm.player {
                 PlayerLayerView(player: player)
                     .ignoresSafeArea(edges: .top)
-                    .onTapGesture { togglePlayPause() }
             }
 
             // Loading
@@ -237,46 +232,14 @@ struct PlayerView: View {
                 }
             }
 
-            // Scoreboard overlay (top)
-            scoreboardOverlay
-
-            // Points fly-up
-            if let fly = game.flyText {
-                Text(fly)
-                    .font(.system(size: 32, weight: .black))
-                    .foregroundColor(Color(arenza: "#ffc107"))
-                    .shadow(color: Color(arenza: "#ffc107").opacity(0.6), radius: 12)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .bottom).combined(with: .opacity),
-                        removal: .move(edge: .top).combined(with: .opacity)
-                    ))
-                    .id(fly)
-            }
-
-            // Pause/play icon flash
-            pauseIconOverlay
+            // Minimal controls — dismiss + fullscreen only
+            videoControlsOverlay
         }
-        .animation(.easeInOut(duration: 0.3), value: game.flyText)
         .clipped()
     }
 
-    // Pause icon flash feedback
-    private var pauseIconOverlay: some View {
-        Group {
-            if showPauseIcon {
-                Image(systemName: vm.player?.rate == 0 ? "pause.circle.fill" : "play.circle.fill")
-                    .font(.system(size: 52))
-                    .foregroundColor(.white.opacity(0.85))
-                    .shadow(radius: 10)
-                    .transition(.opacity.combined(with: .scale(scale: 0.7)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: showPauseIcon)
-    }
-
-    // MARK: - Scoreboard
-
-    private var scoreboardOverlay: some View {
+    // Minimal video controls — dismiss button + fullscreen toggle
+    private var videoControlsOverlay: some View {
         VStack {
             HStack(alignment: .center, spacing: 0) {
                 // Close
@@ -291,24 +254,18 @@ struct PlayerView: View {
 
                 Spacer()
 
-                // Scoreboard
-                HStack(spacing: 10) {
-                    teamScoreView(emoji: "🦅", name: "EAGLES", score: game.homeScore, color: Color(arenza: "#ff6b35"))
-                    VStack(spacing: 0) {
-                        Text("Q\(game.quarter)")
-                            .font(.system(size: 10, weight: .black)).foregroundColor(.white.opacity(0.6))
-                        Text(game.clockDisplay)
-                            .font(.system(size: 14, weight: .black, design: .monospaced)).foregroundColor(.white)
-                    }
-                    teamScoreView(emoji: "🐻", name: "BEARS", score: game.awayScore, color: Color(arenza: "#00c9b1"))
+                // Live badge
+                HStack(spacing: 4) {
+                    Circle().fill(Color.red).frame(width: 6, height: 6)
+                    Text("LIVE").font(.system(size: 9, weight: .black)).foregroundColor(.red).tracking(1.5)
                 }
-                .padding(.horizontal, 14).padding(.vertical, 6)
-                .background(Color.black.opacity(0.75))
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(Color.black.opacity(0.6))
                 .clipShape(Capsule())
 
                 Spacer()
 
-                // Fullscreen toggle button (Phase 2)
+                // Fullscreen toggle button
                 Button {
                     withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
                 } label: {
@@ -326,14 +283,7 @@ struct PlayerView: View {
         }
     }
 
-    private func teamScoreView(emoji: String, name: String, score: Int, color: Color) -> some View {
-        VStack(spacing: 1) {
-            Text("\(emoji) \(name)")
-                .font(.system(size: 9, weight: .semibold)).foregroundColor(.white.opacity(0.7))
-            Text("\(score)")
-                .font(.system(size: 28, weight: .black, design: .monospaced)).foregroundColor(color)
-        }
-    }
+
 
     // MARK: - Unified Tab Panel (Phase 1)
 
@@ -433,21 +383,7 @@ struct PlayerView: View {
         }
     }
 
-    // MARK: - Play / Pause (Phase 4)
 
-    private func togglePlayPause() {
-        guard let player = vm.player else { return }
-        if player.rate == 0 {
-            player.play()
-        } else {
-            player.pause()
-        }
-        // Flash the icon
-        showPauseIcon = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            withAnimation { showPauseIcon = false }
-        }
-    }
 
     // MARK: - Fullscreen Controls (Phase 2)
 
