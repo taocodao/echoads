@@ -1,6 +1,6 @@
-// PredictionAdCard.swift â€” Arenza
+// PredictionAdCard.swift — Arenza
 // Ad Format 1: Live Prediction Banner
-// Sponsored by Pepsi â€” countdown-gated question tied to live game moments.
+// Sponsored by Pepsi — countdown-gated question tied to live game moments.
 // Fans select an outcome, lock in before timer expires, earn points if correct.
 // Directly reads from GameEngine.activePrediction.
 
@@ -41,7 +41,7 @@ struct PredictionAdCard: View {
             // Live dot
             HStack(spacing: 4) {
                 PulsingDot(color: Color(arenza: "#ef4444"))
-                Text("LIVE Â· Q\(engine.quarter) Â· \(engine.clockDisplay)")
+                Text("LIVE · Q\(engine.quarter) · \(engine.clockDisplay)")
                     .font(.system(size: 10, weight: .black))
                     .foregroundColor(Color(arenza: "#ef4444"))
                     .tracking(0.8)
@@ -49,7 +49,7 @@ struct PredictionAdCard: View {
             Spacer()
             // Sponsor
             HStack(spacing: 4) {
-                Text("ðŸ¥¤")
+                Text("🥤")
                 Text("Pepsi")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(Color(arenza: "#00c9b1"))
@@ -74,7 +74,7 @@ struct PredictionAdCard: View {
     private func questionView(pred: GamePrediction) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             if let sponsor = pred.sponsor {
-                Text("ðŸŽ¯ Sponsored by \(sponsor)")
+                Text("🎯 Sponsored by \(sponsor)")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(Color(arenza: "#ff6b35"))
             }
@@ -114,47 +114,29 @@ struct PredictionAdCard: View {
                       isWrong   ? Color(arenza: "#ef4444").opacity(0.1) :
                       isPicked  ? Color(arenza: "#ff6b35").opacity(0.15) : Color(arenza: "#1a1e2a")
 
-        // Phase 3: Simulated vote distribution for social-proof fill bars
-        let votePcts: [Double] = [0.62, 0.38, 0.51, 0.49]
-        let fillPct = index < votePcts.count ? votePcts[index] : 0.5
-
         return Button {
             engine.pickOption(index)
             adEngine.userBeganInteraction(pauseFor: 30)
         } label: {
-            GeometryReader { geo in
-                ZStack(alignment: .bottomLeading) {
-                    // Fill bar (pred-opt-bar from HTML reference)
-                    Rectangle()
-                        .fill((isCorrect ? Color(arenza: "#22c55e") : Color(arenza: "#ff6b35")).opacity(0.18))
-                        .frame(width: geo.size.width * fillPct, height: 3)
-                        .animation(.timingCurve(0.16, 1, 0.3, 1, duration: 0.8), value: fillPct)
+            HStack(spacing: 6) {
+                Text(opt.emoji).font(.system(size: 16))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(opt.label)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(arenza: "#f0f2ff"))
+                    Text(opt.odds)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(isCorrect ? Color(arenza: "#22c55e") : Color(arenza: "#8892b0"))
                 }
-                HStack(spacing: 6) {
-                    Text(opt.emoji).font(.system(size: 16))
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(opt.label)
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Color(arenza: "#f0f2ff"))
-                        Text(opt.odds)
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundColor(isCorrect ? Color(arenza: "#22c55e") : Color(arenza: "#8892b0"))
-                    }
-                    Spacer()
-                    // Social proof % label
-                    Text("\(Int(fillPct * 100))%")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(isPicked ? Color(arenza: "#ff6b35") : Color(arenza: "#4a5568"))
-                    if isPicked {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(isCorrect ? Color(arenza: "#22c55e") : Color(arenza: "#ff6b35"))
-                    }
+                Spacer()
+                if isPicked {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(isCorrect ? Color(arenza: "#22c55e") : Color(arenza: "#ff6b35"))
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
             }
-            .frame(height: 46)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
             .background(bgColor)
             .clipShape(RoundedRectangle(cornerRadius: 9))
             .overlay(RoundedRectangle(cornerRadius: 9).stroke(borderColor, lineWidth: 1))
@@ -169,16 +151,30 @@ struct PredictionAdCard: View {
     private func timerBar(pred: GamePrediction) -> some View {
         VStack(spacing: 5) {
             HStack {
-                Text("â± Locks in \(engine.predictionTimer)s")
+                Text("⏱ Locks in \(engine.predictionTimer)s")
                     .font(.system(size: 10))
                     .foregroundColor(engine.predictionTimer <= 5 ? Color(arenza: "#ef4444") : Color(arenza: "#8892b0"))
                 Spacer()
                 if engine.predictionResolved {
-                    Text(engine.userPick == pred.correctIndex ? "âœ… Correct! +\(pred.pointReward) pts" : "âŒ Not quite! +10 pts")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(engine.userPick == pred.correctIndex ? Color(arenza: "#22c55e") : Color(arenza: "#ef4444"))
+                    if engine.userPick == pred.correctIndex {
+                        HStack(spacing: 4) {
+                            Text("✅ Correct! +\(pred.pointReward) pts")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Color(arenza: "#22c55e"))
+                            Text("⚡ +1 Bonus Spin")
+                                .font(.system(size: 9, weight: .black))
+                                .foregroundColor(Color(arenza: "#ffc107"))
+                                .padding(.horizontal, 5).padding(.vertical, 2)
+                                .background(Color(arenza: "#ffc107").opacity(0.15))
+                                .clipShape(Capsule())
+                        }
+                    } else {
+                        Text("❌ Not quite! +10 pts")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(Color(arenza: "#ef4444"))
+                    }
                 } else {
-                    Text("ðŸŽ– +\(pred.pointReward) pts")
+                    Text("🎖 +\(pred.pointReward) pts · ⚡ Bonus Spin on correct")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(Color(arenza: "#ffc107"))
                 }
@@ -198,7 +194,6 @@ struct PredictionAdCard: View {
             .frame(height: 3)
         }
         .onChange(of: engine.predictionResolved) { resolved in
-            // PREDICT & SPIN BRIDGE: correct answer earns a bonus spin token
             if resolved, let pick = engine.userPick, pick == pred.correctIndex {
                 Task { @MainActor in
                     TemporalRetentionService.shared.addBonusSpin(count: 1)
@@ -211,11 +206,11 @@ struct PredictionAdCard: View {
 
     private var idleView: some View {
         VStack(spacing: 8) {
-            Text("ðŸ”®").font(.system(size: 28))
+            Text("🔮").font(.system(size: 28))
             Text("Next prediction incoming...")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(Color(arenza: "#8892b0"))
-            Text("Stay tuned â€” sponsored by Pepsi")
+            Text("Stay tuned — sponsored by Pepsi")
                 .font(.system(size: 10))
                 .foregroundColor(Color(arenza: "#4a5568"))
         }

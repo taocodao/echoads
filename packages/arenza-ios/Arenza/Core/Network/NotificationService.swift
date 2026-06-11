@@ -165,8 +165,6 @@ final class NotificationService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - Register Notification Categories
-
     // MARK: - Temporal Retention Notifications (Phase 1)
 
     func scheduleGamePhaseAlert(phase: TemporalRetentionService.GamePhase) {
@@ -229,6 +227,8 @@ final class NotificationService: NSObject, ObservableObject {
         let request = UNNotificationRequest(identifier: "tier_up_\(sponsorName)_\(newTier)", content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request)
     }
+
+    // MARK: - Register Notification Categories
 
     func registerCategories() {
         let couponAction = UNNotificationAction(

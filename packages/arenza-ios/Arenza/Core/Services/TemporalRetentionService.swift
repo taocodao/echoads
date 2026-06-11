@@ -104,18 +104,17 @@ final class TemporalRetentionService: ObservableObject {
 
     // MARK: - Phase Simulation (Demo — cycles through phases for TestFlight)
 
-    private func startPhaseSimulation() {
-        // For demo: cycle through phases every 3 minutes
-        // Production: replace with real game schedule from API
-        let phases: [GamePhase] = [.preGame, .liveGame, .halftime, .liveGame, .postGame]
-        var index = 0
+    private let demoPhaseCycle: [GamePhase] = [.preGame, .liveGame, .halftime, .liveGame, .postGame]
+    private var demoPhaseCycleIndex: Int = 0
 
-        updatePhase(phases[index])
+    private func startPhaseSimulation() {
+        updatePhase(demoPhaseCycle[demoPhaseCycleIndex])
 
         phaseTimer = Timer.scheduledTimer(withTimeInterval: 180, repeats: true) { [weak self] _ in
-            index = (index + 1) % phases.count
             Task { @MainActor [weak self] in
-                self?.updatePhase(phases[index])
+                guard let self else { return }
+                self.demoPhaseCycleIndex = (self.demoPhaseCycleIndex + 1) % self.demoPhaseCycle.count
+                self.updatePhase(self.demoPhaseCycle[self.demoPhaseCycleIndex])
             }
         }
         RunLoop.main.add(phaseTimer!, forMode: .common)
