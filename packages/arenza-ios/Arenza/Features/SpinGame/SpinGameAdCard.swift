@@ -764,7 +764,7 @@ struct RewardRevealModal: View {
 
 // MARK: - Emoji Segment View
 struct EmojiSegmentView: View {
-    let segment: SpinWheelSegment
+    let segment: WheelSegment
     let index: Int
     let totalCount: Int
     let rotation: Double
