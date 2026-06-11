@@ -83,10 +83,10 @@ struct ContentView: View {
                     Label("Rewards", systemImage: "gift.fill")
                 }
 
-            // Token Marketplace
-            MarketplaceView()
+            // TableSpin: QR Membership Wallet
+            QRWalletView()
                 .tabItem {
-                    Label("Shop", systemImage: "storefront")
+                    Label("Wallet", systemImage: "qrcode")
                 }
 
             // Phase 4: Sponsor Campaign Hub

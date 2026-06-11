@@ -18,6 +18,9 @@ struct PlayerLayerView: UIViewRepresentable {
         view.playerLayer.player = player
         view.playerLayer.videoGravity = .resizeAspectFill
         view.backgroundColor = .black
+        // Phase 1: Crop bottom 10% to hide CBS Sports broadcast ticker baked into demo clip.
+        // Normalized rect: (x, y, width, height) where y=0 is top, height=0.90 drops bottom 10%.
+        view.playerLayer.contentsRect = CGRect(x: 0, y: 0, width: 1.0, height: 0.90)
         return view
     }
 
@@ -61,16 +64,16 @@ struct PlayerView: View {
     enum UnifiedTab: String, CaseIterable {
         case predict  = "🎯 Predict"
         case bingo    = "🎲 Bingo"
+        case spin     = "🎰 Spin"
         case scratch  = "🎟 Scratch"
-        case moreLess = "📊 M/L"
         case me       = "👤 Me"
 
         var adFormat: InteractiveAdEngine.AdFormat? {
             switch self {
             case .predict:  return .prediction
             case .bingo:    return .bingo
+            case .spin:     return nil
             case .scratch:  return .scratch
-            case .moreLess: return .moreLess
             case .me:       return nil
             }
         }
@@ -393,14 +396,14 @@ struct PlayerView: View {
     private var unifiedTabContent: some View {
         switch activeTab {
         case .predict:
-            // Interactive ad prediction card (Phase 1: merged)
             PredictionAdCard(engine: game, adEngine: adEngine)
         case .bingo:
             BingoAdCard(engine: game, adEngine: adEngine)
+        case .spin:
+            // TableSpin: sponsor-branded spin wheel + scratch cycling through 4 businesses
+            SpinGameAdCard(engine: game, adEngine: adEngine)
         case .scratch:
             ScratchAdCard(engine: game, adEngine: adEngine)
-        case .moreLess:
-            MoreLessAdCard(engine: game, adEngine: adEngine)
         case .me:
             ProfileTab(engine: game)
         }
@@ -413,7 +416,7 @@ struct PlayerView: View {
         autoCycleTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
             guard !tabUserInteracted else { return }
             Task { @MainActor in
-                let cyclingTabs: [UnifiedTab] = [.predict, .bingo, .scratch, .moreLess]
+                let cyclingTabs: [UnifiedTab] = [.predict, .bingo, .spin, .scratch]
                 guard let idx = cyclingTabs.firstIndex(of: activeTab) else { return }
                 let next = cyclingTabs[(idx + 1) % cyclingTabs.count]
                 withAnimation(.easeInOut(duration: 0.3)) { activeTab = next }
