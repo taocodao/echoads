@@ -1,4 +1,4 @@
-﻿// ArenzaApp.swift — Arenza
+// ArenzaApp.swift — Arenza
 // @main entry point — TabView shell with Watch, Predict, Rewards, and Earnings tabs.
 
 import SwiftUI

@@ -1,4 +1,4 @@
-﻿// PredictionAdCard.swift â€” Arenza
+// PredictionAdCard.swift â€” Arenza
 // Ad Format 1: Live Prediction Banner
 // Sponsored by Pepsi â€” countdown-gated question tied to live game moments.
 // Fans select an outcome, lock in before timer expires, earn points if correct.

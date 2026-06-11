@@ -1,4 +1,4 @@
-﻿ï»¿// PlayerView.swift Ã¢â‚¬â€ Arenza V2
+ï»¿// PlayerView.swift Ã¢â‚¬â€ Arenza V2
 // Layout: Top 40% video (PlayerLayerView Ã¢â‚¬â€ tap-to-play/pause)
 //          Bottom 60% unified tabs (Ã°Å¸Å½Â¯ Predict | Ã°Å¸Å½Â² Bingo | Ã°Å¸Å½Å¸ Scratch | Ã°Å¸â€œÅ  M/L | Ã°Å¸â€˜Â¤ Me)
 // Features: landscape fullscreen toggle, share/refer button, audio-session fix.

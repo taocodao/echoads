@@ -1,4 +1,4 @@
-﻿// QRWalletService.swift — Arenza (TableSpin Integration)
+// QRWalletService.swift — Arenza (TableSpin Integration)
 // Singleton that manages the in-memory wallet of member cards and rewards.
 // In production, persists to SwiftData / CloudKit.
 

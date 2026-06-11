@@ -1,4 +1,4 @@
-﻿// NotificationService.swift — Arenza (Phase 5: Push Notifications)
+// NotificationService.swift — Arenza (Phase 5: Push Notifications)
 // APNs push notification registration, handling, and scheduling.
 // Replaces FCM (Firebase) with native APNs for iOS.
 
