@@ -1,4 +1,4 @@
-// QRWalletService.swift — Arenza (TableSpin Integration)
+﻿// QRWalletService.swift — Arenza (TableSpin Integration)
 // Singleton that manages the in-memory wallet of member cards and rewards.
 // In production, persists to SwiftData / CloudKit.
 
@@ -56,16 +56,39 @@ final class QRWalletService: ObservableObject {
     func updatePoints(sponsorId: String, delta: Int) {
         guard let idx = memberCards.firstIndex(where: { $0.sponsorId == sponsorId }) else { return }
         let old = memberCards[idx]
+        let newPoints = old.totalPoints + delta
+        let (tier, emoji, color) = memberTier(for: newPoints)
+        let didTierUp = tier != old.tierLabel
+
         memberCards[idx] = MemberCard(
             id: old.id, memberId: old.memberId,
             sponsorId: old.sponsorId, sponsorName: old.sponsorName,
             sponsorEmoji: old.sponsorEmoji, sponsorBrandColor: old.sponsorBrandColor,
             sponsorWebsiteURL: old.sponsorWebsiteURL,
-            tierLabel: old.tierLabel, tierEmoji: old.tierEmoji, tierColor: old.tierColor,
-            totalPoints: old.totalPoints + delta,
+            tierLabel: tier, tierEmoji: emoji, tierColor: color,
+            totalPoints: newPoints,
             totalSpend: old.totalSpend,
             memberSince: old.memberSince
         )
+
+        // Fire tier-up notification
+        if didTierUp && delta > 0 {
+            NotificationService.shared.scheduleTierAdvancementAlert(
+                sponsorName: old.sponsorName,
+                newTier: tier
+            )
+        }
+    }
+
+    // MARK: - Tier Progression (Bronze -> Silver -> Gold -> VIP)
+
+    private func memberTier(for points: Int) -> (label: String, emoji: String, color: String) {
+        switch points {
+        case 0..<100:   return ("Bronze",  "🥉", "#cd7f32")
+        case 100..<300: return ("Silver",  "🥈", "#a8a9ad")
+        case 300..<600: return ("Gold",    "🥇", "#ffd700")
+        default:        return ("VIP",     "💎", "#00c9b1")
+        }
     }
 
     // MARK: - Expiry Monitor

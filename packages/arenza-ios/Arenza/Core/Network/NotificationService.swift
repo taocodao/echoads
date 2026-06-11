@@ -1,4 +1,4 @@
-// NotificationService.swift — Arenza (Phase 5: Push Notifications)
+﻿// NotificationService.swift — Arenza (Phase 5: Push Notifications)
 // APNs push notification registration, handling, and scheduling.
 // Replaces FCM (Firebase) with native APNs for iOS.
 
@@ -166,6 +166,69 @@ final class NotificationService: NSObject, ObservableObject {
     }
 
     // MARK: - Register Notification Categories
+
+    // MARK: - Temporal Retention Notifications (Phase 1)
+
+    func scheduleGamePhaseAlert(phase: TemporalRetentionService.GamePhase) {
+        let content = UNMutableNotificationContent()
+        content.title = "Arenza LIVE"
+        content.body = phase.label + " - Open to spin & win!"
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: "game_phase_\(phase.rawValue)_\(Date().timeIntervalSince1970)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func scheduleBonusSpinAlert(eventLabel: String, seconds: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "Bonus Spin Window!"
+        content.body = "\(eventLabel) - You have \(seconds) seconds to spin & win bonus rewards!"
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: "bonus_spin_\(Date().timeIntervalSince1970)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func scheduleStreakMilestone(streak: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "Streak Milestone!"
+        content.body = "You have a \(streak)-day spin streak! Multiplier upgraded to \(streak >= 14 ? "3.0x" : streak >= 7 ? "2.0x" : "1.5x"). Keep it going!"
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let request = UNNotificationRequest(identifier: "streak_\(streak)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func schedulePostGameExtensionAlert() {
+        let content = UNMutableNotificationContent()
+        content.title = "Your Rewards Were Extended!"
+        content.body = "Great game! Your rewards have been extended 30 minutes. Don't miss out!"
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(identifier: "post_game_ext_\(Date().timeIntervalSince1970)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func scheduleRewardExpiryWarning(inMinutes minutes: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "Rewards Expiring Soon!"
+        content.body = "Your Arenza rewards expire in \(minutes) minutes. Visit the restaurant to claim them!"
+        content.sound = .default
+        guard Double(minutes * 60) > 0 else { return }
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, Double(minutes * 60) - 60), repeats: false)
+        let request = UNNotificationRequest(identifier: "reward_expiry_\(Date().timeIntervalSince1970)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func scheduleTierAdvancementAlert(sponsorName: String, newTier: String) {
+        let content = UNMutableNotificationContent()
+        content.title = "Tier Upgrade at \(sponsorName)!"
+        content.body = "Congratulations! You've reached \(newTier) tier. New perks and better rewards await you."
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: "tier_up_\(sponsorName)_\(newTier)", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
 
     func registerCategories() {
         let couponAction = UNNotificationAction(

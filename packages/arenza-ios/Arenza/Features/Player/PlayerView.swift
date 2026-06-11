@@ -1,6 +1,6 @@
-﻿// PlayerView.swift â€” Arenza V2
-// Layout: Top 40% video (PlayerLayerView â€” tap-to-play/pause)
-//          Bottom 60% unified tabs (ðŸŽ¯ Predict | ðŸŽ² Bingo | ðŸŽŸ Scratch | ðŸ“Š M/L | ðŸ‘¤ Me)
+﻿ï»¿// PlayerView.swift Ã¢â‚¬â€ Arenza V2
+// Layout: Top 40% video (PlayerLayerView Ã¢â‚¬â€ tap-to-play/pause)
+//          Bottom 60% unified tabs (Ã°Å¸Å½Â¯ Predict | Ã°Å¸Å½Â² Bingo | Ã°Å¸Å½Å¸ Scratch | Ã°Å¸â€œÅ  M/L | Ã°Å¸â€˜Â¤ Me)
 // Features: landscape fullscreen toggle, share/refer button, audio-session fix.
 
 import SwiftUI
@@ -64,11 +64,11 @@ struct PlayerView: View {
     @State private var showShareToast = false
 
     enum UnifiedTab: String, CaseIterable {
-        case predict  = "ðŸŽ¯ Predict"
-        case bingo    = "ðŸŽ² Bingo"
-        case spin     = "ðŸŽ° Spin"
-        case scratch  = "ðŸŽŸ Scratch"
-        case me       = "ðŸ‘¤ Me"
+        case predict  = "Ã°Å¸Å½Â¯ Predict"
+        case bingo    = "Ã°Å¸Å½Â² Bingo"
+        case spin     = "Ã°Å¸Å½Â° Spin"
+        case scratch  = "Ã°Å¸Å½Å¸ Scratch"
+        case me       = "Ã°Å¸â€˜Â¤ Me"
 
         var adFormat: InteractiveAdEngine.AdFormat? {
             switch self {
@@ -122,11 +122,11 @@ struct PlayerView: View {
     private var portraitLayout: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
-                // â”€â”€ TOP 40%: Video Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Ã¢â€â‚¬Ã¢â€â‚¬ TOP 40%: Video Panel Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                 videoPanel
                     .frame(height: geo.size.height * 0.40)
 
-                // â”€â”€ BOTTOM 60%: Unified Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Ã¢â€â‚¬Ã¢â€â‚¬ BOTTOM 60%: Unified Tabs Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                 unifiedTabPanel
                     .frame(height: geo.size.height * 0.60)
             }
@@ -176,13 +176,13 @@ struct PlayerView: View {
                 Spacer()
                 // Scoreboard in fullscreen
                 HStack(spacing: 10) {
-                    Text("ðŸ¦… \(game.homeScore)")
+                    Text("Ã°Å¸Â¦â€¦ \(game.homeScore)")
                         .font(.system(size: 16, weight: .black, design: .monospaced))
                         .foregroundColor(Color(arenza: "#ff6b35"))
-                    Text("Q\(game.quarter) Â· \(game.clockDisplay)")
+                    Text("Q\(game.quarter) Ã‚Â· \(game.clockDisplay)")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white.opacity(0.7))
-                    Text("\(game.awayScore) ðŸ»")
+                    Text("\(game.awayScore) Ã°Å¸ÂÂ»")
                         .font(.system(size: 16, weight: .black, design: .monospaced))
                         .foregroundColor(Color(arenza: "#00c9b1"))
                 }
@@ -211,7 +211,7 @@ struct PlayerView: View {
         ZStack(alignment: .bottom) {
             Color.black
 
-            // Video layer â€” continuous playback, no tap gesture
+            // Video layer Ã¢â‚¬â€ continuous playback, no tap gesture
             if let player = vm.player {
                 PlayerLayerView(player: player)
                     .ignoresSafeArea(edges: .top)
@@ -221,7 +221,7 @@ struct PlayerView: View {
             if vm.isLoading {
                 VStack(spacing: 12) {
                     ProgressView().tint(.white).scaleEffect(1.2)
-                    Text("Connecting to streamâ€¦")
+                    Text("Connecting to streamÃ¢â‚¬Â¦")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(0.6))
                 }
@@ -236,13 +236,13 @@ struct PlayerView: View {
                 }
             }
 
-            // Minimal controls â€” dismiss + fullscreen only
+            // Minimal controls Ã¢â‚¬â€ dismiss + fullscreen only
             videoControlsOverlay
         }
         .clipped()
     }
 
-    // Minimal video controls â€” dismiss button + fullscreen toggle
+    // Minimal video controls Ã¢â‚¬â€ dismiss button + fullscreen toggle
     private var videoControlsOverlay: some View {
         VStack {
             HStack(alignment: .center, spacing: 0) {
@@ -269,7 +269,7 @@ struct PlayerView: View {
 
                 Spacer()
 
-                // Fullscreen toggle — requires AZT unlock if not already paid
+                // Fullscreen toggle â€” requires AZT unlock if not already paid
                 Button {
                     if landscapeUnlocked {
                         withAnimation(.easeInOut(duration: 0.3)) { isFullscreen = true }
@@ -323,6 +323,7 @@ struct PlayerView: View {
 
     private var unifiedTabPanel: some View {
         VStack(spacing: 0) {
+            TemporalStatusBanner()
             unifiedTabBar
             unifiedTabContent
         }
@@ -352,7 +353,7 @@ struct PlayerView: View {
 
             // Points badge
             VStack(spacing: 1) {
-                Text("â­")
+                Text("Ã¢Â­Â")
                     .font(.system(size: 11))
                 Text("\(game.points.formatted())")
                     .font(.system(size: 10, weight: .black, design: .monospaced))
@@ -440,7 +441,7 @@ struct PlayerView: View {
     // MARK: - Share / Refer (Phase 3)
 
     private func shareGame() {
-        let text = "I'm watching Eagles vs Bears LIVE on Arenza! Join me and earn 500 bonus points ðŸˆðŸ”¥"
+        let text = "I'm watching Eagles vs Bears LIVE on Arenza! Join me and earn 500 bonus points Ã°Å¸ÂË†Ã°Å¸â€Â¥"
         let url = URL(string: "https://arenza.tv/join?ref=demo-user")!
         let ac = UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -452,7 +453,7 @@ struct PlayerView: View {
     private var shareToast: some View {
         Group {
             if showShareToast {
-                Text("ðŸ”— Link copied!")
+                Text("Ã°Å¸â€â€” Link copied!")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 16).padding(.vertical, 10)

@@ -1,4 +1,4 @@
-// ArenzaApp.swift — Arenza
+﻿// ArenzaApp.swift — Arenza
 // @main entry point — TabView shell with Watch, Predict, Rewards, and Earnings tabs.
 
 import SwiftUI
@@ -101,6 +101,18 @@ struct ContentView: View {
             EarningsView()
                 .tabItem {
                     Label("Earnings", systemImage: "chart.line.uptrend.xyaxis")
+                }
+
+            // Marketplace: search sponsors, redeem AZT points
+            MarketplaceView()
+                .tabItem {
+                    Label("Shop", systemImage: "storefront.fill")
+                }
+
+            // Operator Mode: business owner QR scanner (PIN-gated)
+            OperatorScanView()
+                .tabItem {
+                    Label("Operator", systemImage: "qrcode.viewfinder")
                 }
         }
         .tint(Color(red: 0.0, green: 0.82, blue: 0.60))  // CMXS brand green
