@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>TableSpin – Restaurant Loyalty Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ======================== TOKENS ======================== */
+    :root {
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+
+      --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+      --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+      --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+      --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+      --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+      --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+      --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+      --space-16: 4rem;
+
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+      --radius-xl: 1rem; --radius-2xl: 1.5rem; --radius-full: 9999px;
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="dark"] {
+      --color-bg:            #0f0e0c;
+      --color-surface:       #161512;
+      --color-surface-2:     #1c1a17;
+      --color-surface-3:     #232119;
+      --color-border:        #2e2b25;
+      --color-divider:       #242220;
+      --color-text:          #f0ede6;
+      --color-text-muted:    #8a8780;
+      --color-text-faint:    #4e4c47;
+
+      --color-primary:       #ff7b3a;
+      --color-primary-hover: #ff6320;
+      --color-primary-glow:  rgba(255,123,58,0.2);
+      --color-gold:          #f5c842;
+      --color-gold-glow:     rgba(245,200,66,0.15);
+      --color-success:       #4caf6a;
+      --color-error:         #e05252;
+      --color-blue:          #5b8ff9;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.35);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.45);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.55);
+      --shadow-glow-primary: 0 0 32px rgba(255,123,58,0.25);
+      --shadow-glow-gold: 0 0 40px rgba(245,200,66,0.3);
+    }
+    [data-theme="light"] {
+      --color-bg:            #faf9f6;
+      --color-surface:       #ffffff;
+      --color-surface-2:     #f5f3ef;
+      --color-surface-3:     #ede9e3;
+      --color-border:        #ddd9d1;
+      --color-divider:       #e8e4de;
+      --color-text:          #1a1712;
+      --color-text-muted:    #6b6860;
+      --color-text-faint:    #b0ada6;
+
+      --color-primary:       #e86c2a;
+      --color-primary-hover: #d05518;
+      --color-primary-glow:  rgba(232,108,42,0.15);
+      --color-gold:          #d4aa1e;
+      --color-gold-glow:     rgba(212,170,30,0.12);
+      --color-success:       #3a9657;
+      --color-error:         #cc3939;
+      --color-blue:          #3b6fe8;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+      --shadow-glow-primary: 0 0 32px rgba(232,108,42,0.2);
+      --shadow-glow-gold: 0 0 40px rgba(212,170,30,0.2);
+    }
+
+    /* ======================== BASE ======================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body {
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.6;
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+    input, select { font: inherit; color: inherit; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* ======================== APP SHELL ======================== */
+    .app-header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-6);
+      background: color-mix(in oklch, var(--color-bg) 90%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .logo {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700;
+      color: var(--color-text);
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--color-primary); border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .header-right { display: flex; align-items: center; gap: var(--space-3); }
+    .nav-tabs {
+      display: flex; background: var(--color-surface); border-radius: var(--radius-full);
+      padding: var(--space-1); gap: var(--space-1); border: 1px solid var(--color-border);
+    }
+    .nav-tab {
+      padding: var(--space-1) var(--space-4); border-radius: var(--radius-full);
+      font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+      transition: all var(--transition-interactive);
+      color: var(--color-text-muted);
+    }
+    .nav-tab.active {
+      background: var(--color-primary); color: #fff;
+      box-shadow: 0 2px 8px var(--color-primary-glow);
+    }
+    .nav-tab:hover:not(.active) { color: var(--color-text); background: var(--color-surface-2); }
+
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: var(--radius-md);
+      background: var(--color-surface-2); border: 1px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition-interactive); font-size: 16px;
+    }
+    .theme-btn:hover { background: var(--color-surface-3); }
+
+    /* ======================== VIEWS ======================== */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ======================== GAME VIEW ======================== */
+    .game-view {
+      max-width: 480px; margin: 0 auto;
+      padding: var(--space-8) var(--space-4) var(--space-12);
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-6);
+    }
+    .restaurant-badge {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-5);
+      background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .restaurant-logo {
+      width: 40px; height: 40px; border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--color-primary), #ff5500);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .restaurant-name { font-weight: 700; font-size: var(--text-base); }
+    .restaurant-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+    .plays-counter {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-surface-2); border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      font-size: var(--text-sm); font-weight: 600;
+    }
+    .plays-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); }
+    .plays-dot.empty { background: var(--color-text-faint); }
+
+    /* ---- WHEEL ---- */
+    .wheel-wrapper {
+      position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-4);
+    }
+    .wheel-pointer {
+      width: 0; height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 28px solid var(--color-gold);
+      filter: drop-shadow(0 2px 8px var(--color-gold-glow));
+      z-index: 10; position: relative;
+    }
+    .wheel-canvas-container {
+      position: relative;
+      width: 300px; height: 300px;
+    }
+    #wheelCanvas {
+      border-radius: 50%;
+      box-shadow: var(--shadow-lg), var(--shadow-glow-primary);
+      cursor: pointer;
+    }
+    .wheel-center {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--color-bg);
+      border: 4px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; z-index: 5;
+      box-shadow: var(--shadow-md);
+    }
+
+    .spin-btn {
+      width: 100%; max-width: 300px;
+      padding: var(--space-4) var(--space-6);
+      background: var(--color-primary);
+      color: #fff; font-weight: 800; font-size: var(--text-base);
+      font-family: var(--font-display);
+      border-radius: var(--radius-xl); letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px var(--color-primary-glow);
+      transition: all var(--transition-interactive);
+      position: relative; overflow: hidden;
+    }
+    .spin-btn:hover:not(:disabled) { background: var(--color-primary-hover); transform: translateY(-1px); box-shadow: 0 6px 28px var(--color-primary-glow); }
+    .spin-btn:active:not(:disabled) { transform: translateY(0); }
+    .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .timer-bar-wrap {
+      width: 100%; max-width: 300px;
+      background: var(--color-surface-2); border-radius: var(--radius-full);
+      height: 6px; overflow: hidden; border: 1px solid var(--color-border);
+    }
+    .timer-bar {
+      height: 100%; border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--color-gold), var(--color-primary));
+      transition: width 1s linear;
+    }
+    .timer-label { font-size: var(--text-xs); color: var(--color-text-muted); text-align: center; }
+
+    /* ---- REWARD MODAL ---- */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--space-4);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .reward-modal {
+      background: var(--color-surface); border-radius: var(--radius-2xl);
+      border: 1px solid var(--color-border);
+      padding: var(--space-8); max-width: 360px; width: 100%;
+      box-shadow: var(--shadow-lg), var(--shadow-glow-gold);
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      opacity: 0;
+      text-align: center;
+    }
+    .modal-overlay.open .reward-modal { transform: scale(1) translateY(0); opacity: 1; }
+
+    .reward-trophy { font-size: 56px; margin-bottom: var(--space-3); line-height: 1; }
+    .reward-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-2); color: var(--color-gold); }
+    .reward-desc { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-6); }
+
+    .qr-container {
+      background: #ffffff; border-radius: var(--radius-lg);
+      padding: var(--space-4); margin: 0 auto var(--space-4);
+      width: fit-content; box-shadow: var(--shadow-sm);
+    }
+    #rewardQR canvas { display: block; }
+    .reward-code {
+      font-family: var(--font-display); font-size: var(--text-sm); font-weight: 700;
+      letter-spacing: 0.12em; color: var(--color-text-muted);
+      margin-bottom: var(--space-6);
+    }
+    .reward-expiry {
+      display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+      font-size: var(--text-xs); color: var(--color-text-faint);
+      margin-bottom: var(--space-6);
+    }
+    .expiry-bar-wrap { width: 100%; background: var(--color-surface-2); border-radius: var(--radius-full); height: 4px; margin-bottom: var(--space-3); }
+    .expiry-bar { height: 4px; border-radius: var(--radius-full); background: var(--color-success); transition: width 1s linear; }
+
+    .modal-claim-btn {
+      width: 100%; padding: var(--space-3) var(--space-6);
+      background: var(--color-primary); color: #fff;
+      font-weight: 700; font-size: var(--text-sm);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 16px var(--color-primary-glow);
+      transition: all var(--transition-interactive);
+      margin-bottom: var(--space-3);
+    }
+    .modal-claim-btn:hover { background: var(--color-primary-hover); }
+    .modal-close-btn {
+      width: 100%; padding: var(--space-2); font-size: var(--text-sm);
+      color: var(--color-text-muted); border-radius: var(--radius-md);
+      transition: color var(--transition-interactive);
+    }
+    .modal-close-btn:hover { color: var(--color-text); }
+
+    /* ---- NO PLAYS / SESSION EXPIRED ---- */
+    .no-plays-card {
+      background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border); padding: var(--space-8);
+      text-align: center; max-width: 320px;
+      box-shadow: var(--shadow-sm);
+    }
+    .no-plays-icon { font-size: 48px; margin-bottom: var(--space-4); }
+    .no-plays-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-2); }
+    .no-plays-msg { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+    /* ---- LOYALTY SECTION ---- */
+    .loyalty-card {
+      width: 100%; max-width: 480px;
+      background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border); padding: var(--space-6);
+      box-shadow: var(--shadow-sm);
+    }
+    .loyalty-card-title {
+      font-family: var(--font-display); font-size: var(--text-base);
+      font-weight: 700; margin-bottom: var(--space-4);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .spend-progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
+    .spend-amount { font-size: var(--text-xl); font-weight: 800; font-family: var(--font-display); }
+    .spend-target { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .spend-bar-wrap { background: var(--color-surface-2); border-radius: var(--radius-full); height: 8px; overflow: hidden; }
+    .spend-bar { height: 100%; border-radius: var(--radius-full); background: linear-gradient(90deg, var(--color-primary), var(--color-gold)); transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+    .tier-badges { display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap; }
+    .tier-badge {
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
+      font-size: var(--text-xs); font-weight: 700; border: 1px solid var(--color-border);
+      color: var(--color-text-faint);
+    }
+    .tier-badge.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .tier-badge.reached { background: var(--color-surface-3); color: var(--color-text-muted); }
+
+    /* ======================== QR NAME CARD TAB ======================== */
+    .qr-card-view {
+      max-width: 480px; margin: 0 auto;
+      padding: var(--space-8) var(--space-4) var(--space-12);
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-6);
+    }
+    .member-card {
+      width: 100%; background: linear-gradient(135deg, #1a0e05, #2d1508);
+      border-radius: var(--radius-2xl); border: 1px solid rgba(255,123,58,0.3);
+      padding: var(--space-6); box-shadow: var(--shadow-glow-primary), var(--shadow-lg);
+      position: relative; overflow: hidden;
+    }
+    .member-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(255,123,58,0.12), transparent 60%),
+                  radial-gradient(circle at 20% 80%, rgba(245,200,66,0.08), transparent 50%);
+    }
+    .member-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-6); position: relative; }
+    .member-card-brand { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; color: var(--color-primary); }
+    .member-card-tier { font-size: var(--text-xs); font-weight: 700; color: var(--color-gold); letter-spacing: 0.1em; }
+    .member-qr-wrap { background: white; border-radius: var(--radius-md); padding: var(--space-3); width: fit-content; margin: 0 auto var(--space-4); position: relative; }
+    .member-card-name { font-size: var(--text-base); font-weight: 700; color: #fff; position: relative; }
+    .member-card-id { font-size: var(--text-xs); color: rgba(255,255,255,0.5); font-family: var(--font-display); letter-spacing: 0.1em; position: relative; }
+    .member-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: var(--space-4); position: relative; }
+    .member-card-points { font-family: var(--font-display); }
+    .member-card-points span { font-size: var(--text-xl); font-weight: 800; color: var(--color-gold); }
+    .member-card-points small { font-size: var(--text-xs); color: rgba(255,255,255,0.5); display: block; }
+
+    .rewards-saved {
+      width: 100%; background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border); overflow: hidden; box-shadow: var(--shadow-sm);
+    }
+    .rewards-header {
+      padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider);
+      font-weight: 700; font-size: var(--text-sm); font-family: var(--font-display);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .reward-item {
+      padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider);
+      display: flex; align-items: center; gap: var(--space-3);
+      transition: background var(--transition-interactive);
+    }
+    .reward-item:hover { background: var(--color-surface-2); }
+    .reward-item:last-child { border-bottom: none; }
+    .reward-item-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-md);
+      background: var(--color-surface-3); display: flex; align-items: center;
+      justify-content: center; font-size: 18px; flex-shrink: 0;
+    }
+    .reward-item-name { font-weight: 600; font-size: var(--text-sm); }
+    .reward-item-date { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .reward-item-status {
+      margin-left: auto; padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700;
+    }
+    .status-active { background: rgba(76,175,106,0.15); color: var(--color-success); }
+    .status-claimed { background: var(--color-surface-2); color: var(--color-text-faint); }
+
+    /* ======================== DASHBOARD ======================== */
+    .dashboard-view {
+      max-width: 960px; margin: 0 auto;
+      padding: var(--space-8) var(--space-4) var(--space-12);
+    }
+    .dashboard-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; margin-bottom: var(--space-6); }
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px,100%), 1fr));
+      gap: var(--space-4); margin-bottom: var(--space-6);
+    }
+    .kpi-card {
+      background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border); padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+    .kpi-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: var(--space-2); }
+    .kpi-value { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; }
+    .kpi-change { font-size: var(--text-xs); margin-top: var(--space-1); }
+    .kpi-up { color: var(--color-success); }
+    .kpi-down { color: var(--color-error); }
+
+    .charts-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-6);
+    }
+    @media (max-width: 640px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border); padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-card-title { font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-4); font-family: var(--font-display); }
+    .chart-canvas-wrap { position: relative; height: 180px; }
+
+    .sessions-table {
+      background: var(--color-surface); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border); overflow: hidden; box-shadow: var(--shadow-sm);
+    }
+    .table-header {
+      padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider);
+      font-weight: 700; font-size: var(--text-sm); font-family: var(--font-display);
+    }
+    .table-row {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider);
+      font-size: var(--text-sm); align-items: center;
+      transition: background var(--transition-interactive);
+    }
+    .table-row:hover { background: var(--color-surface-2); }
+    .table-row:last-child { border-bottom: none; }
+    .table-row-header { background: var(--color-surface-2); font-weight: 700; color: var(--color-text-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; }
+    .table-row-header:hover { background: var(--color-surface-2); }
+
+    .badge-won { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; background: rgba(76,175,106,0.15); color: var(--color-success); }
+    .badge-lost { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; background: var(--color-surface-2); color: var(--color-text-faint); }
+
+    /* ======================== CONFETTI ======================== */
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 300; }
+
+    /* ======================== TOAST ======================== */
+    .toast {
+      position: fixed; bottom: var(--space-8); left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-3) var(--space-5);
+      font-size: var(--text-sm); font-weight: 600;
+      box-shadow: var(--shadow-lg); z-index: 400;
+      display: flex; align-items: center; gap: var(--space-2);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+      opacity: 0; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ======================== RESPONSIVE ======================== */
+    @media (max-width: 520px) {
+      .app-header { padding: var(--space-3) var(--space-4); }
+      .nav-tabs { display: none; }
+      .mobile-nav {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+        background: var(--color-surface); border-top: 1px solid var(--color-border);
+        display: flex; padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+        backdrop-filter: blur(12px);
+      }
+      .mobile-tab {
+        flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+        padding: var(--space-2); border-radius: var(--radius-md);
+        font-size: 10px; font-weight: 600; color: var(--color-text-muted);
+        transition: all var(--transition-interactive);
+      }
+      .mobile-tab.active { color: var(--color-primary); }
+      .mobile-tab-icon { font-size: 22px; }
+      .game-view, .qr-card-view { padding-bottom: 100px; }
+      .dashboard-view { padding-bottom: 100px; }
+    }
+    @media (min-width: 521px) { .mobile-nav { display: none; } }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-icon">🍽️</div>
+    TableSpin
+  </div>
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-tab="game" role="tab">🎰 Spin</button>
+    <button class="nav-tab" data-tab="qrcard" role="tab">🪪 My Card</button>
+    <button class="nav-tab" data-tab="dashboard" role="tab">📊 Dashboard</button>
+  </nav>
+  <div class="header-right">
+    <button class="theme-btn" data-theme-toggle aria-label="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <button class="mobile-tab active" data-tab="game">
+    <span class="mobile-tab-icon">🎰</span>Spin
+  </button>
+  <button class="mobile-tab" data-tab="qrcard">
+    <span class="mobile-tab-icon">🪪</span>My Card
+  </button>
+  <button class="mobile-tab" data-tab="dashboard">
+    <span class="mobile-tab-icon">📊</span>Dashboard
+  </button>
+</nav>
+
+<!-- =================== GAME VIEW =================== -->
+<main>
+<section class="view game-view active" id="view-game">
+  <div class="restaurant-badge">
+    <div class="restaurant-logo">🥩</div>
+    <div>
+      <div class="restaurant-name">The Copper Grill</div>
+      <div class="restaurant-sub">Premium Dining · 34 W 51st St, NYC</div>
+    </div>
+  </div>
+
+  <div class="plays-counter" id="playsCounter">
+    <span class="plays-dot" id="dot1"></span>
+    <span class="plays-dot" id="dot2"></span>
+    <span class="plays-dot" id="dot3"></span>
+    <span id="playsLabel">3 spins remaining today</span>
+  </div>
+
+  <div class="wheel-wrapper" id="wheelSection">
+    <div class="wheel-pointer" aria-hidden="true"></div>
+    <div class="wheel-canvas-container">
+      <canvas id="wheelCanvas" width="300" height="300" role="img" aria-label="Spin the wheel"></canvas>
+      <div class="wheel-center">🎰</div>
+    </div>
+    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">TAP TO SPIN</button>
+    <div class="timer-bar-wrap" id="timerWrap" style="display:none">
+      <div class="timer-bar" id="timerBar" style="width:100%"></div>
+    </div>
+    <div class="timer-label" id="timerLabel"></div>
+  </div>
+
+  <div class="no-plays-card" id="noPlaysCard" style="display:none">
+    <div class="no-plays-icon">⏰</div>
+    <div class="no-plays-title">Come back tomorrow!</div>
+    <div class="no-plays-msg">Your daily spins reset at midnight. Visit us again to spin and win exclusive rewards.</div>
+  </div>
+
+  <div class="loyalty-card">
+    <div class="loyalty-card-title">🏅 Loyalty Progress</div>
+    <div class="spend-progress-row">
+      <span class="spend-amount" id="spendAmt">$47</span>
+      <span class="spend-target">$100 = 10% discount</span>
+    </div>
+    <div class="spend-bar-wrap">
+      <div class="spend-bar" id="spendBar" style="width:47%"></div>
+    </div>
+    <div class="tier-badges">
+      <span class="tier-badge reached">🌱 Newcomer</span>
+      <span class="tier-badge active">🔥 Regular ($50)</span>
+      <span class="tier-badge">⭐ VIP ($150)</span>
+      <span class="tier-badge">💎 Diamond ($500)</span>
+    </div>
+  </div>
+</section>
+
+<!-- =================== QR CARD VIEW =================== -->
+<section class="view" id="view-qrcard">
+  <div class="qr-card-view">
+    <div class="member-card">
+      <div class="member-card-top">
+        <div>
+          <div class="member-card-brand">🍽️ TableSpin</div>
+          <div class="member-card-tier" id="memberTier">🔥 REGULAR MEMBER</div>
+        </div>
+        <div style="text-align:right; position:relative;">
+          <div style="font-size:var(--text-xs); color:rgba(255,255,255,0.4); letter-spacing:0.05em;">SINCE</div>
+          <div style="font-size:var(--text-xs); color:rgba(255,255,255,0.6); font-weight:600;">JUN 2025</div>
+        </div>
+      </div>
+      <div class="member-qr-wrap" id="memberQrWrap"><!-- QR injected --></div>
+      <div class="member-card-name">Alex Rivera</div>
+      <div class="member-card-id" id="memberCardId">MBR-••••-••••</div>
+      <div class="member-card-footer">
+        <div class="member-card-points">
+          <small>Total Points</small>
+          <span id="memberPoints">2,340</span>
+        </div>
+        <div style="text-align:right; position:relative;">
+          <div style="font-size:var(--text-xs); color:rgba(255,255,255,0.4);">VALID THRU</div>
+          <div style="font-size:var(--text-xs); color:rgba(255,255,255,0.6); font-weight:600;">12/2027</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rewards-saved" id="rewardsList">
+      <div class="rewards-header">
+        <span>🎁 Saved Rewards</span>
+        <span id="rewardsCount" style="font-size:var(--text-xs); color:var(--color-text-muted);">0 active</span>
+      </div>
+      <div id="rewardsContainer">
+        <div style="padding:var(--space-8); text-align:center; color:var(--color-text-faint); font-size:var(--text-sm);">
+          Spin the wheel to earn rewards! 🎰
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== DASHBOARD VIEW =================== -->
+<section class="view" id="view-dashboard">
+  <div class="dashboard-view">
+    <div class="dashboard-title">📊 Analytics Dashboard</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Daily Active Players</div>
+        <div class="kpi-value" id="kpi-dau">247</div>
+        <div class="kpi-change kpi-up">↑ 12% vs yesterday</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Spins Today</div>
+        <div class="kpi-value" id="kpi-spins">641</div>
+        <div class="kpi-change kpi-up">↑ 8% vs yesterday</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Win Rate</div>
+        <div class="kpi-value" id="kpi-winrate">34.2%</div>
+        <div class="kpi-change kpi-down">↓ 2.1% configured</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Rewards Claimed</div>
+        <div class="kpi-value" id="kpi-claimed">88</div>
+        <div class="kpi-change kpi-up">↑ 15% vs yesterday</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">Daily Active Users (7d)</div>
+        <div class="chart-canvas-wrap"><canvas id="dauChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Reward Distribution</div>
+        <div class="chart-canvas-wrap"><canvas id="rewardChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="sessions-table">
+      <div class="table-header">Recent Sessions</div>
+      <div class="table-row table-row-header">
+        <span>Player</span><span>Time</span><span>Spins</span><span>Result</span><span>Reward</span>
+      </div>
+      <div id="sessionsBody"><!-- injected by JS --></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- REWARD MODAL -->
+<div class="modal-overlay" id="rewardModal" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+  <div class="reward-modal">
+    <div class="reward-trophy" id="rewardTrophy">🏆</div>
+    <div class="reward-title" id="rewardTitle">You Won!</div>
+    <div class="reward-desc" id="rewardDesc">Show this QR code to your server to claim your reward.</div>
+    <div class="qr-container">
+      <div id="rewardQR"></div>
+    </div>
+    <div class="reward-code" id="rewardCodeLabel"></div>
+    <div class="expiry-bar-wrap"><div class="expiry-bar" id="expiryBar"></div></div>
+    <div class="reward-expiry" id="expiryTimer">⏱ Expires in 5:00</div>
+    <button class="modal-claim-btn" onclick="claimReward()" id="claimBtn">✅ Claim at Counter (Mock POS)</button>
+    <button class="modal-close-btn" onclick="closeModal()">Save for later</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ==================== STATE ====================
+const MAX_DAILY_PLAYS = 3;
+const SESSION_EXPIRE_SECS = 300; // 5 min reward window
+
+let state = {
+  playsUsed: 0,
+  playsMax: MAX_DAILY_PLAYS,
+  isSpinning: false,
+  sessionActive: false,
+  sessionTimer: null,
+  sessionSecsLeft: SESSION_EXPIRE_SECS,
+  lastWin: null,
+  totalPoints: 2340,
+  totalSpend: 47,
+  savedRewards: [],
+  spinHistory: [],
+  spinCount: 0,
+  winCount: 0,
+};
+
+// ==================== REWARDS CONFIG ====================
+const REWARDS = [
+  { label: "10% OFF",  emoji: "🎟️", color: "#ff7b3a", prob: 0.20, desc: "10% off your next bill",   points: 100 },
+  { label: "FREE APP", emoji: "🥗", color: "#4caf6a", prob: 0.12, desc: "Free appetizer of choice",  points: 200 },
+  { label: "TRY AGAIN",emoji: "🔄", color: "#5b8ff9", prob: 0.25, desc: "No reward this time",       points: 0,  noWin: true },
+  { label: "5% OFF",   emoji: "💸", color: "#f5c842", prob: 0.20, desc: "5% off any menu item",      points: 50  },
+  { label: "FREE DRINK",emoji:"🍹", color: "#e05252", prob: 0.08, desc: "Free soft drink or juice",  points: 150 },
+  { label: "DESSERT",  emoji: "🍰", color: "#a06cf5", prob: 0.07, desc: "Complimentary dessert",     points: 180 },
+  { label: "MYSTERY",  emoji: "🎁", color: "#ff9f43", prob: 0.05, desc: "Surprise reward from chef", points: 300 },
+  { label: "BETTER LUCK",emoji:"😅",color:"#8a8780",  prob: 0.03, desc: "Not this time — come back!",points: 0,  noWin: true },
+];
+
+// ==================== WHEEL DRAWING ====================
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const NUM = REWARDS.length;
+const ARC = (2 * Math.PI) / NUM;
+let currentAngle = 0;
+
+function drawWheel(rotation = 0) {
+  ctx.clearRect(0, 0, 300, 300);
+  const cx = 150, cy = 150, r = 145;
+  for (let i = 0; i < NUM; i++) {
+    const start = rotation + i * ARC - Math.PI / 2;
+    const end = start + ARC;
+    // Segment
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = REWARDS[i].color;
+    ctx.fill();
+    // Subtle border
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Label
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + ARC / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px "Space Grotesk", sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(REWARDS[i].label, r - 14, 4);
+    ctx.font = '14px serif';
+    ctx.fillText(REWARDS[i].emoji, r - 88, 5);
+    ctx.restore();
+  }
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+}
+drawWheel(currentAngle);
+
+// ==================== SPIN LOGIC ====================
+function pickReward() {
+  let r = Math.random(), cum = 0;
+  for (const reward of REWARDS) { cum += reward.prob; if (r <= cum) return reward; }
+  return REWARDS[0];
+}
+
+function spinWheel() {
+  if (state.isSpinning || state.playsUsed >= state.playsMax || state.sessionActive) return;
+  state.isSpinning = true;
+  state.playsUsed++;
+  state.spinCount++;
+  document.getElementById('spinBtn').disabled = true;
+
+  const reward = pickReward();
+  const targetIdx = REWARDS.indexOf(reward);
+  const extraSpins = 5 + Math.floor(Math.random() * 4);
+  const targetAngle = -(targetIdx * ARC + ARC / 2) + (Math.PI / 2);
+  const totalRotation = extraSpins * Math.PI * 2 + ((targetAngle - currentAngle + Math.PI * 2 * 10) % (Math.PI * 2));
+
+  const duration = 4000;
+  const start = performance.now();
+  const startAngle = currentAngle;
+
+  function animate(now) {
+    const elapsed = now - start;
+    const t = Math.min(elapsed / duration, 1);
+    const ease = t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; // ease in-out cubic
+    currentAngle = startAngle + totalRotation * ease;
+    drawWheel(currentAngle);
+    if (t < 1) { requestAnimationFrame(animate); }
+    else {
+      currentAngle = startAngle + totalRotation;
+      drawWheel(currentAngle);
+      state.isSpinning = false;
+      handleResult(reward);
+    }
+  }
+  requestAnimationFrame(animate);
+  updatePlaysUI();
+}
+
+function handleResult(reward) {
+  state.spinHistory.unshift({
+    player: 'Alex R.', time: new Date().toLocaleTimeString(),
+    spins: state.spinCount, result: reward.noWin ? 'lost' : 'won', reward: reward.label
+  });
+  if (state.spinHistory.length > 10) state.spinHistory.pop();
+
+  if (reward.noWin) {
+    showToast('😅 Not this time! ' + reward.desc);
+    if (state.playsUsed < state.playsMax) {
+      document.getElementById('spinBtn').disabled = false;
+    } else { checkNoPlays(); }
+    updateDashboard();
+    return;
+  }
+
+  state.winCount++;
+  state.totalPoints += reward.points;
+  state.lastWin = reward;
+  openRewardModal(reward);
+  launchConfetti();
+  updateDashboard();
+  if (state.playsUsed >= state.playsMax) { checkNoPlays(); }
+}
+
+function updatePlaysUI() {
+  const left = state.playsMax - state.playsUsed;
+  document.getElementById('playsLabel').textContent = left === 0 ? 'No spins remaining today' : `${left} spin${left !== 1 ? 's' : ''} remaining today`;
+  ['dot1','dot2','dot3'].forEach((id, i) => {
+    const dot = document.getElementById(id);
+    dot.className = 'plays-dot' + (i < left ? '' : ' empty');
+  });
+}
+
+function checkNoPlays() {
+  if (state.playsUsed >= state.playsMax) {
+    setTimeout(() => {
+      document.getElementById('wheelSection').style.display = 'none';
+      document.getElementById('noPlaysCard').style.display = 'block';
+    }, 1200);
+  } else {
+    document.getElementById('spinBtn').disabled = false;
+  }
+}
+
+// ==================== REWARD MODAL ====================
+let expiryInterval = null;
+
+function openRewardModal(reward) {
+  state.sessionActive = true;
+  state.sessionSecsLeft = SESSION_EXPIRE_SECS;
+
+  document.getElementById('rewardTrophy').textContent = reward.emoji;
+  document.getElementById('rewardTitle').textContent = reward.label;
+  document.getElementById('rewardDesc').textContent = reward.desc;
+
+  const code = 'RWD-' + Math.random().toString(36).substr(2,4).toUpperCase() + '-' + Date.now().toString(36).toUpperCase().substr(-4);
+  document.getElementById('rewardCodeLabel').textContent = code;
+
+  // Generate QR
+  const qrEl = document.getElementById('rewardQR');
+  qrEl.innerHTML = '';
+  QRCode.toCanvas(document.createElement('canvas'), JSON.stringify({
+    code, reward: reward.label, restaurant: 'copper-grill', ts: Date.now()
+  }), { width: 160, margin: 1, color: { dark: '#000', light: '#fff' } }, (err, cvs) => {
+    if (!err) qrEl.appendChild(cvs);
+  });
+
+  // Save reward to state
+  state.savedRewards.unshift({ code, reward, date: new Date().toLocaleDateString(), active: true });
+  updateSavedRewards();
+
+  document.getElementById('rewardModal').classList.add('open');
+  startExpiryTimer();
+}
+
+function startExpiryTimer() {
+  if (expiryInterval) clearInterval(expiryInterval);
+  updateExpiryUI();
+  expiryInterval = setInterval(() => {
+    state.sessionSecsLeft--;
+    updateExpiryUI();
+    if (state.sessionSecsLeft <= 0) {
+      clearInterval(expiryInterval);
+      expireSession();
+    }
+  }, 1000);
+}
+
+function updateExpiryUI() {
+  const pct = (state.sessionSecsLeft / SESSION_EXPIRE_SECS) * 100;
+  document.getElementById('expiryBar').style.width = pct + '%';
+  document.getElementById('expiryBar').style.background = pct > 40 ? 'var(--color-success)' : pct > 15 ? 'var(--color-gold)' : 'var(--color-error)';
+  const m = Math.floor(state.sessionSecsLeft / 60);
+  const s = state.sessionSecsLeft % 60;
+  document.getElementById('expiryTimer').textContent = `⏱ Expires in ${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function expireSession() {
+  state.sessionActive = false;
+  closeModal();
+  showToast('⏰ Reward session expired');
+  if (state.playsUsed < state.playsMax) {
+    document.getElementById('spinBtn').disabled = false;
+  }
+}
+
+async function claimReward() {
+  // Mock POS endpoint
+  const claimBtn = document.getElementById('claimBtn');
+  claimBtn.textContent = '⏳ Sending to POS...';
+  claimBtn.disabled = true;
+
+  await new Promise(r => setTimeout(r, 1200)); // mock latency
+
+  // Mock success
+  clearInterval(expiryInterval);
+  state.sessionActive = false;
+  if (state.savedRewards.length > 0) state.savedRewards[0].active = false;
+  updateSavedRewards();
+  closeModal();
+  showToast('✅ Reward claimed at POS! Enjoy your meal 🍽️');
+  checkNoPlays();
+}
+
+function closeModal() {
+  document.getElementById('rewardModal').classList.remove('open');
+  if (expiryInterval) clearInterval(expiryInterval);
+  if (state.playsUsed < state.playsMax && !state.sessionActive) {
+    document.getElementById('spinBtn').disabled = false;
+  }
+}
+
+// ==================== QR NAME CARD ====================
+function buildMemberCard() {
+  const memberId = 'MBR-A3F2-9X71';
+  document.getElementById('memberCardId').textContent = memberId;
+  document.getElementById('memberPoints').textContent = state.totalPoints.toLocaleString();
+  const wrap = document.getElementById('memberQrWrap');
+  wrap.innerHTML = '';
+  QRCode.toCanvas(document.createElement('canvas'), JSON.stringify({
+    memberId, name: 'Alex Rivera', tier: 'Regular', points: state.totalPoints
+  }), { width: 140, margin: 1, color: { dark: '#000', light: '#fff' } }, (err, cvs) => {
+    if (!err) wrap.appendChild(cvs);
+  });
+}
+
+function updateSavedRewards() {
+  const container = document.getElementById('rewardsContainer');
+  const active = state.savedRewards.filter(r => r.active).length;
+  document.getElementById('rewardsCount').textContent = active + ' active';
+
+  if (state.savedRewards.length === 0) {
+    container.innerHTML = '<div style="padding:var(--space-8); text-align:center; color:var(--color-text-faint); font-size:var(--text-sm);">Spin the wheel to earn rewards! 🎰</div>';
+    return;
+  }
+  container.innerHTML = state.savedRewards.map(r => `
+    <div class="reward-item">
+      <div class="reward-item-icon">${r.reward.emoji}</div>
+      <div>
+        <div class="reward-item-name">${r.reward.label}</div>
+        <div class="reward-item-date">${r.date} · ${r.code}</div>
+      </div>
+      <span class="reward-item-status ${r.active ? 'status-active' : 'status-claimed'}">${r.active ? '● Active' : '✓ Claimed'}</span>
+    </div>`).join('');
+}
+
+// ==================== DASHBOARD ====================
+let dauChart, rewardChart;
+
+function initCharts() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#8a8780' : '#6b6860';
+  const gridColor = isDark ? '#2e2b25' : '#e8e4de';
+
+  Chart.defaults.color = textColor;
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.font.size = 11;
+
+  const dauCtx = document.getElementById('dauChart').getContext('2d');
+  dauChart = new Chart(dauCtx, {
+    type: 'line',
+    data: {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{
+        label: 'Active Users', data: [189,210,198,235,267,321,247],
+        borderColor: '#ff7b3a', backgroundColor: 'rgba(255,123,58,0.08)',
+        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#ff7b3a',
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: textColor } },
+        y: { grid: { color: gridColor }, ticks: { color: textColor } }
+      }
+    }
+  });
+
+  const rwCtx = document.getElementById('rewardChart').getContext('2d');
+  rewardChart = new Chart(rwCtx, {
+    type: 'doughnut',
+    data: {
+      labels: REWARDS.filter(r=>!r.noWin).map(r => r.label),
+      datasets: [{
+        data: REWARDS.filter(r=>!r.noWin).map(r => Math.round(r.prob * 100)),
+        backgroundColor: REWARDS.filter(r=>!r.noWin).map(r => r.color),
+        borderWidth: 0, hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { color: textColor, padding: 8, font: { size: 10 } } }
+      },
+      cutout: '65%',
+    }
+  });
+}
+
+function updateDashboard() {
+  const winRate = state.spinCount > 0 ? ((state.winCount / state.spinCount) * 100).toFixed(1) : '34.2';
+  document.getElementById('kpi-winrate').textContent = winRate + '%';
+  document.getElementById('kpi-spins').textContent = (641 + state.spinCount).toLocaleString();
+  document.getElementById('kpi-claimed').textContent = (88 + state.winCount).toLocaleString();
+
+  const body = document.getElementById('sessionsBody');
+  const mockSessions = [
+    { player: 'Maria K.', time: '6:42 PM', spins: 3, result: 'won',  reward: '10% OFF' },
+    { player: 'James T.', time: '6:38 PM', spins: 2, result: 'lost', reward: '—' },
+    { player: 'Lena M.', time:  '6:31 PM', spins: 3, result: 'won',  reward: 'FREE DRINK' },
+    { player: 'Chen W.', time:  '6:24 PM', spins: 1, result: 'won',  reward: 'DESSERT' },
+    { player: 'Sam B.',  time:  '6:15 PM', spins: 3, result: 'lost', reward: '—' },
+  ];
+  const sessions = [...state.spinHistory.slice(0,3).map(s => ({
+    player: s.player, time: s.time, spins: s.spins, result: s.result, reward: s.reward
+  })), ...mockSessions].slice(0, 8);
+
+  body.innerHTML = sessions.map(s => `
+    <div class="table-row">
+      <span>${s.player}</span>
+      <span style="color:var(--color-text-muted)">${s.time}</span>
+      <span style="color:var(--color-text-muted)">${s.spins}x</span>
+      <span><span class="badge-${s.result}">${s.result}</span></span>
+      <span style="font-size:var(--text-xs); color:var(--color-text-muted)">${s.reward}</span>
+    </div>`).join('');
+}
+
+// ==================== TOAST ====================
+let toastTimeout;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ==================== CONFETTI ====================
+function launchConfetti() {
+  const cvs = document.getElementById('confetti-canvas');
+  cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+  const ctx2 = cvs.getContext('2d');
+  const pieces = Array.from({length:80}, () => ({
+    x: Math.random() * cvs.width, y: -10,
+    w: 6 + Math.random() * 6, h: 10 + Math.random() * 8,
+    color: ['#ff7b3a','#f5c842','#4caf6a','#5b8ff9','#e05252','#a06cf5'][Math.floor(Math.random()*6)],
+    vx: (Math.random()-0.5)*4, vy: 3 + Math.random()*4,
+    rot: Math.random()*360, rv: (Math.random()-0.5)*6, alpha: 1
+  }));
+  let frame;
+  function draw() {
+    ctx2.clearRect(0,0,cvs.width,cvs.height);
+    let alive = false;
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.rv; p.alpha -= 0.012;
+      if (p.alpha > 0 && p.y < cvs.height) {
+        alive = true;
+        ctx2.save(); ctx2.globalAlpha = Math.max(0, p.alpha);
+        ctx2.translate(p.x, p.y); ctx2.rotate(p.rot * Math.PI/180);
+        ctx2.fillStyle = p.color;
+        ctx2.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx2.restore();
+      }
+    });
+    if (alive) frame = requestAnimationFrame(draw);
+    else { ctx2.clearRect(0,0,cvs.width,cvs.height); cvs.width=0; }
+  }
+  frame = requestAnimationFrame(draw);
+}
+
+// ==================== NAVIGATION ====================
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab, .mobile-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.toggle('active', v.id === 'view-' + tab);
+  });
+  if (tab === 'qrcard') buildMemberCard();
+  if (tab === 'dashboard') updateDashboard();
+}
+
+document.querySelectorAll('[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// ==================== THEME TOGGLE ====================
+(function(){
+  const btn = document.querySelector('[data-theme-toggle]');
+  const root = document.documentElement;
+  let dark = true;
+  function applyTheme(d) {
+    dark = d; root.setAttribute('data-theme', d ? 'dark' : 'light');
+    btn.textContent = d ? '☀️' : '🌙';
+    if (dauChart && rewardChart) {
+      const tc = d ? '#8a8780' : '#6b6860';
+      const gc = d ? '#2e2b25' : '#e8e4de';
+      [dauChart, rewardChart].forEach(c => {
+        if (c.config.type !== 'doughnut') {
+          c.options.scales.x.grid.color = gc; c.options.scales.x.ticks.color = tc;
+          c.options.scales.y.grid.color = gc; c.options.scales.y.ticks.color = tc;
+        }
+        c.options.plugins.legend.labels && (c.options.plugins.legend.labels.color = tc);
+        c.update();
+      });
+    }
+  }
+  btn.addEventListener('click', () => applyTheme(!dark));
+  applyTheme(true);
+})();
+
+// ==================== INIT ====================
+updatePlaysUI();
+updateDashboard();
+initCharts();
+</script>
+</body>
+</html>

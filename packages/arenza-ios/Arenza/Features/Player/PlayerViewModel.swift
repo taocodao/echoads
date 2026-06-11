@@ -57,8 +57,20 @@ final class PlayerViewModel: ObservableObject {
         self.channel = channel
         self.env = env
 
+        // ── Phase 4: Set AVAudioSession BEFORE creating AVPlayer ─────────
+        // .playback category: audio plays through silent switch + survives
+        // interruptions (phone calls, Siri). Without this it defaults to
+        // .soloAmbient which mutes on the ring/silent switch.
+        // ──────────────────────────────────────────────────────────────────
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("[Audio] Failed to set audio session: \(error)")
+        }
+
         // ── CRITICAL: Create AVPlayer SYNCHRONOUSLY in init ──────────────
-        // The player must exist BEFORE fullScreenCover finishes presenting.
+        // The player must exist BEFORE the sheet finishes presenting.
         // Creating it async inside .task causes the render surface to never
         // attach on real iPhones (works in Simulator due to different
         // GPU/compositor timing).
@@ -197,16 +209,39 @@ final class PlayerViewModel: ObservableObject {
     // MARK: - Playback End → Loop
 
     private var endObserver: Any?
+    private var interruptionObserver: Any?
 
     private func observePlaybackEnd(for player: AVPlayer) {
+        // Loop observer — seek to zero and resume
         endObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: player.currentItem,
             queue: .main
         ) { [weak player] _ in
-            // Seek to start and resume — seamless loop for the demo clip
             player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { _ in
                 player?.play()
+            }
+        }
+
+        // Phase 4 Fix B — resume audio after interruption (phone call, Siri, etc.)
+        interruptionObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { [weak self, weak player] notification in
+            guard let info = notification.userInfo,
+                  let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+            switch type {
+            case .ended:
+                // Re-activate session and resume playback
+                try? AVAudioSession.sharedInstance().setActive(true)
+                player?.play()
+                print("[Audio] Interruption ended — resumed playback")
+            case .began:
+                print("[Audio] Interruption began")
+            @unknown default:
+                break
             }
         }
     }

@@ -18,10 +18,12 @@ const T = {
 
 export default function GamePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [tab, setTab] = useState<'bets' | 'bingo' | 'feed' | 'profile'>('bets');
+  const [tab, setTab] = useState<'predict' | 'bingo' | 'scratch' | 'moreless' | 'me'>('predict');
   const [videoReady, setVideoReady] = useState(false);
-  const [adFormat, setAdFormat] = useState<'prediction' | 'bingo' | 'scratch' | 'moreless'>('prediction');
-  const [adPaused, setAdPaused] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [shareToast, setShareToast] = useState(false);
+  const [tabUserInteracted, setTabUserInteracted] = useState(false);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const [scratchRevealed, setScratchRevealed] = useState<Record<number,boolean>>({});
   const [couponCode, setCouponCode] = useState<string|null>(null);
   const [mlPicks, setMlPicks] = useState<Record<number,'more'|'less'>>({});
@@ -45,23 +47,37 @@ export default function GamePage() {
     return () => video.removeEventListener('canplay', onCanPlay);
   }, []);
 
-  // ── Interactive ad auto-cycle: 15s per format ─────────────────────────────────
-  const AD_FORMATS = ['prediction', 'bingo', 'scratch', 'moreless'] as const;
+
+  // Fullscreen API
   useEffect(() => {
-    if (adPaused) return;
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    const el = videoContainerRef.current;
+    if (!document.fullscreenElement) { el?.requestFullscreen(); setIsFullscreen(true); }
+    else { document.exitFullscreen(); setIsFullscreen(false); }
+  };
+
+  const shareGame = async () => {
+    const shareData = { title: 'Arenza', text: "I'm watching Eagles vs Bears LIVE on Arenza! Join me and earn 500 bonus pts ????", url: 'https://arenza.tv/join?ref=demo-user' };
+    if (navigator.share) { await navigator.share(shareData).catch(() => {}); }
+    else { navigator.clipboard.writeText(shareData.url).catch(() => {}); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }
+  };
+
+  // Tab auto-cycle: rotate predict?bingo?scratch?moreless every 15s
+  useEffect(() => {
+    if (tabUserInteracted) return;
+    const cycle = ['predict','bingo','scratch','moreless'] as const;
     const id = setInterval(() => {
-      setAdFormat(cur => {
-        const idx = (AD_FORMATS.indexOf(cur) + 1) % AD_FORMATS.length;
-        return AD_FORMATS[idx];
-      });
+      setTab(cur => { const i = cycle.indexOf(cur as any); return i >= 0 ? cycle[(i+1)%cycle.length] : cur; });
     }, 15000);
     return () => clearInterval(id);
-  }, [adPaused]);
+  }, [tabUserInteracted]);
 
-  const pauseAdCycle = (ms = 30000) => {
-    setAdPaused(true);
-    setTimeout(() => setAdPaused(false), ms);
-  };
+  const onTabClick = (t: any) => { setTab(t); setTabUserInteracted(true); setTimeout(() => setTabUserInteracted(false), 30000); };
 
   // Scratch helpers
   const SCRATCH_PRIZES = [
@@ -76,7 +92,7 @@ export default function GamePage() {
     const prize = SCRATCH_PRIZES[i];
     g.points; // trigger re-render
     if (prize.win && prize.code) setCouponCode(prize.code);
-    pauseAdCycle(25000);
+    setTabUserInteracted(true);
   };
 
   // ML helpers
@@ -90,19 +106,13 @@ export default function GamePage() {
   const mlMultiplier = mlPickCount >= 4 ? 6 : mlPickCount === 3 ? 3 : 1.5;
   const mlMaxWin = mlPickCount >= 2 ? Math.round(250 * mlMultiplier) : 0;
 
-  // ── AD FORMAT DATA ────────────────────────────────────────────────────────────
-  const AD_FORMAT_META = [
-    { key: 'prediction', emoji: '🥤', sponsor: 'Pepsi', color: T.teal },
-    { key: 'bingo',      emoji: '🍻', sponsor: 'Budweiser', color: T.gold },
-    { key: 'scratch',    emoji: '🍕', sponsor: "Domino's", color: T.orange },
-    { key: 'moreless',   emoji: '💪', sponsor: 'Gatorade', color: T.green },
-  ] as const;
+
 
   return (
     <div style={{ height: 'calc(100dvh - 56px)', display: 'flex', flexDirection: 'column', background: T.bg, overflow: 'hidden', fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       {/* ══ TOP 35%: Video ══════════════════════════════════════════════════ */}
-      <div style={{ flex: '0 0 35%', position: 'relative', background: '#000', overflow: 'hidden' }}>
+      <div style={{ flex: '0 0 40%', position: 'relative', background: '#000', overflow: 'hidden' }}>
         <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted loop preload="auto" />
         {/* Scoreboard overlay */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '8px 14px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -130,137 +140,56 @@ export default function GamePage() {
         {g.flyPoints && (
           <div style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translateX(-50%)', fontFamily: 'Bebas Neue, sans-serif', fontSize: 32, color: T.gold, textShadow: `0 0 16px ${T.gold}`, animation: 'flyUp 1.5s ease forwards', pointerEvents: 'none', zIndex: 99 }}>{g.flyPoints}</div>
         )}
+        {/* Fullscreen toggle */}
+        <button onClick={toggleFullscreen} style={{ position: 'absolute', bottom: 10, right: 10, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {isFullscreen ? '?' : '?'}
+        </button>
         {/* Glowing bottom divider */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(to right, transparent, ${T.orange}66, transparent)` }} />
       </div>
 
-      {/* ══ MIDDLE 30%: Interactive Ad Carousel ═════════════════════════════ */}
-      <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bg }}>
-        {/* Sponsor tab selector */}
-        <div style={{ display: 'flex', background: T.surface, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-          {AD_FORMAT_META.map(({ key, emoji, sponsor, color }) => (
-            <button key={key} onClick={() => { setAdFormat(key as any); pauseAdCycle(); }} style={{
-              flex: 1, padding: '6px 2px', fontSize: 10, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer',
-              color: adFormat === key ? color : T.faint,
-              borderBottom: adFormat === key ? `2px solid ${color}` : '2px solid transparent',
-              transition: 'all 0.15s',
-            }}>{emoji} {sponsor}</button>
-          ))}
-        </div>
-        {/* Ad card content */}
-        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          {adFormat === 'prediction' && <WebPredictionAd g={g} onInteract={() => pauseAdCycle()} />}
-          {adFormat === 'bingo' && <WebBingoAd g={g} onInteract={() => pauseAdCycle()} />}
-          {adFormat === 'scratch' && <WebScratchAd scratchRevealed={scratchRevealed} revealScratch={revealScratch} couponCode={couponCode} copied={copied} setCopied={setCopied} onInteract={() => pauseAdCycle()} />}
-          {adFormat === 'moreless' && <WebMoreLessAd mlPlayers={mlPlayers} mlPicks={mlPicks} setMlPicks={setMlPicks} mlSubmitted={mlSubmitted} setMlSubmitted={setMlSubmitted} mlMaxWin={mlMaxWin} mlMultiplier={mlMultiplier} onInteract={() => pauseAdCycle()} />}
-        </div>
-        {/* Page dots + status */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 12px', background: T.surface, borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
-          <div style={{ display: 'flex', gap: 5 }}>
-            {AD_FORMAT_META.map(({ key, color }) => (
-              <div key={key} onClick={() => { setAdFormat(key as any); pauseAdCycle(); }} style={{
-                width: adFormat === key ? 10 : 6, height: adFormat === key ? 10 : 6,
-                borderRadius: '50%', background: adFormat === key ? color : 'rgba(255,255,255,0.2)',
-                cursor: 'pointer', transition: 'all 0.3s',
-              }} />
-            ))}
-          </div>
-          <span style={{ fontSize: 9, color: T.faint }}>{adPaused ? '✋ Paused' : '↻ Auto'}</span>
-        </div>
-        {/* Glowing bottom divider */}
-        <div style={{ height: 1, background: `linear-gradient(to right, transparent, ${T.teal}55, transparent)` }} />
-      </div>
+      {/* ══ BOTTOM 60%: Unified Tabs ════════════════════════════════════════ */}
+      <div style={{ flex: '1 1 60%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-      {/* ══ BOTTOM 35%: Game Tabs ═══════════════════════════════════════════ */}
-      <div style={{ flex: '0 0 35%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-        {/* Tab bar */}
-        <div style={{ display: 'flex', background: T.surface, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+        {/* Tab bar — 5 unified tabs + points + share */}
+        <div style={{ display: 'flex', background: T.surface, borderTop: `1px solid ${T.border}`, flexShrink: 0, alignItems: 'stretch' }}>
           {([
-            { key: 'bets', label: '🎯 Bets', },
-            { key: 'bingo', label: '🎲 Bingo' },
-            { key: 'feed', label: '🏆 Live Feed' },
-            { key: 'profile', label: '👤 Profile' },
+            { key: 'predict',  label: '🎯 Predict' },
+            { key: 'bingo',    label: '🎲 Bingo' },
+            { key: 'scratch',  label: '🎟 Scratch' },
+            { key: 'moreless', label: '📊 M/L' },
+            { key: 'me',       label: '👤 Me' },
           ] as const).map(({ key, label }) => (
-            <button key={key} onClick={() => setTab(key)} style={{
-              flex: 1, padding: '10px 4px', fontSize: 12, fontWeight: 600,
+            <button key={key} onClick={() => onTabClick(key)} style={{
+              flex: 1, padding: '10px 2px', fontSize: 11, fontWeight: 600,
               color: tab === key ? T.orange : T.muted,
               background: 'none', border: 'none', cursor: 'pointer',
               borderBottom: tab === key ? `2px solid ${T.orange}` : '2px solid transparent',
               transition: 'all 0.15s',
             }}>{label}</button>
           ))}
-          {/* Points badge */}
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: 12, fontWeight: 700, color: T.gold, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 6px', fontSize: 11, fontWeight: 700, color: T.gold, flexShrink: 0 }}>
             ⭐ {g.points.toLocaleString()}
           </div>
+          <button onClick={shareGame} title="Share" style={{ padding: '0 10px', background: 'none', border: 'none', cursor: 'pointer', color: T.orange, fontSize: 15, flexShrink: 0 }}>
+            &#x2B06;
+          </button>
         </div>
 
+        {/* Share toast */}
+        {shareToast && (
+          <div style={{ position: 'fixed', top: 70, left: '50%', transform: 'translateX(-50%)', background: T.green, color: '#fff', padding: '8px 18px', borderRadius: 999, fontSize: 13, fontWeight: 700, zIndex: 999 }}>
+            🔗 Link copied!
+          </div>
+        )}
+
         {/* Tab content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
-
-          {/* ── BETS TAB ───────────────────────────────────────────────── */}
-          {tab === 'bets' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {g.activePrediction ? (
-                <PredictionCard
-                  pred={g.activePrediction}
-                  timer={g.predictionTimer}
-                  userPick={g.userPick}
-                  resolved={g.predictionResolved}
-                  onPick={g.handlePredictionPick}
-                />
-              ) : (
-                <div style={{ textAlign: 'center', padding: '24px 0', color: T.muted, fontSize: 13 }}>
-                  ⏳ Next prediction incoming...
-                </div>
-              )}
-              {/* Upcoming predictions */}
-              <div style={{ fontSize: 11, color: T.faint, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>Upcoming Props</div>
-              {[...new Set(AD_CATALOG.map(a => a.brand))].map(brand => (
-                <div key={brand} style={{ padding: '8px 12px', background: T.surface2, borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.muted }}>
-                  🎯 Sponsored prediction by <span style={{ color: T.orange }}>{brand}</span> — arriving soon
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ── BINGO TAB ──────────────────────────────────────────────── */}
-          {tab === 'bingo' && (
-            <BingoGrid board={g.bingoBoard} lines={g.bingoLines} onCellClick={g.handleBingoClick} />
-          )}
-
-          {/* ── LIVE FEED TAB ──────────────────────────────────────────── */}
-          {tab === 'feed' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {g.feed.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '24px 0', color: T.faint, fontSize: 13 }}>
-                  Waiting for game events...
-                </div>
-              )}
-              {g.feed.map(entry => (
-                <div key={entry.id} style={{
-                  display: 'flex', gap: 10, alignItems: 'flex-start',
-                  padding: '8px 10px', borderRadius: 8,
-                  background: entry.type === 'ad' ? `${T.orange}11` : entry.type === 'prediction' ? `${T.teal}11` : T.surface2,
-                  border: `1px solid ${entry.type === 'ad' ? `${T.orange}33` : entry.type === 'pod' ? `${T.green}33` : T.border}`,
-                  fontSize: 12,
-                }}>
-                  <span style={{ fontSize: 16, flexShrink: 0 }}>{entry.emoji}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: T.text }}>{entry.text}</div>
-                    {entry.detail && <div style={{ color: T.muted, fontSize: 10, marginTop: 2 }}>{entry.detail}</div>}
-                  </div>
-                  <span style={{ color: T.faint, fontSize: 10, flexShrink: 0 }}>{entry.timestamp}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ── PROFILE TAB ────────────────────────────────────────────── */}
-          {tab === 'profile' && (
-            <ProfileTab lastAd={g.lastAd} adsServed={adsServed} revenue={totalRevenue} points={g.points} elapsed={g.elapsed} />
-          )}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px' }}>
+          {tab === 'predict'  && <WebPredictionAd g={g} onInteract={() => setTabUserInteracted(true)} />}
+          {tab === 'bingo'    && <WebBingoAd g={g} onInteract={() => setTabUserInteracted(true)} />}
+          {tab === 'scratch'  && <WebScratchAd scratchRevealed={scratchRevealed} revealScratch={revealScratch} couponCode={couponCode} copied={copied} setCopied={setCopied} onInteract={() => setTabUserInteracted(true)} />}
+          {tab === 'moreless' && <WebMoreLessAd mlPlayers={mlPlayers} mlPicks={mlPicks} setMlPicks={setMlPicks} mlSubmitted={mlSubmitted} setMlSubmitted={setMlSubmitted} mlMaxWin={mlMaxWin} mlMultiplier={mlMultiplier} onInteract={() => setTabUserInteracted(true)} />}
+          {tab === 'me'       && <ProfileTab lastAd={g.lastAd} adsServed={adsServed} revenue={totalRevenue} points={g.points} elapsed={g.elapsed} />}
         </div>
       </div>
 

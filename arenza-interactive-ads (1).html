@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arenza Interactive Ad Demos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --transition: 180ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"] {
+  --bg: #0e0f11;
+  --surface: #15171a;
+  --surface-2: #1c1f23;
+  --surface-3: #252a30;
+  --border: rgba(255,255,255,0.08);
+  --text: #e8eaed;
+  --text-muted: #8a8f98;
+  --text-faint: #4a5060;
+  --accent: #f5a623;
+  --accent-hover: #e09010;
+  --accent-glow: rgba(245,166,35,0.18);
+  --green: #22c55e;
+  --green-glow: rgba(34,197,94,0.15);
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+}
+[data-theme="light"] {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --surface-3: #edf0f3;
+  --border: rgba(0,0,0,0.09);
+  --text: #111318;
+  --text-muted: #5a6070;
+  --text-faint: #9aa0ad;
+  --accent: #d4860a;
+  --accent-hover: #b87208;
+  --accent-glow: rgba(212,134,10,0.12);
+  --green: #16a34a;
+  --green-glow: rgba(22,163,74,0.1);
+  --red: #dc2626;
+  --blue: #2563eb;
+  --purple: #9333ea;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--text);background:var(--bg);min-height:100dvh;line-height:1.6}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+img{display:block;max-width:100%;height:auto}
+/* ── SHELL ──────────────────────────────────────────────── */
+.shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+.logo svg { flex-shrink: 0; }
+.top-controls { display: flex; gap: var(--space-3); align-items: center; }
+.theme-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+  color: var(--text-muted);
+}
+.theme-btn:hover { background: var(--surface-2); color: var(--text); }
+.pts-badge {
+  display: flex; align-items: center; gap: var(--space-2);
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--accent);
+}
+/* ── NAV TABS ───────────────────────────────────────────── */
+.nav-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-8) 0 var(--space-6);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: var(--space-1);
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: all var(--transition);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.tab-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+.tab-btn.active {
+  background: var(--accent);
+  color: #0e0f11;
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.tab-num {
+  width: 20px; height: 20px;
+  border-radius: var(--radius-full);
+  background: rgba(0,0,0,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+/* ── PANEL ──────────────────────────────────────────────── */
+.panel { display: none; animation: fadeUp 0.3s ease; }
+.panel.active { display: block; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+/* ── AD LABEL ───────────────────────────────────────────── */
+.ad-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: var(--space-4);
+}
+.ad-label::before {
+  content: '';
+  width: 20px; height: 2px;
+  background: var(--text-faint);
+  border-radius: 2px;
+}
+/* ════════════════════════════════════════════════════════
+   AD 1 — LIVE PREDICTION BANNER
+════════════════════════════════════════════════════════ */
+.pred-ad {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.pred-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: linear-gradient(135deg, #1a0a00 0%, #0d0a15 100%);
+  border-bottom: 1px solid var(--border);
+}
+.pred-live {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: pulse-dot 1.4s ease infinite;
+}
+@keyframes pulse-dot {
+  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}
+  50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}
+}
+.pred-sponsor {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.pred-sponsor span { color: var(--accent); font-weight: 700; }
+.pred-body { padding: var(--space-6); }
+.pred-question {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: var(--space-6);
+  max-width: 60ch;
+}
+.pred-question em { color: var(--accent); font-style: normal; }
+.pred-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.pred-opt {
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  text-align: left;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.pred-opt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.pred-opt:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.pred-opt:hover::before { opacity: 0.06; }
+.pred-opt.selected { border-color: var(--green); background: var(--green-glow); }
+.pred-opt.locked { pointer-events: none; }
+.pred-opt-name {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+  position: relative;
+}
+.pred-opt-pct {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  position: relative;
+}
+.pred-opt-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.pred-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-4);
+}
+.pred-pts {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.pred-pts strong { color: var(--accent); }
+.pred-timer {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--red);
+  min-width: 48px;
+}
+.pred-cta {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #0e0f11;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  transition: all var(--transition);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.pred-cta:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.pred-cta:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.pred-result {
+  display: none;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--green-glow);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  margin-top: var(--space-4);
+  animation: fadeUp 0.3s ease;
+}
+/* ════════════════════════════════════════════════════════
+   AD 2 — BINGO CARD
+════════════════════════════════════════════════════════ */
+.bingo-ad {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+@media (max-width: 768px) { .bingo-ad { grid-template-columns: 1fr; } }
+.bingo-main { padding: var(--space-6); }
+.bingo-sidebar {
+  background: var(--surface-2);
+  border-left: 1px solid var(--border);
+  padding: var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-5);
+}
+@media (max-width: 768px) {
+  .bingo-sidebar { border-left: none; border-top: 1px solid var(--border); }
+}
+.bingo-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap; gap: var(--space-3);
+}
+.bingo-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.bingo-heading span { color: var(--accent); }
+.bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+}
+.bingo-col-header {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  text-align: center;
+  padding: var(--space-2);
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+.bingo-cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  padding: 4px;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+  color: var(--text-muted);
+  user-select: none;
+}
+.bingo-cell:hover { border-color: var(--accent); color: var(--text); transform: scale(1.04); }
+.bingo-cell.marked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0e0f11;
+  font-weight: 700;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.bingo-cell.free {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 9px;
+  cursor: default;
+}
+.bingo-cell.win-line {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  animation: cell-pop 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes cell-pop {
+  0%{transform:scale(1)}
+  50%{transform:scale(1.15)}
+  100%{transform:scale(1)}
+}
+.bingo-status {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.bingo-status strong { color: var(--accent); }
+.bingo-win-banner {
+  display: none;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--green-glow), transparent);
+  border: 1px solid var(--green);
+  text-align: center;
+  animation: fadeUp 0.4s ease;
+}
+.bingo-win-banner h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: var(--space-2);
+}
+.bingo-win-banner p { font-size: var(--text-sm); color: var(--text-muted); }
+.bingo-sponsor-card {
+  background: var(--surface-3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+}
+.bingo-sponsor-card h4 {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  margin-bottom: var(--space-3);
+}
+.bingo-prize-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+.bingo-prize-list li {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-sm); color: var(--text);
+}
+.prize-icon {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--accent-glow);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.bingo-scan-btn {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #0e0f11;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  transition: all var(--transition);
+  box-shadow: 0 4px 16px var(--accent-glow);
+  text-align: center;
+}
+.bingo-scan-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.qr-mock {
+  width: 80px; height: 80px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(8,1fr);
+  gap: 2px;
+  padding: 6px;
+  margin: 0 auto var(--space-3);
+}
+.qr-mock div {
+  border-radius: 1px;
+  background: var(--text-faint);
+}
+/* ════════════════════════════════════════════════════════
+   AD 3 — SCRATCH CARD / COUPON REVEAL
+════════════════════════════════════════════════════════ */
+.scratch-ad {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+  max-width: 700px;
+  margin: 0 auto;
+}
+.scratch-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3);
+}
+.scratch-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+}
+.scratch-heading span { color: var(--accent); }
+.scratch-cards {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+@media (max-width: 480px) { .scratch-cards { grid-template-columns: 1fr; } }
+.scratch-card {
+  aspect-ratio: 1.4;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.scratch-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(255,255,255,0.15); }
+.scratch-cover {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--surface-3) 0%, var(--surface-2) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+  z-index: 2;
+}
+.scratch-cover-icon { font-size: 28px; }
+.scratch-cover-text {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.scratch-card.revealed .scratch-cover {
+  transform: scale(1.15) rotate(5deg);
+  opacity: 0;
+  pointer-events: none;
+}
+.scratch-reveal {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: var(--space-2);
+  z-index: 1;
+  padding: var(--space-3);
+}
+.scratch-reveal-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+.scratch-reveal-value {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+.scratch-reveal-pts {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 600;
+  background: var(--accent-glow);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+}
+.scratch-reveal-loss {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  font-weight: 600;
+}
+.scratch-coupon-box {
+  display: none;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent-glow), transparent);
+  border: 1px solid var(--accent);
+  animation: fadeUp 0.4s ease;
+}
+.scratch-coupon-box.show { display: block; }
+.coupon-row {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: var(--space-3);
+}
+.coupon-code-wrap {
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.coupon-code {
+  font-family: 'Courier New', monospace;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  background: var(--surface);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+}
+.coupon-copy-btn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #0e0f11;
+  font-weight: 700;
+  font-size: var(--text-xs);
+  transition: all var(--transition);
+}
+.coupon-copy-btn:hover { background: var(--accent-hover); }
+.coupon-desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+.coupon-expiry {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  margin-top: var(--space-1);
+}
+/* ════════════════════════════════════════════════════════
+   AD 4 — MORE / LESS PREDICTION (PrizePicks-style)
+════════════════════════════════════════════════════════ */
+.moreless-ad {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.moreless-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: var(--space-3);
+}
+.moreless-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+}
+.moreless-heading span { color: var(--accent); }
+.moreless-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+.player-card {
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition);
+}
+.player-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.player-top {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.player-avatar {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.player-name { font-weight: 700; font-size: var(--text-sm); margin-bottom: 2px; }
+.player-team { font-size: var(--text-xs); color: var(--text-muted); }
+.player-stat {
+  padding: var(--space-4);
+}
+.player-stat-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.player-stat-line {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+.player-stat-line span { color: var(--accent); }
+.player-stat-desc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+.moreless-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.ml-btn {
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  transition: all var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+}
+.ml-btn.more:hover,.ml-btn.more.picked { background: var(--green-glow); border-color: var(--green); color: var(--green); }
+.ml-btn.less:hover,.ml-btn.less.picked { background: rgba(239,68,68,0.12); border-color: var(--red); color: var(--red); }
+.moreless-footer {
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: var(--space-3);
+}
+.entry-count {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.entry-count strong { color: var(--text); }
+.submit-entry-btn {
+  padding: var(--space-3) var(--space-8);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #0e0f11;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  transition: all var(--transition);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.submit-entry-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.submit-entry-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* ── LEADERBOARD ──────────────────────────────────────── */
+.lb-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-top: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+.lb-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  margin-bottom: var(--space-4);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.lb-row {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank {
+  width: 28px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  color: var(--text-faint);
+  flex-shrink: 0;
+  text-align: center;
+}
+.lb-rank.gold { color: #f5a623; }
+.lb-rank.silver { color: #9ca3af; }
+.lb-rank.bronze { color: #b87333; }
+.lb-name { flex: 1; font-weight: 600; }
+.lb-pts { font-weight: 800; font-family: var(--font-display); color: var(--accent); font-size: var(--text-base); }
+.lb-you {
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-full);
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+}
+/* ── TOAST ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: 999;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  display: flex; align-items: center; gap: var(--space-2);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none;
+  max-width: 300px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-icon { font-size: 18px; }
+/* ── CONFETTI ───────────────────────────────────────────── */
+.confetti-piece {
+  position: fixed;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0%   { opacity:1; transform: translateY(-20px) rotate(0deg); }
+  100% { opacity:0; transform: translateY(100vh) rotate(720deg); }
+}
+/* ── SECTION HEADER ─────────────────────────────────────── */
+.section-label {
+  display: flex; align-items: flex-start;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+}
+.section-label h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+}
+.section-label p { font-size: var(--text-sm); color: var(--text-muted); max-width: 60ch; }
+/* ── SPONSOR STRIP ──────────────────────────────────────── */
+.sponsor-strip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  display: flex; align-items: center; gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.sponsor-strip strong { color: var(--accent); }
+.sponsor-logos { display: flex; gap: var(--space-4); align-items: center; margin-left: auto; }
+.sponsor-logo-pill {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="logo">
+    <svg aria-label="Arenza" viewBox="0 0 32 32" width="28" height="28" fill="none">
+      <polygon points="16,2 30,26 2,26" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+      <line x1="16" y1="12" x2="16" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="16" cy="9" r="1.5" fill="currentColor"/>
+    </svg>
+    ARENZA
+  </div>
+  <div class="top-controls">
+    <div class="pts-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+      <span id="totalPts">1,250</span> pts
+    </div>
+    <button class="theme-btn" data-theme-toggle aria-label="Toggle theme">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="shell">
+  <!-- NAV TABS -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="tab-btn active" onclick="switchTab(0)" role="tab" aria-selected="true">
+      <span class="tab-num">1</span> Live Prediction
+    </button>
+    <button class="tab-btn" onclick="switchTab(1)" role="tab">
+      <span class="tab-num">2</span> Bingo Card
+    </button>
+    <button class="tab-btn" onclick="switchTab(2)" role="tab">
+      <span class="tab-num">3</span> Scratch &amp; Win
+    </button>
+    <button class="tab-btn" onclick="switchTab(3)" role="tab">
+      <span class="tab-num">4</span> More or Less
+    </button>
+  </nav>
+
+  <!-- ══════════ PANEL 1: LIVE PREDICTION ══════════ -->
+  <div class="panel active" id="panel-0">
+    <div class="ad-label">Sponsored Interactive Ad</div>
+    <div class="section-label">
+      <h2>🏈 Live Game Prediction</h2>
+      <p>Inspired by Monterosa/Interaction Cloud — embed live polls and predictions that run alongside any broadcast. Zero app download required.</p>
+    </div>
+    <div class="sponsor-strip">
+      🏟️ <strong>Pepsi</strong> Presents: Sunday Night Football — Q3 Live
+      <div class="sponsor-logos">
+        <span class="sponsor-logo-pill">PEPSI</span>
+        <span class="sponsor-logo-pill">NFL ×</span>
+        <span class="sponsor-logo-pill">CBS Sports</span>
+      </div>
+    </div>
+    <div class="pred-ad">
+      <div class="pred-header">
+        <div class="pred-live">
+          <div class="live-dot"></div>
+          LIVE · Q3 · 7:42
+        </div>
+        <div class="pred-sponsor">Powered by <span>ARENZA</span> Fan Engine</div>
+      </div>
+      <div class="pred-body">
+        <div class="pred-question">
+          Who scores next in <em>KC vs BUF</em>?
+        </div>
+        <div class="pred-options" id="predOptions">
+          <button class="pred-opt" onclick="selectPred(this,'KC Mahomes TD')" data-pct="42">
+            <div class="pred-opt-name">🏈 Mahomes TD Pass</div>
+            <div class="pred-opt-pct">42% of fans</div>
+            <div class="pred-opt-bar" style="width:42%"></div>
+          </button>
+          <button class="pred-opt" onclick="selectPred(this,'KC Field Goal')" data-pct="19">
+            <div class="pred-opt-name">🎯 KC Field Goal</div>
+            <div class="pred-opt-pct">19% of fans</div>
+            <div class="pred-opt-bar" style="width:19%"></div>
+          </button>
+          <button class="pred-opt" onclick="selectPred(this,'BUF Allen TD')" data-pct="31">
+            <div class="pred-opt-name">⚡ Allen TD Run</div>
+            <div class="pred-opt-pct">31% of fans</div>
+            <div class="pred-opt-bar" style="width:31%"></div>
+          </button>
+          <button class="pred-opt" onclick="selectPred(this,'BUF Field Goal')" data-pct="8">
+            <div class="pred-opt-name">🎯 BUF Field Goal</div>
+            <div class="pred-opt-pct">8% of fans</div>
+            <div class="pred-opt-bar" style="width:8%"></div>
+          </button>
+        </div>
+        <div class="pred-result" id="predResult"></div>
+        <div class="pred-footer">
+          <div class="pred-pts">Correct = <strong>+250 pts</strong> → redeem at Pepsi Shop</div>
+          <div class="pred-timer" id="predTimer">0:30</div>
+          <button class="pred-cta" id="predCta" onclick="lockPrediction()" disabled>Lock In Pick</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PANEL 2: BINGO ══════════ -->
+  <div class="panel" id="panel-1">
+    <div class="ad-label">Sponsored Interactive Ad</div>
+    <div class="section-label">
+      <h2>🎱 Auto-Updating Bingo Card</h2>
+      <p>Inspired by SQWAD — fans scan a QR code at any broadcast venue and receive a personalised bingo board that marks itself in real time.</p>
+    </div>
+    <div class="sponsor-strip">
+      🍻 <strong>Budweiser</strong> Game-Day Bingo — NBA Finals · Game 5
+      <div class="sponsor-logos">
+        <span class="sponsor-logo-pill">BUD LIGHT</span>
+        <span class="sponsor-logo-pill">NBA ×</span>
+      </div>
+    </div>
+    <div class="bingo-ad">
+      <div class="bingo-main">
+        <div class="bingo-title-row">
+          <div class="bingo-heading"><span>B·I·N·G·O</span> Board</div>
+          <button onclick="autoMark()" style="padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);background:var(--surface-3);border:1px solid var(--border);font-size:var(--text-xs);font-weight:600;color:var(--text-muted);transition:all var(--transition);" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">⚡ Simulate Play</button>
+        </div>
+        <div class="bingo-grid" id="bingoGrid"></div>
+        <div class="bingo-status" id="bingoStatus">Click cells to mark them, or hit <strong>Simulate Play</strong> to auto-mark</div>
+        <div class="bingo-win-banner" id="bingoWin">
+          <h3>🎉 BINGO!</h3>
+          <p>You won! Claim your Budweiser prize coupon below.</p>
+        </div>
+      </div>
+      <div class="bingo-sidebar">
+        <div class="bingo-sponsor-card">
+          <h4>🏆 Prizes Available</h4>
+          <ul class="bingo-prize-list">
+            <li><div class="prize-icon">🍺</div> Free 6-pack (1 line)</li>
+            <li><div class="prize-icon">🎽</div> Team Jersey ($50 off)</li>
+            <li><div class="prize-icon">🎟️</div> Game 6 Ticket (Full card)</li>
+            <li><div class="prize-icon">🏀</div> Signed Ball (Blackout)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="qr-mock" id="qrMock"></div>
+          <button class="bingo-scan-btn">📱 Share My Card</button>
+          <div style="font-size:var(--text-xs);color:var(--text-faint);text-align:center;margin-top:var(--space-2);">No app download needed</div>
+        </div>
+        <div style="font-size:var(--text-xs);color:var(--text-muted);line-height:1.6;">
+          Board auto-updates as plays happen. Each square completed = <strong style="color:var(--accent);">+50 pts</strong> added to your Arenza wallet.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PANEL 3: SCRATCH CARD ══════════ -->
+  <div class="panel" id="panel-2">
+    <div class="ad-label">Sponsored Interactive Ad</div>
+    <div class="section-label">
+      <h2>🎟️ Scratch &amp; Win Coupon</h2>
+      <p>Inspired by SQWAD scratch card activations — each earned scratch reveals a real sponsor discount code, tracked in the Arenza coupon wallet.</p>
+    </div>
+    <div class="sponsor-strip">
+      🍕 <strong>Domino's</strong> Halftime Scratch — NFL Week 14
+      <div class="sponsor-logos">
+        <span class="sponsor-logo-pill">DOMINO'S</span>
+        <span class="sponsor-logo-pill">FOX Sports</span>
+      </div>
+    </div>
+    <div class="scratch-ad">
+      <div class="scratch-top">
+        <div>
+          <div class="scratch-heading">Halftime <span>Scratch</span></div>
+          <div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:var(--space-1);">You earned 3 cards. Click each to reveal your prize.</div>
+        </div>
+        <div class="pts-badge">3 cards left</div>
+      </div>
+      <div class="scratch-cards" id="scratchCards"></div>
+      <div class="scratch-coupon-box" id="scratchCouponBox">
+        <div style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);margin-bottom:var(--space-3);">🎉 Your Coupon — saved to Arenza Wallet</div>
+        <div class="coupon-row">
+          <div class="coupon-code-wrap">
+            <div class="coupon-code" id="couponCode">DOM-SAVE30</div>
+            <button class="coupon-copy-btn" onclick="copyCoupon()">Copy</button>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--text-muted);">Auto-applied at checkout</div>
+        </div>
+        <div class="coupon-desc" id="couponDesc">30% off your next Domino's order. Valid online only.</div>
+        <div class="coupon-expiry">Expires in 48 hours · Powered by Arenza Fan Engine</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PANEL 4: MORE OR LESS ══════════ -->
+  <div class="panel" id="panel-3">
+    <div class="ad-label">Sponsored Interactive Ad</div>
+    <div class="section-label">
+      <h2>📊 More or Less — Player Props</h2>
+      <p>Inspired by PrizePicks' binary "More or Less" mechanic — the simplest possible prediction format. Free-to-play with points, no cash, nationwide compliance.</p>
+    </div>
+    <div class="sponsor-strip">
+      💪 <strong>Gatorade</strong> Player Challenge — NBA Tonight
+      <div class="sponsor-logos">
+        <span class="sponsor-logo-pill">GATORADE</span>
+        <span class="sponsor-logo-pill">ESPN</span>
+      </div>
+    </div>
+    <div class="moreless-ad">
+      <div class="moreless-header">
+        <div class="moreless-heading">Tonight's <span>Player Picks</span></div>
+        <div style="font-size:var(--text-xs);color:var(--text-muted);">Pick 3+ for bonus pts · Free to play</div>
+      </div>
+      <div class="moreless-grid" id="morelessGrid"></div>
+      <div class="moreless-footer">
+        <div class="entry-count">Picks: <strong id="pickCount">0</strong> / 4</div>
+        <div style="font-size:var(--text-xs);color:var(--text-muted);">All correct = <strong style="color:var(--accent);">+1,000 pts</strong></div>
+        <button class="submit-entry-btn" id="submitEntry" onclick="submitEntry()" disabled>Submit Entry</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="lb-section">
+      <div class="lb-title">🏆 Tonight's Leaderboard</div>
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-name">SportsKing99</div>
+        <div class="lb-pts">4,200</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-name">QueensNYC_Fan <span class="lb-you">YOU</span></div>
+        <div class="lb-pts" id="lbYourPts">1,250</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-name">FastBreak22</div>
+        <div class="lb-pts">980</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">4</div>
+        <div class="lb-name">GoTeam_Bills</div>
+        <div class="lb-pts">840</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank">5</div>
+        <div class="lb-name">CheerLeader_LA</div>
+        <div class="lb-pts">620</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">✅</span>
+  <span id="toastMsg">Done!</span>
+</div>
+
+<script>
+/* ── GLOBAL STATE ─────────────────────────────────────── */
+let totalPoints = 1250;
+let predSelection = null;
+let predLocked = false;
+let predTimerSecs = 30;
+let predInterval = null;
+let bingoMarked = new Set([12]); // center FREE
+let bingoWon = false;
+let scratchRevealed = 0;
+let picks = {};
+
+/* ── THEME ────────────────────────────────────────────── */
+(function(){
+  const d = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', d);
+  const btn = document.querySelector('[data-theme-toggle]');
+  if(btn) btn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+  });
+})();
+
+/* ── TABS ─────────────────────────────────────────────── */
+function switchTab(idx) {
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  if(idx===0 && !predInterval) startPredTimer();
+}
+
+/* ── POINTS ───────────────────────────────────────────── */
+function addPoints(n) {
+  totalPoints += n;
+  const el = document.getElementById('totalPts');
+  let cur = parseInt(el.textContent.replace(/,/g,''));
+  const target = totalPoints;
+  const step = Math.ceil((target - cur) / 15);
+  const iv = setInterval(() => {
+    cur = Math.min(cur + step, target);
+    el.textContent = cur.toLocaleString();
+    if(cur >= target) clearInterval(iv);
+  }, 40);
+  document.getElementById('lbYourPts').textContent = totalPoints.toLocaleString();
+}
+
+/* ── TOAST ────────────────────────────────────────────── */
+function showToast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastIcon').textContent = icon;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── CONFETTI ─────────────────────────────────────────── */
+function burst(x, y) {
+  const colors = ['#f5a623','#22c55e','#3b82f6','#ef4444','#a855f7','#ffffff'];
+  for(let i=0;i<40;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${x+Math.random()*60-30}px;top:${y}px;background:${colors[i%colors.length]};animation-duration:${0.8+Math.random()*1}s;animation-delay:${Math.random()*0.3}s;transform:rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2000);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   AD 1 — PREDICTION
+════════════════════════════════════════════════════════ */
+function selectPred(el, val) {
+  if(predLocked) return;
+  predSelection = val;
+  document.querySelectorAll('.pred-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('predCta').disabled = false;
+}
+
+function startPredTimer() {
+  predTimerSecs = 30;
+  const timerEl = document.getElementById('predTimer');
+  predInterval = setInterval(() => {
+    predTimerSecs--;
+    const m = Math.floor(predTimerSecs/60);
+    const s = predTimerSecs%60;
+    timerEl.textContent = m+':'+String(s).padStart(2,'0');
+    if(predTimerSecs <= 0) {
+      clearInterval(predInterval);
+      timerEl.textContent = '0:00';
+      if(!predLocked) {
+        document.getElementById('predCta').disabled = true;
+        showToast('Time\'s up! Prediction window closed.','⏱️');
+      }
+    }
+  }, 1000);
+}
+
+function lockPrediction() {
+  if(!predSelection || predLocked) return;
+  predLocked = true;
+  document.getElementById('predCta').disabled = true;
+  document.querySelectorAll('.pred-opt').forEach(o => o.classList.add('locked'));
+  // simulate correct answer ~60% of time
+  const correct = Math.random() > 0.4;
+  const resultEl = document.getElementById('predResult');
+  resultEl.style.display = 'block';
+  if(correct) {
+    resultEl.style.borderColor = 'var(--green)';
+    resultEl.style.color = 'var(--green)';
+    resultEl.style.background = 'var(--green-glow)';
+    resultEl.textContent = '🎉 Correct! +250 pts added to your wallet. Redeem at Pepsi Shop →';
+    addPoints(250);
+    burst(window.innerWidth/2, 200);
+    showToast('+250 pts earned! Great pick!','🏈');
+  } else {
+    resultEl.style.borderColor = 'var(--border)';
+    resultEl.style.color = 'var(--text-muted)';
+    resultEl.style.background = 'var(--surface-2)';
+    resultEl.textContent = '😬 Not quite! Better luck next quarter. +10 pts for participating.';
+    addPoints(10);
+    showToast('+10 pts for playing!','💪');
+  }
+  clearInterval(predInterval);
+}
+
+/* ════════════════════════════════════════════════════════
+   AD 2 — BINGO
+════════════════════════════════════════════════════════ */
+const BINGO_CELLS = [
+  'Slam Dunk','3-Pointer','Tech Foul','Fast Break','Timeout',
+  'Free Throw','Blocked Shot','Steal','Turnover','Coach Ejected',
+  '30+ Pts Half','Behind Arc','FREE','Buzzer Shot','Overtime Talk',
+  'Challenge Flag','Flagrant Foul','Alley-Oop','Big Lead','Triple-Dbl',
+  'Walk-Off','Game Tying','Player Sub','Crowd Roar','MVP Chant'
+];
+
+function buildBingo() {
+  const grid = document.getElementById('bingoGrid');
+  const headers = ['B','I','N','G','O'];
+  headers.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'bingo-col-header';
+    el.textContent = h;
+    grid.appendChild(el);
+  });
+  BINGO_CELLS.forEach((txt, i) => {
+    const el = document.createElement('div');
+    el.className = 'bingo-cell' + (i===12?' free':'');
+    el.textContent = i===12 ? 'FREE\nSPACE' : txt;
+    el.style.whiteSpace = 'pre-line';
+    el.dataset.idx = i;
+    if(i===12) {
+      el.classList.add('marked');
+      bingoMarked.add(12);
+    } else {
+      el.addEventListener('click', () => toggleBingoCell(el, i));
+    }
+    grid.appendChild(el);
+  });
+  buildQR();
+}
+
+function toggleBingoCell(el, idx) {
+  if(bingoWon) return;
+  if(bingoMarked.has(idx)) {
+    bingoMarked.delete(idx);
+    el.classList.remove('marked','win-line');
+  } else {
+    bingoMarked.add(idx);
+    el.classList.add('marked');
+    addPoints(50);
+    showToast('+50 pts! Square marked.','✅');
+  }
+  checkBingo();
+}
+
+function autoMark() {
+  if(bingoWon) return;
+  const unmarked = [];
+  document.querySelectorAll('.bingo-cell:not(.marked)').forEach(el => {
+    unmarked.push(parseInt(el.dataset.idx));
+  });
+  if(unmarked.length === 0) return;
+  const pick = unmarked[Math.floor(Math.random()*unmarked.length)];
+  const el = document.querySelector(`.bingo-cell[data-idx="${pick}"]`);
+  if(el) {
+    bingoMarked.add(pick);
+    el.classList.add('marked');
+    addPoints(50);
+    showToast('+50 pts! Play happened — square marked.','⚡');
+    checkBingo();
+  }
+}
+
+function checkBingo() {
+  const LINES = [
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+    [0,6,12,18,24],[4,8,12,16,20]
+  ];
+  const marked = bingoMarked;
+  let won = false;
+  for(const line of LINES) {
+    if(line.every(i => marked.has(i))) {
+      won = true;
+      line.forEach(i => {
+        const el = document.querySelector(`.bingo-cell[data-idx="${i}"]`);
+        if(el) el.classList.add('win-line');
+      });
+    }
+  }
+  if(won && !bingoWon) {
+    bingoWon = true;
+    document.getElementById('bingoWin').style.display = 'block';
+    addPoints(500);
+    burst(window.innerWidth/2, 300);
+    showToast('BINGO! +500 pts! Coupon unlocked!','🎉');
+    document.getElementById('bingoStatus').innerHTML = '<strong style="color:var(--green)">BINGO! You won the Budweiser prize!</strong>';
+  } else {
+    const cnt = marked.size - 1;
+    document.getElementById('bingoStatus').innerHTML = `${cnt} squares marked. <strong>Keep watching for more plays!</strong>`;
+  }
+}
+
+function buildQR() {
+  const qr = document.getElementById('qrMock');
+  for(let i=0;i<64;i++){
+    const d = document.createElement('div');
+    d.style.background = Math.random()>0.45 ? 'var(--text)' : 'transparent';
+    qr.appendChild(d);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   AD 3 — SCRATCH CARDS
+════════════════════════════════════════════════════════ */
+const SCRATCH_PRIZES = [
+  { label:'30% Off', code:'DOM-SAVE30', desc:'30% off your next Domino\'s order. Valid online only.', pts:300, win:true },
+  { label:'FREE Brownie', code:'DOM-BROWNIE', desc:'Free brownie with any $10 order. Show at checkout.', pts:150, win:true },
+  { label:'Better Luck Next Time', code:null, desc:null, pts:25, win:false }
+];
+
+function buildScratch() {
+  const container = document.getElementById('scratchCards');
+  const shuffled = [...SCRATCH_PRIZES].sort(()=>Math.random()-0.5);
+  shuffled.forEach((prize, i) => {
+    const card = document.createElement('div');
+    card.className = 'scratch-card';
+    card.innerHTML = `
+      <div class="scratch-cover">
+        <div class="scratch-cover-icon">🎟️</div>
+        <div class="scratch-cover-text">Tap to scratch</div>
+      </div>
+      <div class="scratch-reveal">
+        ${prize.win
+          ? `<div class="scratch-reveal-label">You won!</div>
+             <div class="scratch-reveal-value">${prize.label}</div>
+             <div class="scratch-reveal-pts">+${prize.pts} pts</div>`
+          : `<div class="scratch-reveal-loss">😢 Try again next game</div>
+             <div class="scratch-reveal-pts">+${prize.pts} pts for playing</div>`
+        }
+      </div>`;
+    card.addEventListener('click', () => {
+      if(card.classList.contains('revealed')) return;
+      card.classList.add('revealed');
+      scratchRevealed++;
+      addPoints(prize.pts);
+      if(prize.win) {
+        showToast(`${prize.label} coupon saved to wallet!`,'🎟️');
+        document.getElementById('couponCode').textContent = prize.code;
+        document.getElementById('couponDesc').textContent = prize.desc;
+        document.getElementById('scratchCouponBox').classList.add('show');
+        burst(card.getBoundingClientRect().left + 60, card.getBoundingClientRect().top);
+      } else {
+        showToast(`+${prize.pts} pts for playing!`,'💪');
+      }
+    });
+    container.appendChild(card);
+  });
+}
+
+function copyCoupon() {
+  const code = document.getElementById('couponCode').textContent;
+  navigator.clipboard.writeText(code).catch(()=>{});
+  showToast(`Code "${code}" copied!`,'📋');
+}
+
+/* ════════════════════════════════════════════════════════
+   AD 4 — MORE OR LESS
+════════════════════════════════════════════════════════ */
+const PLAYERS = [
+  { emoji:'🏀', name:'LeBron James', team:'Lakers', stat:'Points', line:'26.5', desc:'Season avg: 25.1 pts' },
+  { emoji:'⚡', name:'Kevin Durant', team:'Suns', stat:'Points', line:'28.5', desc:'Season avg: 27.8 pts' },
+  { emoji:'🌟', name:'Steph Curry', team:'Warriors', stat:'3-Pointers', line:'3.5', desc:'Season avg: 4.1 made' },
+  { emoji:'🦁', name:'Giannis A.', team:'Bucks', stat:'Rebounds', line:'11.5', desc:'Season avg: 11.2 reb' },
+];
+
+function buildMoreLess() {
+  const grid = document.getElementById('morelessGrid');
+  PLAYERS.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.innerHTML = `
+      <div class="player-top">
+        <div class="player-avatar">${p.emoji}</div>
+        <div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-team">${p.team}</div>
+        </div>
+      </div>
+      <div class="player-stat">
+        <div class="player-stat-label">${p.stat}</div>
+        <div class="player-stat-line"><span>${p.line}</span></div>
+        <div class="player-stat-desc">${p.desc}</div>
+        <div class="moreless-btns">
+          <button class="ml-btn more" onclick="pickML(${i},'more',this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+            MORE
+          </button>
+          <button class="ml-btn less" onclick="pickML(${i},'less',this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            LESS
+          </button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function pickML(idx, dir, btn) {
+  // clear siblings
+  const card = btn.closest('.player-card');
+  card.querySelectorAll('.ml-btn').forEach(b => b.classList.remove('picked'));
+  btn.classList.add('picked');
+  if(picks[idx] === dir) {
+    delete picks[idx];
+    btn.classList.remove('picked');
+  } else {
+    picks[idx] = dir;
+  }
+  const count = Object.keys(picks).length;
+  document.getElementById('pickCount').textContent = count;
+  document.getElementById('submitEntry').disabled = count < 2;
+}
+
+function submitEntry() {
+  const count = Object.keys(picks).length;
+  if(count < 2) return;
+  const multiplier = count >= 4 ? 4 : count >= 3 ? 2 : 1;
+  const base = 250;
+  const bonus = base * multiplier;
+  addPoints(bonus);
+  burst(window.innerWidth/2, window.innerHeight/2);
+  showToast(`Entry locked! Win up to +${bonus} pts!`,'🚀');
+  document.getElementById('submitEntry').textContent = '✅ Entry Submitted!';
+  document.getElementById('submitEntry').disabled = true;
+  document.getElementById('submitEntry').style.background = 'var(--green)';
+  setTimeout(()=>{
+    document.getElementById('submitEntry').textContent = 'Submit Entry';
+    document.getElementById('submitEntry').disabled = true;
+    document.getElementById('submitEntry').style.background = '';
+    picks = {};
+    document.getElementById('pickCount').textContent = '0';
+    document.querySelectorAll('.ml-btn.picked').forEach(b=>b.classList.remove('picked'));
+  }, 3000);
+}
+
+/* ── INIT ─────────────────────────────────────────────── */
+buildBingo();
+buildScratch();
+buildMoreLess();
+startPredTimer();
+</script>
+</body>
+</html>

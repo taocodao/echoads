@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arenza Live Shop — Earn. Watch. Win. Shop.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-display:'Space Grotesk','Helvetica Neue',sans-serif;
+  --font-body:'Inter','Helvetica Neue',sans-serif;
+  --text-xs:clamp(0.75rem,0.7rem + 0.25vw,0.875rem);
+  --text-sm:clamp(0.875rem,0.8rem + 0.35vw,1rem);
+  --text-base:clamp(1rem,0.95rem + 0.25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + 0.75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --text-2xl:clamp(2rem,1.2rem + 2.5vw,3.5rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;
+  --radius-xl:1rem;--radius-2xl:1.5rem;--radius-full:9999px;
+  --transition:180ms cubic-bezier(0.16,1,0.3,1);
+  --content-default:1100px;
+}
+[data-theme="dark"] {
+  --color-bg:#0a0c10;--color-surface:#111318;--color-surface-2:#181b22;
+  --color-surface-3:#1e222b;--color-surface-offset:#252a35;
+  --color-border:rgba(255,255,255,0.08);--color-divider:rgba(255,255,255,0.05);
+  --color-text:#e8eaf0;--color-text-muted:#8b91a0;--color-text-faint:#4a4f60;--color-text-inverse:#0a0c10;
+  --color-primary:#ff5c00;--color-primary-hover:#e85200;--color-primary-glow:rgba(255,92,0,0.25);
+  --color-gold:#f0a500;--color-gold-muted:rgba(240,165,0,0.15);
+  --color-success:#22c55e;--color-success-bg:rgba(34,197,94,0.12);
+  --color-error:#ef4444;--color-error-bg:rgba(239,68,68,0.12);--color-live:#ff3b30;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4);--shadow-md:0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.6);--shadow-glow:0 0 24px rgba(255,92,0,0.3);
+}
+[data-theme="light"] {
+  --color-bg:#f5f5f7;--color-surface:#ffffff;--color-surface-2:#f9f9fb;
+  --color-surface-3:#f0f0f5;--color-surface-offset:#ebebef;
+  --color-border:rgba(0,0,0,0.09);--color-divider:rgba(0,0,0,0.05);
+  --color-text:#1a1c26;--color-text-muted:#5a5e70;--color-text-faint:#a0a4b4;--color-text-inverse:#ffffff;
+  --color-primary:#e04800;--color-primary-hover:#c53e00;--color-primary-glow:rgba(224,72,0,0.15);
+  --color-gold:#d09000;--color-gold-muted:rgba(208,144,0,0.12);
+  --color-success:#16a34a;--color-success-bg:rgba(22,163,74,0.1);
+  --color-error:#dc2626;--color-error-bg:rgba(220,38,38,0.1);--color-live:#dc2626;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 16px rgba(0,0,0,0.1);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.15);--shadow-glow:0 0 24px rgba(224,72,0,0.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6;overflow-x:hidden;}
+img,svg{display:block;max-width:100%}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit;}
+a{color:inherit;text-decoration:none;}
+input,select{font:inherit;color:inherit;}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;}
+.container{max-width:var(--content-default);margin-inline:auto;padding-inline:var(--space-4);}
+.page{display:none;}.page.active{display:block;}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:100;background:var(--color-bg);border-bottom:1px solid var(--color-border);backdrop-filter:blur(12px);}
+.header-inner{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-4);max-width:var(--content-default);margin-inline:auto;}
+.logo{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-display);font-weight:700;font-size:var(--text-lg);cursor:pointer;}
+.nav{display:flex;align-items:center;gap:var(--space-2);flex:1;margin-left:var(--space-4);}
+.nav-btn{padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted);transition:all var(--transition);cursor:pointer;border:none;background:none;}
+.nav-btn:hover,.nav-btn.active{color:var(--color-text);background:var(--color-surface-2);}
+.nav-btn.active{color:var(--color-primary);}
+.header-actions{display:flex;align-items:center;gap:var(--space-3);margin-left:auto;}
+.points-badge{display:flex;align-items:center;gap:var(--space-2);background:var(--color-gold-muted);border:1px solid var(--color-gold);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3);font-size:var(--text-sm);font-weight:700;color:var(--color-gold);cursor:pointer;transition:all var(--transition);}
+.points-badge:hover{background:var(--color-gold);color:var(--color-bg);}
+.cart-btn{position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);background:var(--color-surface-2);transition:all var(--transition);cursor:pointer;border:none;}
+.cart-btn:hover{background:var(--color-surface-3);}
+.cart-count{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--color-primary);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.theme-toggle{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);background:var(--color-surface-2);color:var(--color-text-muted);transition:all var(--transition);border:none;cursor:pointer;}
+.theme-toggle:hover{background:var(--color-surface-3);color:var(--color-text);}
+.live-banner{background:linear-gradient(135deg,rgba(255,92,0,0.12) 0%,rgba(240,165,0,0.06) 100%);border-bottom:1px solid rgba(255,92,0,0.2);padding:var(--space-2) var(--space-6);display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
+.live-dot{width:8px;height:8px;background:var(--color-live);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.4);}}
+.live-banner-text{font-size:var(--text-sm);color:var(--color-text-muted);}
+.live-banner-text strong{color:var(--color-text);}
+.live-banner-score{margin-left:auto;font-family:var(--font-display);font-weight:700;font-size:var(--text-sm);color:var(--color-gold);}
+.live-banner-timer{font-size:var(--text-xs);color:var(--color-text-muted);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;transition:all var(--transition);cursor:pointer;border:none;}
+.btn-primary{background:var(--color-primary);color:white;}
+.btn-primary:hover{background:var(--color-primary-hover);box-shadow:var(--shadow-glow);}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
+.btn-secondary{background:var(--color-surface-2);color:var(--color-text);border:1px solid var(--color-border);}
+.btn-secondary:hover{background:var(--color-surface-3);}
+.btn-ghost{background:transparent;color:var(--color-text-muted);}
+.btn-ghost:hover{color:var(--color-text);background:var(--color-surface-2);}
+.btn-gold{background:var(--color-gold);color:var(--color-bg);font-weight:700;}
+.btn-gold:hover{filter:brightness(1.1);}
+.btn-sm{padding:var(--space-1) var(--space-3);font-size:var(--text-xs);}
+.btn-lg{padding:var(--space-3) var(--space-6);font-size:var(--text-base);border-radius:var(--radius-lg);}
+.btn-full{width:100%;}
+
+/* SHOP PAGE */
+.shop-hero{padding:var(--space-12) var(--space-4) var(--space-8);text-align:center;}
+.shop-hero-eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);background:var(--color-gold-muted);border:1px solid var(--color-gold);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3);font-size:var(--text-xs);font-weight:600;color:var(--color-gold);margin-bottom:var(--space-4);}
+.shop-hero-title{font-size:var(--text-2xl);font-weight:800;margin-bottom:var(--space-3);background:linear-gradient(135deg,var(--color-text) 0%,var(--color-primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.shop-hero-sub{font-size:var(--text-base);color:var(--color-text-muted);max-width:480px;margin:0 auto var(--space-6);}
+.shop-hero-stats{display:flex;align-items:center;justify-content:center;gap:var(--space-8);margin-top:var(--space-6);}
+.stat-num{font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;color:var(--color-primary);}
+.stat-label{font-size:var(--text-xs);color:var(--color-text-muted);}
+
+/* GAME SECTION */
+.game-section{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-2xl);overflow:hidden;margin-bottom:var(--space-6);}
+.game-header{background:linear-gradient(135deg,rgba(255,92,0,0.08) 0%,rgba(240,165,0,0.04) 100%);padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:var(--space-3);}
+.game-header h2{font-family:var(--font-display);font-weight:700;font-size:var(--text-base);}
+.game-content{padding:var(--space-5) var(--space-6);display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);}
+.game-card{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);text-align:center;cursor:pointer;transition:all var(--transition);}
+.game-card:hover{border-color:var(--color-primary);background:rgba(255,92,0,0.06);transform:translateY(-2px);}
+.game-card-icon{font-size:2.2rem;margin-bottom:var(--space-3);}
+.game-card-title{font-family:var(--font-display);font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);}
+.game-card-pts{font-size:var(--text-xs);color:var(--color-gold);font-weight:600;}
+
+/* DROP CARD */
+.drop-card{background:linear-gradient(135deg,rgba(255,92,0,0.1) 0%,rgba(240,165,0,0.05) 100%);border:1px solid rgba(255,92,0,0.25);border-radius:var(--radius-xl);padding:var(--space-5) var(--space-6);display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);}
+.drop-icon{font-size:2.5rem;}
+.drop-info{flex:1;}
+.drop-title{font-family:var(--font-display);font-weight:700;font-size:var(--text-base);margin-bottom:var(--space-1);}
+.drop-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);}
+.drop-timer{font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;color:var(--color-primary);text-align:right;}
+.drop-timer-label{font-size:var(--text-xs);color:var(--color-text-muted);text-align:right;}
+
+/* FILTERS */
+.filter-bar{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-6);}
+.filter-pill{padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:500;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;transition:all var(--transition);}
+.filter-pill:hover,.filter-pill.active{background:var(--color-primary);border-color:var(--color-primary);color:white;}
+.sort-select{margin-left:auto;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);font-size:var(--text-sm);cursor:pointer;}
+
+/* PRODUCT GRID */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:var(--space-5);margin-bottom:var(--space-16);}
+.product-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;transition:all var(--transition);cursor:pointer;position:relative;}
+.product-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(255,92,0,0.3);}
+.product-img{width:100%;aspect-ratio:1;background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;}
+.product-badge{position:absolute;top:var(--space-3);left:var(--space-3);padding:3px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;z-index:1;}
+.badge-hot{background:#ff3b30;color:white;}
+.badge-new{background:#22c55e;color:white;}
+.badge-sponsor{background:var(--color-gold);color:#0a0c10;}
+.badge-exclusive{background:var(--color-primary);color:white;}
+.product-info{padding:var(--space-4);}
+.product-brand{font-size:var(--text-xs);color:var(--color-text-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;}
+.product-name{font-family:var(--font-display);font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-3);line-height:1.3;}
+.product-price-row{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-2);}
+.product-pts{font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;line-height:1;}
+.product-pts.affordable{color:var(--color-gold);}
+.product-pts.near{color:var(--color-text);}
+.product-pts.unavailable{color:var(--color-text-faint);}
+.product-pts-label{font-size:10px;color:var(--color-text-muted);margin-top:2px;}
+.add-cart-btn{padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;background:var(--color-primary);color:white;transition:all var(--transition);flex-shrink:0;cursor:pointer;border:none;}
+.add-cart-btn:hover{background:var(--color-primary-hover);}
+.add-cart-btn:disabled{background:var(--color-surface-3);color:var(--color-text-faint);cursor:not-allowed;}
+.add-cart-btn.added{background:var(--color-success);}
+@keyframes pop{0%{transform:scale(1);}50%{transform:scale(1.18);}100%{transform:scale(1);}}
+
+/* CART PAGE */
+.cart-page{max-width:var(--content-default);margin:0 auto;padding:var(--space-8) var(--space-4);}
+.cart-layout{display:grid;grid-template-columns:1fr 360px;gap:var(--space-6);align-items:start;}
+.cart-items{display:flex;flex-direction:column;gap:var(--space-3);}
+.cart-item{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-4);display:flex;align-items:center;gap:var(--space-4);}
+.cart-item-img{width:68px;height:68px;border-radius:var(--radius-lg);background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
+.cart-item-info{flex:1;}
+.cart-item-name{font-weight:600;font-family:var(--font-display);font-size:var(--text-sm);margin-bottom:2px;}
+.cart-item-brand{font-size:var(--text-xs);color:var(--color-text-faint);margin-bottom:var(--space-1);}
+.cart-item-pts{font-family:var(--font-display);font-weight:700;color:var(--color-gold);}
+.remove-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);background:var(--color-error-bg);color:var(--color-error);transition:all var(--transition);flex-shrink:0;cursor:pointer;border:none;}
+.remove-btn:hover{background:var(--color-error);color:white;}
+.cart-empty{text-align:center;padding:var(--space-16) var(--space-4);}
+.order-panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);position:sticky;top:100px;}
+.order-panel h3{font-family:var(--font-display);font-weight:700;font-size:var(--text-base);margin-bottom:var(--space-4);}
+.order-line{display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) 0;font-size:var(--text-sm);}
+.order-line.total{border-top:1px solid var(--color-divider);padding-top:var(--space-3);margin-top:var(--space-2);font-weight:700;font-size:var(--text-base);color:var(--color-gold);}
+.order-divider{border:none;border-top:1px solid var(--color-divider);margin:var(--space-3) 0;}
+.points-bar{background:var(--color-surface-2);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4);margin:var(--space-3) 0;display:flex;align-items:center;justify-content:space-between;}
+.points-progress{width:100%;height:5px;background:var(--color-surface-3);border-radius:var(--radius-full);overflow:hidden;margin-top:var(--space-2);}
+.points-progress-fill{height:100%;background:linear-gradient(90deg,var(--color-gold),var(--color-primary));border-radius:var(--radius-full);transition:width 0.6s ease;}
+
+/* COUPON UI */
+.coupon-section{margin:var(--space-4) 0;}
+.coupon-section h4{font-size:var(--text-xs);font-weight:700;margin-bottom:var(--space-3);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;}
+.coupon-input-row{display:flex;gap:var(--space-2);}
+.coupon-input{flex:1;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-sm);transition:border-color var(--transition);text-transform:uppercase;outline:none;}
+.coupon-input:focus{border-color:var(--color-primary);}
+.coupon-msg{font-size:var(--text-xs);margin-top:var(--space-1);min-height:16px;}
+.coupon-msg.success{color:var(--color-success);}
+.coupon-msg.error{color:var(--color-error);}
+.saved-coupons-label{font-size:var(--text-xs);color:var(--color-text-faint);margin:var(--space-3) 0 var(--space-2);}
+.coupon-tags{display:flex;flex-wrap:wrap;gap:var(--space-2);}
+.coupon-tag{display:flex;align-items:center;gap:var(--space-1);padding:var(--space-1) var(--space-2);border-radius:var(--radius-md);border:1px dashed var(--color-gold);background:var(--color-gold-muted);font-size:var(--text-xs);font-weight:600;color:var(--color-gold);cursor:pointer;transition:all var(--transition);}
+.coupon-tag:hover{background:var(--color-gold);color:var(--color-bg);}
+.coupon-tag.used{opacity:0.35;cursor:default;pointer-events:none;}
+
+/* CONFIRMATION */
+.confirmation{text-align:center;padding:var(--space-12) var(--space-4);}
+.confirm-icon{font-size:4.5rem;margin-bottom:var(--space-4);}
+.confirm-coupon-box{display:inline-block;padding:var(--space-3) var(--space-6);background:var(--color-gold-muted);border:2px dashed var(--color-gold);border-radius:var(--radius-xl);font-family:'Courier New',monospace;font-size:var(--text-lg);font-weight:700;color:var(--color-gold);letter-spacing:0.15em;margin:var(--space-4) 0;}
+
+/* LIVE PAGE */
+.live-page{padding:var(--space-6) var(--space-4);max-width:var(--content-default);margin:0 auto;}
+.live-grid{display:grid;grid-template-columns:1fr 300px;gap:var(--space-5);align-items:start;}
+.live-stream-panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;margin-bottom:var(--space-4);}
+.live-video-placeholder{aspect-ratio:16/9;background:linear-gradient(135deg,#0d1117 0%,#1a2035 50%,#0d1117 100%);display:flex;align-items:center;justify-content:center;position:relative;}
+.live-video-placeholder::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(255,92,0,0.07) 0%,transparent 70%);}
+.live-video-inner{text-align:center;z-index:1;}
+.live-badge-pill{display:inline-flex;align-items:center;gap:var(--space-2);background:var(--color-live);color:white;padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-top:var(--space-3);}
+.live-stream-meta{padding:var(--space-4);display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--color-border);}
+.live-drop-panel{display:flex;flex-direction:column;gap:var(--space-3);}
+.live-drop-header{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-4);}
+.live-drop-header h3{font-family:var(--font-display);font-weight:700;font-size:var(--text-sm);margin-bottom:var(--space-1);display:flex;align-items:center;gap:var(--space-2);}
+.live-item{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-4);transition:all var(--transition);}
+.live-item.featured{border-color:var(--color-primary);box-shadow:0 0 20px rgba(255,92,0,0.15);}
+.live-item-row{display:flex;gap:var(--space-3);align-items:center;margin-bottom:var(--space-3);}
+.live-item-img{width:52px;height:52px;border-radius:var(--radius-lg);background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+.live-item-name{font-family:var(--font-display);font-weight:600;font-size:var(--text-sm);}
+.live-item-pts{font-size:var(--text-xs);color:var(--color-gold);font-weight:700;}
+.live-countdown-row{background:var(--color-surface-2);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted);display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-3);}
+.countdown-highlight{color:var(--color-primary);font-weight:700;font-family:var(--font-display);}
+
+/* COUPON TRACKER PAGE */
+.coupon-tracker-page{max-width:var(--content-default);margin:0 auto;padding:var(--space-8) var(--space-4);}
+.coupon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:var(--space-4);margin-top:var(--space-6);}
+.coupon-card{background:var(--color-surface);border-radius:var(--radius-xl);overflow:hidden;border:1px solid var(--color-border);transition:all var(--transition);}
+.coupon-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.coupon-card-top{padding:var(--space-5);background:linear-gradient(135deg,var(--color-primary),var(--color-gold));color:white;}
+.coupon-card-top.inactive{background:var(--color-surface-2);color:var(--color-text-muted);}
+.coupon-card-brand{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;opacity:0.8;margin-bottom:var(--space-1);}
+.coupon-card-discount{font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;margin-bottom:var(--space-1);}
+.coupon-card-desc{font-size:var(--text-sm);opacity:0.9;}
+.coupon-card-bottom{padding:var(--space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);}
+.coupon-code-box{font-family:'Courier New',monospace;font-size:var(--text-sm);font-weight:700;color:var(--color-gold);background:var(--color-gold-muted);padding:3px 8px;border-radius:var(--radius-sm);letter-spacing:0.1em;}
+.coupon-meta{font-size:var(--text-xs);color:var(--color-text-faint);}
+.status-badge{font-size:var(--text-xs);font-weight:600;padding:3px 8px;border-radius:var(--radius-full);}
+.status-active{background:var(--color-success-bg);color:var(--color-success);}
+.status-used{background:var(--color-surface-3);color:var(--color-text-faint);}
+.status-expired{background:var(--color-error-bg);color:var(--color-error);}
+
+/* TOAST */
+.toast{position:fixed;bottom:var(--space-6);right:var(--space-6);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-4) var(--space-5);max-width:320px;box-shadow:var(--shadow-lg);z-index:500;display:flex;align-items:center;gap:var(--space-3);transform:translateY(120px);opacity:0;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-icon{font-size:1.4rem;flex-shrink:0;}
+.toast-body strong{display:block;font-weight:600;font-size:var(--text-sm);}
+.toast-body span{font-size:var(--text-xs);color:var(--color-text-muted);}
+
+/* POINTS POPUP */
+.pts-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:600;background:var(--color-surface);border:2px solid var(--color-gold);border-radius:var(--radius-2xl);padding:var(--space-8) var(--space-10);text-align:center;box-shadow:var(--shadow-lg),0 0 60px rgba(240,165,0,0.25);pointer-events:none;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease;opacity:0;}
+.pts-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+.pts-popup-amt{font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;color:var(--color-gold);}
+.pts-popup-label{color:var(--color-text-muted);font-size:var(--text-sm);margin-top:var(--space-1);}
+
+/* CONFETTI */
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:999;}
+@keyframes confettiFall{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .cart-layout,.live-grid{grid-template-columns:1fr;}
+  .game-content{grid-template-columns:1fr;}
+  .shop-hero-stats{gap:var(--space-4);}
+  .nav{display:none;}
+  .order-panel{position:static;}
+}
+@media(max-width:500px){
+  .drop-card{flex-direction:column;}
+  .header-inner{gap:var(--space-2);}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon">🎉</div>
+  <div class="toast-body"><strong id="toastTitle"></strong><span id="toastBody"></span></div>
+</div>
+
+<!-- POINTS POPUP -->
+<div class="pts-popup" id="ptsPopup">
+  <div style="font-size:2.5rem;margin-bottom:var(--space-2)">⚡</div>
+  <div class="pts-popup-amt" id="ptsPopupAmt">+250 pts</div>
+  <div class="pts-popup-label">Points Earned!</div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="goPage('shop')">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="Arenza">
+        <polygon points="16,3 29,27 3,27" fill="none" stroke="currentColor" stroke-width="2.2"/>
+        <polygon points="16,9 25,25 7,25" fill="var(--color-primary)" opacity="0.75"/>
+        <circle cx="16" cy="19" r="3" fill="white" opacity="0.9"/>
+      </svg>
+      <span>Arenza <span style="color:var(--color-primary)">Live</span></span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" id="nav-shop" onclick="goPage('shop')">🏪 Shop</button>
+      <button class="nav-btn" id="nav-live" onclick="goPage('live')">📺 Live Drop</button>
+      <button class="nav-btn" id="nav-coupons" onclick="goPage('coupons')">🎟️ Coupons</button>
+    </nav>
+    <div class="header-actions">
+      <button class="points-badge" onclick="showToast('⚡','Your Balance','Keep watching and playing to earn more points!')">
+        <span>⚡</span><span id="headerPts">2,450</span><span style="font-weight:400;font-size:11px;opacity:0.7">pts</span>
+      </button>
+      <button class="cart-btn" onclick="goPage('cart')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="theme-toggle" id="themeToggle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="live-banner" style="padding-left:var(--space-6);padding-right:var(--space-6);">
+    <div class="live-dot"></div>
+    <div class="live-banner-text"><strong>🏈 NFL · Chiefs vs Eagles</strong> &nbsp;Q3 7:42</div>
+    <div class="live-banner-score">KC 21 &mdash; PHI 17</div>
+    <div class="live-banner-timer" id="bannerClock">&nbsp;⏱ 4:18 remaining</div>
+  </div>
+</header>
+
+<!-- ===== PAGE: SHOP ===== -->
+<main class="page active" id="page-shop">
+  <div class="shop-hero container">
+    <div class="shop-hero-eyebrow">⚡ Watch · Earn · Shop</div>
+    <h1 class="shop-hero-title">Turn Your Fandom Into Prizes</h1>
+    <p class="shop-hero-sub">Earn points playing bingo, predictions &amp; trivia during live games — then spend them here.</p>
+    <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-lg" onclick="goPage('live')">📺 Watch &amp; Earn Now</button>
+      <button class="btn btn-secondary btn-lg" onclick="goPage('coupons')">🎟️ My Coupons</button>
+    </div>
+    <div class="shop-hero-stats">
+      <div><div class="stat-num" id="statsEarned">2,450</div><div class="stat-label">Your Points</div></div>
+      <div><div class="stat-num">32</div><div class="stat-label">Prize Items</div></div>
+      <div><div class="stat-num" id="statsCoupons">4</div><div class="stat-label">Your Coupons</div></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- GAME EARN SECTION -->
+    <div class="game-section">
+      <div class="game-header">
+        <span style="font-size:1.5rem">🎮</span>
+        <h2>Earn Points Right Now</h2>
+        <span style="margin-left:auto;font-size:var(--text-xs);color:var(--color-text-muted);">Live during NFL</span>
+      </div>
+      <div class="game-content">
+        <div class="game-card" onclick="earnPts(250,'Bingo Hit!')">
+          <div class="game-card-icon">🎯</div>
+          <div class="game-card-title">Sports Bingo</div>
+          <div class="game-card-pts">+250 pts per BINGO</div>
+        </div>
+        <div class="game-card" onclick="earnPts(150,'Prediction Locked!')">
+          <div class="game-card-icon">🔮</div>
+          <div class="game-card-title">Make Prediction</div>
+          <div class="game-card-pts">+150 pts if correct</div>
+        </div>
+        <div class="game-card" onclick="earnPts(100,'Trivia Correct!')">
+          <div class="game-card-icon">❓</div>
+          <div class="game-card-title">Live Trivia</div>
+          <div class="game-card-pts">+100 pts per answer</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DROP ALERT -->
+    <div class="drop-card">
+      <div class="drop-icon">🔥</div>
+      <div class="drop-info">
+        <div class="drop-title">🏈 Halftime Shop Drop — Active Now!</div>
+        <div class="drop-subtitle">Exclusive jerseys &amp; signed gear — halftime only</div>
+      </div>
+      <div>
+        <div class="drop-timer" id="dropTimer">12:44</div>
+        <div class="drop-timer-label">remaining</div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-bar">
+      <button class="filter-pill active" onclick="filterProducts('all',this)">All Items</button>
+      <button class="filter-pill" onclick="filterProducts('apparel',this)">👕 Apparel</button>
+      <button class="filter-pill" onclick="filterProducts('giftcard',this)">🎁 Gift Cards</button>
+      <button class="filter-pill" onclick="filterProducts('experience',this)">🎟️ Experiences</button>
+      <button class="filter-pill" onclick="filterProducts('food',this)">🍔 Food &amp; Drink</button>
+      <button class="filter-pill" onclick="filterProducts('sponsor',this)">⭐ Sponsor Deals</button>
+      <select class="sort-select" onchange="sortProducts(this.value)">
+        <option value="default">Sort: Featured</option>
+        <option value="pts-asc">Points: Low → High</option>
+        <option value="pts-desc">Points: High → Low</option>
+      </select>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+</main>
+
+<!-- ===== PAGE: CART ===== -->
+<main class="page" id="page-cart">
+  <div class="cart-page">
+    <h1 style="font-size:var(--text-xl);font-weight:700;margin-bottom:var(--space-6);">🛒 Your Cart</h1>
+    <div class="cart-layout">
+      <div id="cartItemsWrapper">
+        <div class="cart-items" id="cartItems"></div>
+      </div>
+      <div class="order-panel" id="orderPanel">
+        <h3>Order Summary</h3>
+        <div class="points-bar">
+          <div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Your Balance</div>
+            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-gold);" id="panelBalance">2,450 pts</div>
+          </div>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="points-progress"><div class="points-progress-fill" id="balanceFill" style="width:49%"></div></div>
+        <hr class="order-divider">
+        <div id="orderLines"></div>
+        <div class="coupon-section">
+          <h4>🎟️ Coupon Codes</h4>
+          <div class="coupon-input-row">
+            <input class="coupon-input" id="couponInput" type="text" placeholder="Enter code e.g. EAGLE25" maxlength="20">
+            <button class="btn btn-secondary btn-sm" onclick="applyCoupon()">Apply</button>
+          </div>
+          <div class="coupon-msg" id="couponMsg"></div>
+          <div class="saved-coupons-label">📌 Saved coupons — tap to apply:</div>
+          <div class="coupon-tags" id="savedCouponTags"></div>
+        </div>
+        <hr class="order-divider">
+        <div id="orderTotal"></div>
+        <button class="btn btn-primary btn-full btn-lg" style="margin-top:var(--space-4);" id="checkoutBtn" onclick="checkout()">⚡ Pay with Points</button>
+        <p style="font-size:var(--text-xs);color:var(--color-text-faint);text-align:center;margin-top:var(--space-2);">100% free-to-play · No real money</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== PAGE: LIVE ===== -->
+<main class="page" id="page-live">
+  <div class="live-page">
+    <h2 style="font-family:var(--font-display);font-weight:700;font-size:var(--text-xl);margin-bottom:var(--space-5);">📺 Live Game Shop Drop</h2>
+    <div class="live-grid">
+      <div>
+        <div class="live-stream-panel">
+          <div class="live-video-placeholder">
+            <div class="live-video-inner">
+              <div style="font-size:4rem;">🏈</div>
+              <div style="color:rgba(255,255,255,0.5);font-size:var(--text-sm);margin-top:var(--space-2);">Your broadcast feed appears here</div>
+              <div class="live-badge-pill"><div class="live-dot" style="width:6px;height:6px;"></div> LIVE — Chiefs vs Eagles</div>
+            </div>
+          </div>
+          <div class="live-stream-meta">
+            <div>
+              <div style="font-family:var(--font-display);font-weight:600;font-size:var(--text-sm);">NFL Game 3 · Q3 7:42</div>
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted);">👁 48,291 watching · KC 21 — PHI 17</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="earnPts(150,'Watch Bonus!')">⚡ Earn Points</button>
+          </div>
+        </div>
+        <div class="game-section" style="margin-top:var(--space-4);">
+          <div class="game-header"><span>🎮</span><h2>In-Game Activities</h2></div>
+          <div class="game-content">
+            <div class="game-card" onclick="earnPts(250,'⚡ BINGO!')"><div class="game-card-icon">🎯</div><div class="game-card-title">Sports Bingo</div><div class="game-card-pts">+250 pts</div></div>
+            <div class="game-card" onclick="earnPts(200,'🔮 Prediction Locked!')"><div class="game-card-icon">🔮</div><div class="game-card-title">Predict Score</div><div class="game-card-pts">+200 pts</div></div>
+            <div class="game-card" onclick="earnPts(100,'❓ Trivia Correct!')"><div class="game-card-icon">❓</div><div class="game-card-title">Live Trivia</div><div class="game-card-pts">+100 pts</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="live-drop-panel">
+        <div class="live-drop-header">
+          <h3>🔥 Live Drops <div class="live-dot" style="width:7px;height:7px;display:inline-block;vertical-align:middle;"></div></h3>
+          <p style="font-size:var(--text-xs);color:var(--color-text-muted);">Limited to this game only</p>
+        </div>
+        <div id="liveDropItems"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== PAGE: COUPONS ===== -->
+<main class="page" id="page-coupons">
+  <div class="coupon-tracker-page">
+    <h2 style="font-size:var(--text-xl);font-weight:700;">🎟️ My Coupon Wallet</h2>
+    <p style="color:var(--color-text-muted);margin-top:var(--space-2);margin-bottom:var(--space-2);">Earned from games &amp; sponsor rewards. Tap active coupons to copy &amp; apply at checkout.</p>
+    <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-2);flex-wrap:wrap;">
+      <div style="background:var(--color-success-bg);color:var(--color-success);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:600;" id="activeCouponCount">4 Active</div>
+      <div style="background:var(--color-surface-2);color:var(--color-text-muted);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);font-size:var(--text-xs);">2 Used/Expired</div>
+    </div>
+    <div class="coupon-grid" id="couponGrid"></div>
+  </div>
+</main>
+
+<script>
+// ===== STATE =====
+var state = {
+  points: 2450,
+  cart: [],
+  appliedCoupons: [],
+  filter: 'all',
+  sort: 'default'
+};
+
+var COUPONS = [
+  {code:'EAGLE25',discount:250,desc:'250 pts off any apparel',source:'Prediction Win',expires:'Jun 30, 2026',status:'active',brand:'Arenza Sports'},
+  {code:'NFL2026',discount:150,desc:'150 pts off orders 750+',source:'Bingo Achievement',expires:'Jun 28, 2026',status:'active',brand:'NFL x Arenza'},
+  {code:'PEPSI10',discount:100,desc:'100 pts off + free drink',source:'Sponsor Reward',expires:'Jun 25, 2026',status:'active',brand:'Pepsi'},
+  {code:'WIN500',discount:500,desc:'500 pts off any item',source:'Halftime BINGO Winner',expires:'Jun 30, 2026',status:'active',brand:'Arenza Gold'},
+  {code:'NIKE15',discount:200,desc:'200 pts off Nike items',source:'Trivia Champion',expires:'Jun 15, 2026',status:'used',brand:'Nike'},
+  {code:'BK2024',discount:75,desc:'Free Whopper combo',source:'Daily Login',expires:'Jun 10, 2026',status:'expired',brand:'Burger King'},
+];
+
+var VALID_CODES = {EAGLE25:250,NFL2026:150,PEPSI10:100,WIN500:500,SALE200:200};
+
+var PRODUCTS = [
+  {id:1,name:'Chiefs Super Bowl Jersey',brand:'Nike',pts:1800,cat:'apparel',emoji:'👕',badge:'hot',drop:true},
+  {id:2,name:'NFL Signed Football',brand:'Fanatics',pts:3200,cat:'experience',emoji:'🏈',badge:'exclusive',drop:true},
+  {id:3,name:'$25 Amazon Gift Card',brand:'Amazon',pts:600,cat:'giftcard',emoji:'🎁',badge:'new',drop:false},
+  {id:4,name:'Eagles Snapback Cap',brand:'New Era',pts:950,cat:'apparel',emoji:'🧢',badge:null,drop:false},
+  {id:5,name:'Pepsi Fan Bundle x4',brand:'Pepsi',pts:400,cat:'food',emoji:'🥤',badge:'sponsor',drop:false},
+  {id:6,name:'VIP Stadium Suite Pass',brand:'Arenza',pts:5000,cat:'experience',emoji:'🏟️',badge:'exclusive',drop:true},
+  {id:7,name:'DoorDash $20 Credit',brand:'DoorDash',pts:450,cat:'food',emoji:'🍔',badge:'sponsor',drop:false},
+  {id:8,name:'Nike Air Max Sneakers',brand:'Nike',pts:2800,cat:'apparel',emoji:'👟',badge:'hot',drop:false},
+  {id:9,name:'$50 Best Buy Gift Card',brand:'Best Buy',pts:1100,cat:'giftcard',emoji:'💻',badge:null,drop:false},
+  {id:10,name:'Uber Eats $30 Credit',brand:'Uber Eats',pts:650,cat:'food',emoji:'🛵',badge:'sponsor',drop:false},
+  {id:11,name:'Meet & Greet Pass',brand:'Arenza',pts:4500,cat:'experience',emoji:'🤝',badge:'exclusive',drop:true},
+  {id:12,name:'Team Hoodie',brand:'Fanatics',pts:1200,cat:'apparel',emoji:'🧥',badge:null,drop:false},
+];
+
+// ===== NAVIGATION =====
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  var pg = document.getElementById('page-'+name);
+  if(pg) pg.classList.add('active');
+  var nb = document.getElementById('nav-'+name);
+  if(nb) nb.classList.add('active');
+  if(name==='cart') renderCart();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== THEME =====
+document.getElementById('themeToggle').addEventListener('click',function(){
+  var isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme', isDark?'light':'dark');
+  this.innerHTML = isDark
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+});
+
+// ===== PRODUCTS =====
+function getPtsClass(pts){
+  if(pts<=state.points) return 'affordable';
+  if(pts<=state.points*1.4) return 'near';
+  return 'unavailable';
+}
+function filterProducts(cat,btn){
+  state.filter=cat;
+  document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');
+  renderProducts();
+}
+function sortProducts(val){state.sort=val;renderProducts();}
+function getFiltered(){
+  var p=PRODUCTS.slice();
+  if(state.filter!=='all') p=p.filter(function(x){return x.cat===state.filter;});
+  if(state.sort==='pts-asc') p.sort(function(a,b){return a.pts-b.pts;});
+  else if(state.sort==='pts-desc') p.sort(function(a,b){return b.pts-a.pts;});
+  return p;
+}
+function renderProducts(){
+  var grid=document.getElementById('productGrid');
+  var prods=getFiltered();
+  if(!prods.length){grid.innerHTML='<p style="padding:var(--space-8);color:var(--color-text-muted);grid-column:1/-1;">No items in this category.</p>';return;}
+  grid.innerHTML=prods.map(function(p){
+    var inCart=state.cart.find(function(c){return c.id===p.id;});
+    var pc=getPtsClass(p.pts);
+    var badgeMap={hot:'🔥 Hot',new:'✨ New',sponsor:'⭐ Sponsor',exclusive:'💎 Exclusive'};
+    var badge=p.badge?'<span class="product-badge badge-'+p.badge+'">'+badgeMap[p.badge]+'</span>':'';
+    var canBuy=pc!=='unavailable';
+    var btnTxt=inCart?'✓ Added':canBuy?'Add to Cart':'Need pts';
+    return '<div class="product-card" onclick="addToCart('+p.id+')">'
+      +'<div class="product-img">'+badge+'<span style="font-size:3.2rem;z-index:1;position:relative;">'+p.emoji+'</span></div>'
+      +'<div class="product-info">'
+      +'<div class="product-brand">'+p.brand+'</div>'
+      +'<div class="product-name">'+p.name+'</div>'
+      +'<div class="product-price-row">'
+      +'<div><div class="product-pts '+pc+'">'+p.pts.toLocaleString()+'</div><div class="product-pts-label">points</div></div>'
+      +'<button class="add-cart-btn'+(inCart?' added':'')+'" '+((!canBuy&&!inCart)?'disabled':'')+' onclick="event.stopPropagation();addToCart('+p.id+')">'+btnTxt+'</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+function addToCart(id){
+  var p=PRODUCTS.find(function(x){return x.id===id;});
+  if(!p) return;
+  if(p.pts>state.points){showToast('⚠️','Need more points!','Earn more by playing games during the live game.');return;}
+  if(state.cart.find(function(c){return c.id===id;})){showToast('ℹ️','Already in cart','This item is already in your cart.');return;}
+  state.cart.push(Object.assign({},p));
+  updateUI();
+  showToast('🛒','Added!',p.name+' — '+p.pts.toLocaleString()+' pts');
+}
+function removeFromCart(id){
+  state.cart=state.cart.filter(function(c){return c.id!==id;});
+  updateUI();renderCart();
+}
+
+// ===== CART =====
+function renderCart(){
+  var wrap=document.getElementById('cartItemsWrapper');
+  var panel=document.getElementById('orderPanel');
+  if(!wrap||!panel) return;
+  if(state.cart.length===0){
+    wrap.innerHTML='<div class="cart-empty"><div style="font-size:4rem;margin-bottom:var(--space-4)">🛒</div>'
+      +'<h3 style="font-family:var(--font-display);margin-bottom:var(--space-2)">Cart is empty</h3>'
+      +'<p style="color:var(--color-text-muted);margin-bottom:var(--space-5)">Earn points &amp; shop the prize marketplace!</p>'
+      +'<button class="btn btn-primary" onclick="goPage(\'shop\')">Browse Prize Shop</button></div>';
+  } else {
+    wrap.innerHTML='<div class="cart-items">'+state.cart.map(function(item){
+      return '<div class="cart-item">'
+        +'<div class="cart-item-img">'+item.emoji+'</div>'
+        +'<div class="cart-item-info"><div class="cart-item-name">'+item.name+'</div>'
+        +'<div class="cart-item-brand">'+item.brand+'</div>'
+        +'<div class="cart-item-pts">'+item.pts.toLocaleString()+' pts</div></div>'
+        +'<button class="remove-btn" onclick="removeFromCart('+item.id+')">'
+        +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+        +'</button></div>';
+    }).join('')+'</div>';
+  }
+  var sub=state.cart.reduce(function(s,c){return s+c.pts;},0);
+  var disc=state.appliedCoupons.reduce(function(s,c){return s+c.discount;},0);
+  var total=Math.max(0,sub-disc);
+  var canAfford=total<=state.points;
+  document.getElementById('orderLines').innerHTML='<div class="order-line"><span>Subtotal ('+state.cart.length+' items)</span><span>'+sub.toLocaleString()+' pts</span></div>'
+    +state.appliedCoupons.map(function(c){return '<div class="order-line" style="color:var(--color-success)"><span>🎟️ '+c.code+'</span><span>−'+c.discount+' pts</span></div>';}).join('');
+  document.getElementById('orderTotal').innerHTML='<div class="order-line total"><span>Total</span><span>'+total.toLocaleString()+' pts</span></div>';
+  var fill=Math.min(100,Math.round((state.points/5000)*100));
+  document.getElementById('balanceFill').style.width=fill+'%';
+  document.getElementById('panelBalance').textContent=state.points.toLocaleString()+' pts';
+  var btn=document.getElementById('checkoutBtn');
+  if(btn){
+    btn.disabled=state.cart.length===0||!canAfford;
+    btn.textContent=state.cart.length===0?'Add Items First':!canAfford?'Need '+(total-state.points).toLocaleString()+' more pts':'⚡ Pay with Points';
+  }
+  renderCouponTags();
+}
+
+// ===== COUPONS =====
+function applyCoupon(){
+  var input=document.getElementById('couponInput');
+  var msg=document.getElementById('couponMsg');
+  var code=input.value.trim().toUpperCase();
+  if(!code){msg.className='coupon-msg error';msg.textContent='Enter a coupon code.';return;}
+  if(state.appliedCoupons.find(function(c){return c.code===code;})){msg.className='coupon-msg error';msg.textContent='Already applied!';return;}
+  if(VALID_CODES[code]){
+    state.appliedCoupons.push({code:code,discount:VALID_CODES[code]});
+    msg.className='coupon-msg success';msg.textContent='✅ '+code+' applied! −'+VALID_CODES[code]+' pts';
+    input.value='';renderCart();
+    showToast('🎟️','Coupon applied!',code+' saves '+VALID_CODES[code]+' pts');
+  } else {
+    msg.className='coupon-msg error';msg.textContent='❌ Invalid or expired code.';
+  }
+}
+function applyFromTag(code){
+  document.getElementById('couponInput').value=code;
+  applyCoupon();
+}
+function renderCouponTags(){
+  var el=document.getElementById('savedCouponTags');
+  if(!el) return;
+  el.innerHTML=COUPONS.filter(function(c){return c.status==='active';}).map(function(c){
+    var used=state.appliedCoupons.find(function(a){return a.code===c.code;});
+    return '<button class="coupon-tag'+(used?' used':'')+'" onclick="applyFromTag(\''+c.code+'\')" '+(used?'disabled':'')+'>'+c.code+' <span style="opacity:0.7">−'+c.discount+'</span></button>';
+  }).join('');
+}
+
+// ===== CHECKOUT =====
+function checkout(){
+  if(!state.cart.length) return;
+  var sub=state.cart.reduce(function(s,c){return s+c.pts;},0);
+  var disc=state.appliedCoupons.reduce(function(s,c){return s+c.discount;},0);
+  var total=Math.max(0,sub-disc);
+  if(total>state.points) return;
+  state.points-=total;
+  var newCode='REWARD'+Math.floor(Math.random()*9000+1000);
+  COUPONS.push({code:newCode,discount:200,desc:'200 pts off next order',source:'Purchase Reward',expires:'Jul 15, 2026',status:'active',brand:'Arenza'});
+  VALID_CODES[newCode]=200;
+  state.cart=[];state.appliedCoupons=[];
+  updateUI();renderCoupons();
+  var wrap=document.getElementById('cartItemsWrapper');
+  var panel=document.getElementById('orderPanel');
+  panel.style.display='none';
+  wrap.innerHTML='<div class="confirmation">'
+    +'<div class="confirm-icon">🎉</div>'
+    +'<h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:var(--space-2);">Order Confirmed!</h2>'
+    +'<p style="color:var(--color-text-muted);margin-bottom:var(--space-5);">Your prize is on its way! You earned a new reward coupon:</p>'
+    +'<div class="confirm-coupon-box">'+newCode+'</div>'
+    +'<p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:var(--space-3) 0 var(--space-6);">Saved to your Coupon Wallet automatically ✅</p>'
+    +'<div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap;">'
+    +'<button class="btn btn-primary" onclick="resetCartPage()">Continue Shopping</button>'
+    +'<button class="btn btn-secondary" onclick="goPage(\'coupons\')">View Coupons 🎟️</button>'
+    +'</div></div>';
+  launchConfetti();
+}
+function resetCartPage(){
+  var panel=document.getElementById('orderPanel');
+  if(panel) panel.style.display='';
+  goPage('shop');
+}
+
+// ===== LIVE DROPS =====
+function renderLiveDrops(){
+  var el=document.getElementById('liveDropItems');
+  if(!el) return;
+  var drops=PRODUCTS.filter(function(p){return p.drop;});
+  el.innerHTML=drops.map(function(p,i){
+    return '<div class="live-item'+(i===0?' featured':'')+'">'
+      +'<div class="live-item-row">'
+      +'<div class="live-item-img">'+p.emoji+'</div>'
+      +'<div><div class="live-item-name">'+p.name+'</div><div class="live-item-pts">'+p.pts.toLocaleString()+' pts</div></div>'
+      +'</div>'
+      +(i===0?'<div class="live-countdown-row">⏱ Expires in <span class="countdown-highlight" id="liveCountdown">12:44</span></div>':'')
+      +'<button class="btn btn-primary btn-full btn-sm" onclick="addToCart('+p.id+');goPage(\'cart\')">'
+      +(i===0?'🔥 Claim Now →':'Add to Cart →')+'</button></div>';
+  }).join('');
+}
+
+// ===== COUPON PAGE =====
+function renderCoupons(){
+  var grid=document.getElementById('couponGrid');
+  if(!grid) return;
+  grid.innerHTML=COUPONS.map(function(c){
+    return '<div class="coupon-card">'
+      +'<div class="coupon-card-top'+(c.status!=='active'?' inactive':'')+'"><div class="coupon-card-brand">'+c.brand+'</div>'
+      +'<div class="coupon-card-discount">−'+c.discount+' pts</div><div class="coupon-card-desc">'+c.desc+'</div></div>'
+      +'<div class="coupon-card-bottom">'
+      +'<div><div class="coupon-code-box">'+c.code+'</div><div class="coupon-meta">'+c.expires+' · '+c.source+'</div></div>'
+      +'<span class="status-badge status-'+c.status+'">'+c.status.charAt(0).toUpperCase()+c.status.slice(1)+'</span>'
+      +'</div></div>';
+  }).join('');
+  var active=COUPONS.filter(function(c){return c.status==='active';}).length;
+  var el=document.getElementById('statsCoupons');
+  if(el) el.textContent=active;
+  var ac=document.getElementById('activeCouponCount');
+  if(ac) ac.textContent=active+' Active';
+}
+
+// ===== POINTS =====
+function earnPts(amt,label){
+  state.points+=amt;updateUI();
+  var p=document.getElementById('ptsPopup');
+  document.getElementById('ptsPopupAmt').textContent='+'+amt.toLocaleString()+' pts';
+  p.classList.add('show');
+  setTimeout(function(){p.classList.remove('show');},2200);
+  showToast('⚡',label||'Points earned!','+'+amt.toLocaleString()+' pts added');
+}
+
+function updateUI(){
+  document.getElementById('headerPts').textContent=state.points.toLocaleString();
+  document.getElementById('statsEarned').textContent=state.points.toLocaleString();
+  document.getElementById('cartCount').textContent=state.cart.length;
+  renderProducts();
+}
+
+// ===== TOAST =====
+var toastTimer;
+function showToast(icon,title,body){
+  clearTimeout(toastTimer);
+  document.getElementById('toastIcon').textContent=icon;
+  document.getElementById('toastTitle').textContent=title;
+  document.getElementById('toastBody').textContent=body;
+  var t=document.getElementById('toast');
+  t.classList.add('show');
+  toastTimer=setTimeout(function(){t.classList.remove('show');},3500);
+}
+
+// ===== TIMERS =====
+function startTimers(){
+  var dropSecs=12*60+44;
+  setInterval(function(){
+    dropSecs=Math.max(0,dropSecs-1);
+    var m=Math.floor(dropSecs/60),s=dropSecs%60;
+    var str=m+':'+(s<10?'0':'')+s;
+    var dt=document.getElementById('dropTimer');var lc=document.getElementById('liveCountdown');
+    if(dt) dt.textContent=str;
+    if(lc) lc.textContent=str;
+  },1000);
+  var bannerSecs=4*60+18;
+  setInterval(function(){
+    bannerSecs=Math.max(0,bannerSecs-1);
+    var m=Math.floor(bannerSecs/60),s=bannerSecs%60;
+    var bc=document.getElementById('bannerClock');
+    if(bc) bc.textContent=' ⏱ '+m+':'+(s<10?'0':'')+s+' remaining';
+  },1000);
+}
+
+// ===== CONFETTI =====
+function launchConfetti(){
+  var wrap=document.createElement('div');
+  wrap.className='confetti-wrap';
+  document.body.appendChild(wrap);
+  var colors=['#ff5c00','#f0a500','#22c55e','#ffffff','#ff3b30','#a855f7'];
+  for(var i=0;i<70;i++){
+    var c=document.createElement('div');
+    var col=colors[Math.floor(Math.random()*colors.length)];
+    var left=Math.random()*100;
+    var delay=Math.random()*0.8;
+    var dur=1.5+Math.random()*1.5;
+    var sz=5+Math.random()*9;
+    c.style.cssText='position:absolute;left:'+left+'%;top:-20px;width:'+sz+'px;height:'+sz+'px;background:'+col+';border-radius:'+(Math.random()>0.5?'50%':'3px')+';animation:confettiFall '+dur+'s '+delay+'s ease-in forwards;';
+    wrap.appendChild(c);
+  }
+  setTimeout(function(){wrap.remove();},4000);
+}
+
+// ===== INIT =====
+renderProducts();
+renderLiveDrops();
+renderCoupons();
+renderCouponTags();
+updateUI();
+startTimers();
+</script>
+</body>
+</html>

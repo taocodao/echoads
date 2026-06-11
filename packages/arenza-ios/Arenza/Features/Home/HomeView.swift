@@ -7,7 +7,6 @@ struct HomeView: View {
     @EnvironmentObject var env: AppEnvironment
     @StateObject private var vm: HomeViewModel = HomeViewModel(env: .shared)
     @State private var selectedChannel: Channel?
-    @State private var showPlayer = false
     @State private var showVideoTest = false
 
     private let columns = [
@@ -68,14 +67,14 @@ struct HomeView: View {
             .task { await vm.load() }
             // KEY FIX: .sheet (not .fullScreenCover) — diagnostic proves
             // VideoPlayer works in .sheet. presentationDetents fills screen.
-            .sheet(isPresented: $showPlayer) {
-                if let channel = selectedChannel {
-                    PlayerView(channel: channel)
-                        .environmentObject(env)
-                        .presentationDetents([.fraction(1.0)])
-                        .presentationDragIndicator(.hidden)
-                        .interactiveDismissDisabled(false)
-                }
+            // KEY: .sheet(item:) binds directly to selectedChannel — no race condition.
+            // Setting selectedChannel = channel is the single source of truth for presentation.
+            .sheet(item: $selectedChannel) { channel in
+                PlayerView(channel: channel)
+                    .environmentObject(env)
+                    .presentationDetents([.fraction(1.0)])
+                    .presentationDragIndicator(.hidden)
+                    .interactiveDismissDisabled(false)
             }
             .sheet(isPresented: $showVideoTest) {
                 VideoTestView()
@@ -201,8 +200,7 @@ struct HomeView: View {
     // MARK: - Helpers
 
     private func selectChannel(_ channel: Channel) {
-        selectedChannel = channel
-        showPlayer = true
+        selectedChannel = channel   // .sheet(item:) presents automatically
     }
 
 

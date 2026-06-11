@@ -125,7 +125,7 @@ export default function AuctionPage() {
         {loading ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: '#475569' }}>Loading…</div>
         ) : auctions.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>No auctions yet — click "Run Test Auction" above</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>No auctions yet — click &ldquo;Run Test Auction&rdquo; above</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
             <thead>
