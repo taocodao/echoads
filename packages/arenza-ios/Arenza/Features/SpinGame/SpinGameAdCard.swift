@@ -398,7 +398,7 @@ struct ScratchGamePanel: View {
                     .foregroundColor(Color(arenza: "#8892b0"))
 
                 // Scratch card
-                ScratchCardView(
+                SpinScratchCardView(
                     business: biz,
                     isRevealed: spinEngine.scratchRevealed,
                     reward: spinEngine.scratchReward,
@@ -440,7 +440,7 @@ struct ScratchGamePanel: View {
 
 // MARK: - Scratch Card View (touch-based canvas)
 
-struct ScratchCardView: View {
+struct SpinScratchCardView: View {
     let business: SponsorBusiness
     let isRevealed: Bool
     let reward: SpinReward?
