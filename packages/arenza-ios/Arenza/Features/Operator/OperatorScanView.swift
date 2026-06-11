@@ -24,39 +24,46 @@ struct OperatorScanView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color.black.ignoresSafeArea()
-
-                switch vm.state {
-                case .locked:
+        if vm.state == .locked {
+            NavigationView {
+                ZStack {
+                    Color.black.ignoresSafeArea()
                     pinEntryView
-                case .scanning:
-                    scannerView
-                case .validating:
-                    validatingView
-                case .success(let result):
-                    resultView(result: result)
-                case .error(let msg):
-                    errorView(message: msg)
                 }
+                .navigationTitle("Operator Mode")
+                .navigationBarTitleDisplayMode(.inline)
             }
-            .navigationTitle("Operator Mode")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") { dismiss() }
-                        .foregroundColor(.white)
-                }
-                if vm.state != .locked {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Lock") { vm.lock() }
-                            .foregroundColor(Color(arenza: "#ff6b35"))
+            .preferredColorScheme(.dark)
+        } else {
+            TabView {
+                NavigationView {
+                    ZStack {
+                        Color.black.ignoresSafeArea()
+                        switch vm.state {
+                        case .scanning:   scannerView
+                        case .validating: validatingView
+                        case .success(let r): resultView(result: r)
+                        case .error(let m):   errorView(message: m)
+                        default: EmptyView()
+                        }
+                    }
+                    .navigationTitle("Scan Reward")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Lock") { vm.lock() }
+                                .foregroundColor(Color(arenza: "#ff6b35"))
+                        }
                     }
                 }
+                .tabItem { Label("Scanner", systemImage: "qrcode.viewfinder") }
+
+                OperatorAnalyticsView()
+                    .tabItem { Label("Analytics", systemImage: "chart.bar.fill") }
             }
+            .tint(Color(arenza: "#00c9b1"))
+            .preferredColorScheme(.dark)
         }
-        .preferredColorScheme(.dark)
     }
 
     // MARK: - PIN Entry
