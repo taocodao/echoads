@@ -140,11 +140,14 @@ jobs:
     name: 🚀 Upload to TestFlight
     runs-on: macos-15
     needs: build-and-test
-    # Only run on main branch push (not PRs), AND only if Apple secrets are configured
+    # Only run on main branch push (not PRs), secrets configured, AND commit tagged [release]
+    # To trigger TestFlight: include [release] in your commit message
+    # Example: git commit -m "feat: new feature [release]"
     if: |
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push' &&
-      contains(vars.TESTFLIGHT_ENABLED, 'true')
+      contains(vars.TESTFLIGHT_ENABLED, 'true') &&
+      contains(github.event.head_commit.message, '[release]')
 
     defaults:
       run:
