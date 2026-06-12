@@ -201,7 +201,7 @@ struct PostGameRetentionView: View {
             HStack(spacing: 0) {
                 statColumn(value: "\(prediction.wallet.aztBalance)", label: "AZT Balance", color: "#ffc107")
                 divider
-                statColumn(value: "\(prediction.wallet.totalEarned)", label: "Total Earned", color: "#00c9b1")
+                statColumn(value: "\(prediction.wallet.seasonAZT)", label: "Season AZT", color: "#00c9b1")
                 divider
                 statColumn(value: "\(wallet.memberCards.count)", label: "Memberships", color: "#ff6b35")
             }
