@@ -94,6 +94,7 @@ struct TeamInfo: Codable {
 /// Abstraction for the match event source.
 /// Prototype: MatchSimClient (WebSocket to Node.js)
 /// Production: SportradarClient (live data API)
+@MainActor
 protocol MatchEventProviding: AnyObject {
     var eventPublisher: AnyPublisher<MatchEvent, Never> { get }
     var timelinePublisher: AnyPublisher<MatchTimeline, Never> { get }

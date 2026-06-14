@@ -378,7 +378,6 @@ final class OperatorScanViewModel: ObservableObject {
 
         let rewardId    = payload["reward_id"] as? String ?? ""
         let memberId    = payload["member_id"] as? String ?? "MBR-UNKNOWN"
-        let sponsorId   = payload["sponsor_id"] as? String ?? ""
         let rewardLabel = payload["reward_label"] as? String ?? "Unknown Reward"
         let rewardCode  = payload["reward_code"] as? String ?? "-"
         let sponsorName = payload["sponsor_name"] as? String ?? "-"

@@ -495,13 +495,7 @@ final class GameEngine: ObservableObject {
     /// Reconfigures the bingo board with sport-specific labels.
     /// Call this when changing the watched sport or starting a new match.
     func configureBingo(for sport: String) {
-        let labels: [String]
-        switch sport.uppercased() {
-        case "NFL":     labels = SportBingoLabels.nfl
-        case "NBA":     labels = SportBingoLabels.nba
-        case "SOCCER":  labels = SportBingoLabels.soccer
-        default:        labels = SportBingoLabels.nfl
-        }
+        let labels = SportBingoPack.pack(for: sport).boardLabels
 
         bingoBoard = labels.enumerated().map { i, label in
             BingoCell(id: i, label: label, marked: label == "FREE", isFree: label == "FREE")
