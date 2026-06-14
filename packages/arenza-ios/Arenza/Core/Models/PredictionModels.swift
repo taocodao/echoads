@@ -102,6 +102,10 @@ enum AZTSource: String, Codable {
     case socialShare    = "social_share"
     case spinGame       = "spin_game"        // spin/scratch reward
     case businessShare  = "business_share"   // shared sponsor info
+    case teamTrivia     = "team_trivia"      // team history trivia correct answer
+    case sponsorQuiz    = "sponsor_quiz"     // sponsor business quiz correct answer
+    case bingoMark      = "bingo_mark"       // bingo cell manually marked
+    case bingoLine      = "bingo_line"       // completed bingo line (500 AZT)
     case redemption     = "redemption"       // negative (spend)
     case landscapeUnlock = "landscape_unlock" // negative (spend for fullscreen)
     case expired        = "expired"          // negative (auto-expire)

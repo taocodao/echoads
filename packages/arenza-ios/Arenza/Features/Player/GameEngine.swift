@@ -230,9 +230,21 @@ final class GameEngine: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.tick() }
         }
+
+        // Start Live Activity for Dynamic Island
+        LiveActivityManager.shared.startActivity(state: LiveScoreState(
+            homeTeam: "Eagles", homeEmoji: "🦅", homeScore: homeScore,
+            awayTeam: "Bears", awayEmoji: "🐻", awayScore: awayScore,
+            quarter: quarter, clockDisplay: clockDisplay, isLive: true,
+            lastPlay: nil
+        ))
     }
 
-    func stop() { timer?.invalidate(); timer = nil }
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+        LiveActivityManager.shared.endActivity()
+    }
 
     private func tick() {
         elapsed += 1
@@ -245,6 +257,14 @@ final class GameEngine: ObservableObject {
         } else {
             let remaining = max(0, 15 * 60 - (elapsed - 390))
             clockDisplay = "\(remaining / 60):\(String(format: "%02d", remaining % 60))"
+        }
+
+        // Update Live Activity every 5 seconds (reduce overhead)
+        if elapsed.isMultiple(of: 5) {
+            LiveActivityManager.shared.updateScore(
+                homeScore: homeScore, awayScore: awayScore,
+                quarter: quarter, clock: clockDisplay
+            )
         }
 
         // Ad countdown
@@ -306,6 +326,29 @@ final class GameEngine: ObservableObject {
             chatMessages.append((user: msg.user, text: msg.text))
             if chatMessages.count > 30 { chatMessages.removeFirst() }
         }
+
+        // ── Demo game triggers (ArenzaTV prototype) ───────────────────
+        // Fire trivia/sponsor quiz at scripted moments during the timeline.
+        // These simulate MatchSim events for the offline demo.
+        struct DemoTrigger {
+            let at: Int; let type: String; let data: [String: Any]
+        }
+        let demoTriggers: [DemoTrigger] = [
+            // t=120s: Eagles team history trivia
+            DemoTrigger(at: 120, type: "trivia", data: ["pack": "eagles_history"]),
+            // t=250s: Pepsi sponsor quiz
+            DemoTrigger(at: 250, type: "sponsor_quiz", data: ["sponsorId": "pepsi"]),
+            // t=400s: Head-to-head trivia
+            DemoTrigger(at: 400, type: "trivia", data: ["pack": "eagles_bears_rivalry"]),
+            // t=480s: Domino's sponsor quiz
+            DemoTrigger(at: 480, type: "sponsor_quiz", data: ["sponsorId": "dominos"]),
+        ]
+        for trigger in demoTriggers {
+            let key = "demo-\(trigger.type)-\(trigger.at)"
+            guard elapsed == trigger.at, !firedKeys.contains(key) else { continue }
+            firedKeys.insert(key)
+            handleMatchSimEvent(type: trigger.type, data: trigger.data)
+        }
     }
 
     // MARK: - Bingo
@@ -313,7 +356,7 @@ final class GameEngine: ObservableObject {
     func markBingoCell(_ index: Int) {
         guard !bingoBoard[index].marked, !bingoBoard[index].isFree else { return }
         bingoBoard[index].marked = true
-        awardPoints(25, label: "Bingo cell marked")
+        awardPoints(25, label: "Bingo cell marked", source: .bingoMark)
         checkBingoLines()
     }
 
@@ -330,7 +373,7 @@ final class GameEngine: ObservableObject {
             [0,6,12,18,24],[4,8,12,16,20],
         ]
         let completed = lines.filter { $0.allSatisfy { bingoBoard[$0].marked || bingoBoard[$0].isFree } }.count
-        if completed > bingoLines { awardPoints(500, label: "BINGO! Line \(completed) complete!") }
+        if completed > bingoLines { awardPoints(500, label: "BINGO! Line \(completed) complete!", source: .bingoLine) }
         bingoLines = completed
     }
 
@@ -344,11 +387,15 @@ final class GameEngine: ObservableObject {
 
     // MARK: - Points
 
-    private func awardPoints(_ pts: Int, label: String) {
+    private func awardPoints(_ pts: Int, label: String, source: AZTSource = .prediction) {
         points += pts
         flyText = "+\(pts) pts"
         addFeed(.init(type: .prediction, emoji: "⭐", text: label, detail: "+\(pts) pts earned", timestamp: Date()))
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in self?.flyText = nil }
+
+        // Also route through central RewardsWallet for persistence
+        PredictionEngine.shared.wallet.earn(pts, source: source)
+        PredictionEngine.shared.saveWallet()
     }
 
     private func addFeed(_ entry: FeedEntry) {
@@ -367,4 +414,113 @@ final class GameEngine: ObservableObject {
     func addFeedPublic(_ entry: FeedEntry) {
         addFeed(entry)
     }
+
+    // MARK: - MatchSim Event Integration
+
+    /// Handles an event from the MatchSim timeline server (or local fallback).
+    /// Called by MatchSimClient or by the built-in tick() for scripted demo events.
+    func handleMatchSimEvent(type: String, data: [String: Any]) {
+        switch type {
+        case "trivia":
+            // Trigger team trivia session
+            if let packId = data["pack"] as? String {
+                let teamId = packId.replacingOccurrences(of: "_history", with: "")
+                    .replacingOccurrences(of: "_rivalry", with: "")
+                if let pack = TriviaQuestionPack.demoPacks[teamId] {
+                    TriviaEngine.shared.startSession(questions: pack.sessionQuestions())
+                    addFeed(.init(
+                        type: .game,
+                        emoji: "🏆",
+                        text: "Team Trivia: \(pack.title)",
+                        detail: "Answer \(pack.sessionSize) questions to earn AZT!",
+                        timestamp: Date()
+                    ))
+                }
+            }
+
+        case "sponsor_quiz":
+            // Trigger sponsor business quiz
+            if let sponsorId = data["sponsorId"] as? String {
+                SponsorQuizEngine.shared.startQuiz(sponsorId: sponsorId)
+                addFeed(.init(
+                    type: .ad,
+                    emoji: "🏢",
+                    text: "Sponsor Quiz started!",
+                    detail: "Learn about the sponsor & earn AZT",
+                    timestamp: Date()
+                ))
+            }
+
+        case "play":
+            // Standard game play event
+            if let desc = data["desc"] as? String,
+               let emoji = data["emoji"] as? String {
+                addFeed(.init(
+                    type: .game,
+                    emoji: emoji,
+                    text: desc,
+                    detail: nil,
+                    timestamp: Date()
+                ))
+                if let bingo = data["bingo"] as? String {
+                    autoMarkBingo(bingo)
+                }
+            }
+
+        case "score":
+            // Score change from MatchSim
+            if let team = data["team"] as? String,
+               let delta = data["delta"] as? Int {
+                if team == "home" { homeScore += delta }
+                else { awayScore += delta }
+                if let desc = data["desc"] as? String {
+                    addFeed(.init(
+                        type: .game,
+                        emoji: "🏈",
+                        text: desc,
+                        detail: "Eagles \(homeScore) — Bears \(awayScore)",
+                        timestamp: Date()
+                    ))
+                    autoMarkBingo("Touchdown")
+                }
+            }
+
+        default:
+            break
+        }
+    }
+
+    // MARK: - Sport-Specific Bingo Setup
+
+    /// Reconfigures the bingo board with sport-specific labels.
+    /// Call this when changing the watched sport or starting a new match.
+    func configureBingo(for sport: String) {
+        let labels: [String]
+        switch sport.uppercased() {
+        case "NFL":     labels = SportBingoLabels.nfl
+        case "NBA":     labels = SportBingoLabels.nba
+        case "SOCCER":  labels = SportBingoLabels.soccer
+        default:        labels = SportBingoLabels.nfl
+        }
+
+        bingoBoard = labels.enumerated().map { i, label in
+            BingoCell(id: i, label: label, marked: label == "FREE", isFree: label == "FREE")
+        }
+        bingoLines = 0
+    }
+
+    // MARK: - Wallet Sync
+
+    /// Syncs game engine points to the central RewardsWallet.
+    /// Called periodically or when significant point changes occur.
+    func syncToWallet() {
+        // The central wallet tracks running AZT balance separately;
+        // game.points is the session display counter.
+        // When awarding via predictions/bingo, also route through wallet.
+        let sessionEarned = points - 1250  // base points
+        if sessionEarned > 0 {
+            print("[GameEngine] Session AZT earned: \(sessionEarned)")
+        }
+    }
 }
+

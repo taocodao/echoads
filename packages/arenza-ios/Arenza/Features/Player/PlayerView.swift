@@ -42,13 +42,17 @@ struct PlayerView: View {
     @EnvironmentObject var env: AppEnvironment
     @StateObject private var vm: PlayerViewModel
     @StateObject private var game = GameEngine()
+    @ObservedObject private var sponsorQuiz = SponsorQuizEngine.shared
     @StateObject private var adEngine = InteractiveAdEngine()
     @Environment(\.dismiss) private var dismiss
 
     // Tab state
-    @State private var activeTab: UnifiedTab = .predict
+    @State private var activeTab: UnifiedTab = .score
     @State private var tabUserInteracted = false
     @State private var autoCycleTimer: Timer? = nil
+
+    // Split-screen state (Phase 1: ArenzaSplitView)
+    @State private var splitState: SplitState = .splitView
 
     // Fullscreen state (Phase 2)
     @State private var isFullscreen = false
@@ -63,18 +67,23 @@ struct PlayerView: View {
     // Toast (Phase 3)
     @State private var showShareToast = false
 
+    // Sponsor dashboard (Phase 4)
+    @State private var showSponsorDashboard = false
+
     enum UnifiedTab: String, CaseIterable {
-        case predict  = "ðŸŽ¯ Predict"
-        case bingo    = "ðŸŽ² Bingo"
-        case spin     = "ðŸŽ° Spin"
-        case scratch  = "ðŸŽŸ Scratch"
-        case me       = "ðŸ‘¤ Me"
+        case score    = "📊 Score"
+        case games    = "🎮 Games"
+        case predict  = "🎯 Predict"
+        case bingo    = "🎲 Bingo"
+        case scratch  = "🎟 Scratch"
+        case me       = "👤 Me"
 
         var adFormat: InteractiveAdEngine.AdFormat? {
             switch self {
+            case .score:    return nil
+            case .games:    return nil
             case .predict:  return .prediction
             case .bingo:    return .bingo
-            case .spin:     return nil
             case .scratch:  return .scratch
             case .me:       return nil
             }
@@ -115,21 +124,22 @@ struct PlayerView: View {
             autoCycleTimer?.invalidate()
         }
         .overlay(shareToast, alignment: .top)
+        .pointsFlyUp(text: game.flyText)
+        .overlay(BingoCelebrationOverlay(lineCount: game.bingoLines))
+        .sheet(isPresented: $showSponsorDashboard) {
+            SponsorDashboardView(engine: game)
+        }
     }
 
-    // MARK: - Portrait Layout (Phase 1: 2-panel 40/60)
+    // MARK: - Portrait Layout (ArenzaSplitView: 3-state draggable container)
 
     private var portraitLayout: some View {
-        GeometryReader { geo in
-            VStack(spacing: 0) {
-                // â”€â”€ TOP 40%: Video Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                videoPanel
-                    .frame(height: geo.size.height * 0.40)
-
-                // â”€â”€ BOTTOM 60%: Unified Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                unifiedTabPanel
-                    .frame(height: geo.size.height * 0.60)
-            }
+        ArenzaSplitView(state: $splitState) {
+            // Video content
+            videoPanel
+        } panel: {
+            // Companion panel content
+            unifiedTabPanel
         }
         .ignoresSafeArea(edges: .top)
     }
@@ -380,13 +390,19 @@ struct PlayerView: View {
     @ViewBuilder
     private var unifiedTabContent: some View {
         switch activeTab {
+        case .score:
+            ScoreTab(engine: game)
+        case .games:
+            GamesTab(
+                gameEngine: game,
+                sport: "NFL",
+                homeTeamId: "PHI",
+                awayTeamId: "CHI"
+            )
         case .predict:
             PredictionAdCard(engine: game, adEngine: adEngine)
         case .bingo:
             BingoAdCard(engine: game, adEngine: adEngine)
-        case .spin:
-            // TableSpin: sponsor-branded spin wheel + scratch cycling through 4 businesses
-            SpinGameAdCard(engine: game, adEngine: adEngine)
         case .scratch:
             ScratchAdCard(engine: game, adEngine: adEngine)
         case .me:
@@ -394,14 +410,14 @@ struct PlayerView: View {
         }
     }
 
-    // MARK: - Auto-Cycle (rotates first 4 tabs every 15s unless user tapped)
+    // MARK: - Auto-Cycle (rotates game tabs every 15s unless user tapped)
 
     private func startAutoCycle() {
         autoCycleTimer?.invalidate()
         autoCycleTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
             guard !tabUserInteracted else { return }
             Task { @MainActor in
-                let cyclingTabs: [UnifiedTab] = [.predict, .bingo, .spin, .scratch]
+                let cyclingTabs: [UnifiedTab] = [.score, .games, .predict, .bingo, .scratch]
                 guard let idx = cyclingTabs.firstIndex(of: activeTab) else { return }
                 let next = cyclingTabs[(idx + 1) % cyclingTabs.count]
                 withAnimation(.easeInOut(duration: 0.3)) { activeTab = next }

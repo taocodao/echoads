@@ -67,6 +67,52 @@ final class ProfileEngine: ObservableObject {
         }
     }
 
+    // MARK: - Enrichment from team trivia (ArenzaTV game signals)
+
+    /// High trivia accuracy for a sport → "Sports Scholar" signal
+    func ingestTriviaResult(sport: String, category: TriviaPackCategory,
+                            correctRate: Double, avgSpeed: Double) {
+        let sportKey = sport.lowercased().replacingOccurrences(of: " ", with: "_")
+
+        // Boost sport affinity based on knowledge depth
+        let knowledgeBoost = correctRate * 0.15
+        sportAffinities[sportKey, default: 0.3] =
+            min(1.0, (sportAffinities[sportKey, default: 0.3] + knowledgeBoost))
+
+        // Sponsor quiz engagement → purchase-intent signal
+        if category == .sponsorBusiness {
+            sportAffinities["sponsor_engagement", default: 0.0] =
+                min(1.0, (sportAffinities["sponsor_engagement", default: 0.0] + 0.2))
+        }
+
+        // Fast + correct = hardcore fan → premium segment
+        if avgSpeed < 4.0 && correctRate > 0.8 {
+            sportAffinities["hardcore_fan", default: 0.0] =
+                min(1.0, (sportAffinities["hardcore_fan", default: 0.0] + 0.15))
+            Task { await reclassify() }
+        }
+    }
+
+    // MARK: - Enrichment from bingo engagement
+
+    /// Active bingo play → "Live Event Enthusiast" signal
+    func ingestBingoEngagement(sport: String, tilesMarked: Int, linesCompleted: Int) {
+        let sportKey = sport.lowercased().replacingOccurrences(of: " ", with: "_")
+
+        // Active bingo = watching closely = engaged live viewer
+        if tilesMarked >= 5 {
+            sportAffinities["live_event_engagement", default: 0.3] =
+                min(1.0, (sportAffinities["live_event_engagement", default: 0.3] + 0.1))
+        }
+
+        // Completed lines = deep session → high-value viewer
+        if linesCompleted > 0 {
+            sportAffinities[sportKey, default: 0.5] =
+                min(1.0, (sportAffinities[sportKey, default: 0.5] + Double(linesCompleted) * 0.05))
+            Task { await reclassify() }
+        }
+    }
+
     // MARK: - Churn Risk
 
     private func checkChurnRisk(features: ViewerFeatureVector) {

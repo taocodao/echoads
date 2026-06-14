@@ -1,0 +1,51 @@
+{
+  "id": "dominos-quiz",
+  "sport": "NFL",
+  "teamIds": [],
+  "category": "sponsor_business",
+  "sponsorId": "dominos",
+  "sponsorName": "Domino's",
+  "title": "Domino's Game Break",
+  "subtitle": "Pizza knowledge challenge! 🍕",
+  "questions": [
+    {
+      "id": "dq1",
+      "questionText": "What year was Domino's Pizza founded?",
+      "options": [
+        { "id": "a", "label": "1960" },
+        { "id": "b", "label": "1975" },
+        { "id": "c", "label": "1952" },
+        { "id": "d", "label": "1968" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "medium",
+      "aztReward": 15
+    },
+    {
+      "id": "dq2",
+      "questionText": "How many dots are on the Domino's logo?",
+      "options": [
+        { "id": "a", "label": "3" },
+        { "id": "b", "label": "5" },
+        { "id": "c", "label": "2" },
+        { "id": "d", "label": "6" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "easy",
+      "aztReward": 15
+    },
+    {
+      "id": "dq3",
+      "questionText": "What state was the first Domino's store located in?",
+      "options": [
+        { "id": "a", "label": "Michigan" },
+        { "id": "b", "label": "New York" },
+        { "id": "c", "label": "Ohio" },
+        { "id": "d", "label": "California" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "medium",
+      "aztReward": 15
+    }
+  ]
+}

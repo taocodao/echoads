@@ -1,0 +1,77 @@
+{
+  "id": "pepsi-quiz",
+  "sport": "NFL",
+  "teamIds": [],
+  "category": "sponsor_business",
+  "sponsorId": "pepsi",
+  "sponsorName": "Pepsi",
+  "title": "Pepsi Game Break",
+  "subtitle": "How well do you know Pepsi? 🥤",
+  "questions": [
+    {
+      "id": "pq1",
+      "questionText": "What year was Pepsi founded?",
+      "options": [
+        { "id": "a", "label": "1893" },
+        { "id": "b", "label": "1902" },
+        { "id": "c", "label": "1886" },
+        { "id": "d", "label": "1910" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "medium",
+      "aztReward": 15
+    },
+    {
+      "id": "pq2",
+      "questionText": "What is Pepsi's signature color?",
+      "options": [
+        { "id": "a", "label": "Blue" },
+        { "id": "b", "label": "Red" },
+        { "id": "c", "label": "Green" },
+        { "id": "d", "label": "Orange" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "easy",
+      "aztReward": 15
+    },
+    {
+      "id": "pq3",
+      "questionText": "Which Super Bowl halftime show did Pepsi sponsor featuring Dr. Dre?",
+      "options": [
+        { "id": "a", "label": "Super Bowl LVI (2022)" },
+        { "id": "b", "label": "Super Bowl LIII (2019)" },
+        { "id": "c", "label": "Super Bowl LIV (2020)" },
+        { "id": "d", "label": "Super Bowl LV (2021)" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "hard",
+      "aztReward": 15
+    },
+    {
+      "id": "pq4",
+      "questionText": "Pepsi is a product of which parent company?",
+      "options": [
+        { "id": "a", "label": "PepsiCo" },
+        { "id": "b", "label": "Coca-Cola Co" },
+        { "id": "c", "label": "Nestlé" },
+        { "id": "d", "label": "Dr Pepper Snapple" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "easy",
+      "aztReward": 15
+    },
+    {
+      "id": "pq5",
+      "questionText": "What was Pepsi originally called when it was created?",
+      "options": [
+        { "id": "a", "label": "Brad's Drink" },
+        { "id": "b", "label": "Pepsi-Cola" },
+        { "id": "c", "label": "Carolina Cola" },
+        { "id": "d", "label": "Sweet Fizz" }
+      ],
+      "correctOptionId": "a",
+      "difficulty": "hard",
+      "aztReward": 15
+    }
+  ]
+}

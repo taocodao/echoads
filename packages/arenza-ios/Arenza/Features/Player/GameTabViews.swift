@@ -345,6 +345,7 @@ struct FeedEntryRow: View {
 
 struct ProfileTab: View {
     @ObservedObject var engine: GameEngine
+    @State private var showDashboard = false
 
     private let interests: [(label: String, pct: Double, color: Color)] = [
         ("Football", 0.92, Color(arenza: "#ff6b35")),
@@ -357,13 +358,63 @@ struct ProfileTab: View {
         ScrollView {
             VStack(spacing: 10) {
                 viewerSegmentCard
+                gameSessionStatsCard
                 interestSignalsCard
                 if let lastAd = engine.lastAd { whyThisAdCard(lastAd) }
                 sessionRevenueCard
                 pointsSummaryCard
+
+                // Sponsor dashboard access
+                Button {
+                    showDashboard = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "chart.bar.xaxis")
+                            .font(.system(size: 14))
+                        Text("Sponsor Dashboard")
+                            .font(.system(size: 12, weight: .bold))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10))
+                    }
+                    .foregroundColor(G.teal)
+                    .padding(12)
+                    .background(G.teal.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(G.teal.opacity(0.25), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
             }
             .padding(12)
         }
+        .sheet(isPresented: $showDashboard) {
+            SponsorDashboardView(engine: engine)
+        }
+    }
+
+    // Game Session Stats
+    private var gameSessionStatsCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionLabel("🎮 Game Session")
+            HStack(spacing: 6) {
+                sessionStat("Bingo Lines", value: "\(engine.bingoLines)", color: G.orange)
+                sessionStat("Predictions", value: "\(engine.feed.filter { $0.type == .prediction }.count)", color: G.teal)
+                sessionStat("AZT Earned", value: "\(max(0, engine.points - 1250))", color: G.gold)
+            }
+        }
+        .surfaceCard()
+    }
+
+    private func sessionStat(_ label: String, value: String, color: Color) -> some View {
+        VStack(spacing: 3) {
+            Text(value)
+                .font(.system(size: 16, weight: .black, design: .monospaced))
+                .foregroundColor(color)
+            Text(label)
+                .font(.system(size: 8, weight: .bold))
+                .foregroundColor(G.faint)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // Viewer Segment

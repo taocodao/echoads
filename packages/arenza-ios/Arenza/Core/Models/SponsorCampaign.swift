@@ -46,6 +46,8 @@ enum AdFormat: String, Codable, CaseIterable {
     case bingo        = "bingo"
     case scratchCard  = "scratch_card"
     case moreLess     = "more_less"
+    case sponsorQuiz  = "sponsor_quiz"
+    case teamTrivia   = "team_trivia"
 
     var displayName: String {
         switch self {
@@ -53,6 +55,8 @@ enum AdFormat: String, Codable, CaseIterable {
         case .bingo:       return "Bingo Card"
         case .scratchCard: return "Scratch & Win"
         case .moreLess:    return "More or Less"
+        case .sponsorQuiz: return "Sponsor Quiz"
+        case .teamTrivia:  return "Team Trivia"
         }
     }
 
@@ -62,6 +66,8 @@ enum AdFormat: String, Codable, CaseIterable {
         case .bingo:       return "checkerboard.rectangle"
         case .scratchCard: return "ticket.fill"
         case .moreLess:    return "arrow.up.arrow.down"
+        case .sponsorQuiz: return "building.2.fill"
+        case .teamTrivia:  return "graduationcap.fill"
         }
     }
 
@@ -71,6 +77,8 @@ enum AdFormat: String, Codable, CaseIterable {
         case .bingo:       return "🎯"
         case .scratchCard: return "🎰"
         case .moreLess:    return "📊"
+        case .sponsorQuiz: return "🏢"
+        case .teamTrivia:  return "🏆"
         }
     }
 }
