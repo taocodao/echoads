@@ -221,6 +221,7 @@ final class GameEngine: ObservableObject {
     var sessionRevenue: Double { AD_CATALOG.filter { $0.appearsAt <= elapsed }.reduce(0) { $0 + Double($1.cpm) / 1000.0 } }
 
     private var elapsed  = 0
+    @Published var elapsedPublic = 0  // mirrors elapsed for external observers
     private let duration = 600   // 10-min clip
     private var timer: Timer?
     private var firedKeys = Set<String>()
@@ -248,7 +249,8 @@ final class GameEngine: ObservableObject {
 
     private func tick() {
         elapsed += 1
-        if elapsed > duration { elapsed = 1; firedKeys.removeAll() }
+        elapsedPublic = elapsed
+        if elapsed > duration { elapsed = 1; elapsedPublic = 1; firedKeys.removeAll() }
 
         // Q3: 12:00 countdown, Q4 starts at 390s
         if elapsed < 390 {

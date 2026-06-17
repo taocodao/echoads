@@ -1,5 +1,6 @@
 // HomeView.swift — Arenza Prototype
 // Premium dark sports grid with featured hero and live channel cards.
+// QR Scan button lives here (moved from bottom tab).
 
 import SwiftUI
 
@@ -8,6 +9,8 @@ struct HomeView: View {
     @StateObject private var vm: HomeViewModel = HomeViewModel(env: .shared)
     @State private var selectedChannel: Channel?
     @State private var showVideoTest = false
+    @State private var showScan = false
+    @State private var showMarketplace = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -79,6 +82,22 @@ struct HomeView: View {
             .sheet(isPresented: $showVideoTest) {
                 VideoTestView()
             }
+            .sheet(isPresented: $showScan) {
+                OperatorScanView()
+            }
+            .sheet(isPresented: $showMarketplace) {
+                NavigationStack {
+                    MarketplaceView()
+                        .navigationTitle("Marketplace")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { showMarketplace = false }
+                                    .foregroundColor(Color(arenza: "#ff6b35"))
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -96,7 +115,6 @@ struct HomeView: View {
                             endPoint: .trailing
                         )
                     )
-                    // Triple-tap opens video diagnostic
                     .onTapGesture(count: 3) { showVideoTest = true }
                 Text("Sports · Free · Verified")
                     .font(.system(size: 11, weight: .medium))
@@ -104,6 +122,26 @@ struct HomeView: View {
                     .tracking(2)
             }
             Spacer()
+            // Marketplace button
+            Button { showMarketplace = true } label: {
+                Image(systemName: "storefront.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(arenza: "#00c9b1"))
+                    .padding(8)
+                    .background(Color(arenza: "#00c9b1").opacity(0.12))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            // QR Scan button
+            Button { showScan = true } label: {
+                Image(systemName: "qrcode.viewfinder")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(Color(arenza: "#ff6b35"))
+                    .padding(8)
+                    .background(Color(arenza: "#ff6b35").opacity(0.12))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
             // Backend status indicator
             Circle()
                 .fill(env.isBackendReachable ? Color.green : Color.orange)

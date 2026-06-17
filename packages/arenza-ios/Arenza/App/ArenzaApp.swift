@@ -89,24 +89,24 @@ struct ContentView: View {
 
     private var mainTabs: some View {
         TabView {
-            // Tab 1 — Live Game (matches web demo first screen exactly)
+            // Tab 1 — Home: TV programme grid + QR Scan in header
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "tv.fill")
+                }
+                .tag(0)
+
+            // Tab 2 — Live Game (split-screen Watch·Earn·Shop)
             LiveGameView()
                 .tabItem {
                     Label("Live", systemImage: "play.circle.fill")
                 }
-                .tag(0)
+                .tag(1)
 
-            // Tab 2 — Earnings / Stats
+            // Tab 3 — Earnings / Stats
             EarningsView()
                 .tabItem {
                     Label("Earnings", systemImage: "chart.line.uptrend.xyaxis")
-                }
-                .tag(1)
-
-            // Tab 3 — Business Operator QR Scanner
-            OperatorScanView()
-                .tabItem {
-                    Label("Scan", systemImage: "qrcode.viewfinder")
                 }
                 .tag(2)
         }
