@@ -619,10 +619,16 @@ struct LiveGameView: View {
 final class NFLDemoPlayer: ObservableObject {
     static let shared = NFLDemoPlayer()
     @Published var player: AVPlayer?
-    private static let nflURL = "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
+    private static let nflURL = "https://lavcma6duvpplftv.public.blob.vercel-storage.com/NFL%20video%20clips%20for%20demo.mp4"
     private init() {
+        // Set audio session before creating player
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
+        try? AVAudioSession.sharedInstance().setActive(true)
+
         guard let url = URL(string: Self.nflURL) else { return }
         let item = AVPlayerItem(url: url)
+        // Buffer just 10s ahead — lets large MP4 start playing fast
+        item.preferredForwardBufferDuration = 10
         let p = AVPlayer(playerItem: item)
         p.isMuted = false
         p.automaticallyWaitsToMinimizeStalling = true
