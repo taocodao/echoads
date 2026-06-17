@@ -39,6 +39,8 @@ final class DemoOrchestrator: ObservableObject {
     @Published var showProfilingCard: Bool = false
     @Published var showAdIncomingBadge: Bool = false
     @Published var showDemoSummary: Bool = false
+    @Published var showLocalAdOverlay: Bool = false   // NEW: LocalAdCard fires during ad pod
+    @Published var showPostGameRecap: Bool = false    // NEW: PostGameRecapView at end
     @Published var totalAZTEarned: Int = 0
     @Published var revenueGenerated: Double = 0.0
     @Published var stepNarration: String = ""
@@ -110,12 +112,14 @@ final class DemoOrchestrator: ObservableObject {
         await sleep(4)
         showAdIncomingBadge = false
 
-        // ── T+16s: Fire ad pod ─────────────────────────────────────────────
+        // ── T+16s: Fire ad pod + show local ad cards ──────────────────────
         await step(.adPodActive,
-                   narration: "DraftKings won at $62.00 CPM — targeted to '\(profileEngine.currentSegment.label)' segment.")
-        revenueGenerated += 0.062   // per-impression revenue
+                   narration: "DraftKings won at $62.00 CPM — and local sponsors show their deals.")
+        revenueGenerated += 0.062
         playerViewModel?.triggerDemoAdPodFromOrchestrator()
-        await sleep(16)             // 15s pod + 1s buffer
+        showLocalAdOverlay = true   // 🆕 Show 3-button ad card
+        await sleep(16)
+        showLocalAdOverlay = false
 
         // ── T+32s: Ad complete, AZT awarded ───────────────────────────────
         await step(.adComplete,
@@ -142,9 +146,10 @@ final class DemoOrchestrator: ObservableObject {
         NotificationCenter.default.post(name: .demoOpenMarketplace, object: nil)
         await sleep(10)
 
-        // ── T+80s: Demo complete ───────────────────────────────────────────
+        // ── T+80s: Post-game recap ─────────────────────────────────────────
         await step(.demoComplete,
                    narration: "Demo complete. \(totalAZTEarned) AZT earned. $\(String(format: "%.3f", revenueGenerated)) revenue attributed.")
+        showPostGameRecap = true   // 🆕 Show PostGameRecapView
         showDemoSummary = true
     }
 

@@ -66,56 +66,98 @@ struct ArenzaApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var env: AppEnvironment
+    @State private var onboardingDone = UserDefaults.standard.arenzaOnboardingComplete
+    @State private var showPostGame = false
+    @ObservedObject private var demo = DemoOrchestrator.shared
 
     var body: some View {
+        ZStack {
+            mainTabs
+
+            // First-launch onboarding
+            if !onboardingDone {
+                OnboardingView { _ in
+                    withAnimation { onboardingDone = true }
+                }
+                .transition(.opacity)
+                .zIndex(100)
+            }
+
+            // Local ad card overlay (fires during demo ad break)
+            if demo.showLocalAdOverlay {
+                VStack {
+                    Spacer()
+                    LocalAdBreakOverlay(
+                        businesses: Array(demoBusinesses.prefix(3)),
+                        onDismiss: { demo.showLocalAdOverlay = false },
+                        onCouponClaim: { biz in
+                            MembershipService.shared.addCoupon(
+                                businessId: biz.id,
+                                offer: biz.activeOffer?.headline ?? "Discount",
+                                value: biz.activeOffer?.value ?? ""
+                            )
+                            demo.showLocalAdOverlay = false
+                        },
+                        onJoinClub: { biz in
+                            MembershipService.shared.addStamp(businessId: biz.id)
+                            demo.showLocalAdOverlay = false
+                        }
+                    )
+                    .padding(.bottom, 100)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: demo.showLocalAdOverlay)
+                .zIndex(50)
+            }
+
+            // Post-game recap sheet
+            if demo.showPostGameRecap {
+                Color.black.opacity(0.6).ignoresSafeArea().zIndex(60)
+                PostGameRecapView(
+                    points: MembershipService.shared.totalPointsAcrossAllBusinesses + demo.totalAZTEarned,
+                    correctPredictions: PredictionEngine.shared.wallet.correctPredictions,
+                    totalPredictions: PredictionEngine.shared.wallet.totalPredictions,
+                    adsWatched: 2,
+                    couponsClaimedCount: MembershipService.shared.allActiveCoupons.count,
+                    homeScore: 27, awayScore: 14
+                ) {
+                    withAnimation { demo.showPostGameRecap = false }
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.spring(response: 0.45, dampingFraction: 0.82), value: demo.showPostGameRecap)
+                .zIndex(70)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: onboardingDone)
+    }
+
+    private var mainTabs: some View {
         TabView {
             HomeView()
-                .tabItem {
-                    Label("Watch", systemImage: "play.circle.fill")
-                }
+                .tabItem { Label("Watch", systemImage: "play.circle.fill") }
 
-            // Phase 2: Predictions tab
             PredictionsTabView()
-                .tabItem {
-                    Label("Predict", systemImage: "sparkles")
-                }
+                .tabItem { Label("Predict", systemImage: "sparkles") }
 
-            // Phase 2: Rewards tab
             RewardsWalletView()
-                .tabItem {
-                    Label("Rewards", systemImage: "gift.fill")
-                }
+                .tabItem { Label("Rewards", systemImage: "gift.fill") }
 
-            // TableSpin: QR Membership Wallet
             QRWalletView()
-                .tabItem {
-                    Label("Wallet", systemImage: "qrcode")
-                }
+                .tabItem { Label("Wallet", systemImage: "qrcode") }
 
-            // Phase 4: Sponsor Campaign Hub
             SponsorCampaignView()
-                .tabItem {
-                    Label("Sponsors", systemImage: "megaphone.fill")
-                }
+                .tabItem { Label("Sponsors", systemImage: "megaphone.fill") }
 
             EarningsView()
-                .tabItem {
-                    Label("Earnings", systemImage: "chart.line.uptrend.xyaxis")
-                }
+                .tabItem { Label("Earnings", systemImage: "chart.line.uptrend.xyaxis") }
 
-            // Marketplace: search sponsors, redeem AZT points
             MarketplaceView()
-                .tabItem {
-                    Label("Shop", systemImage: "storefront.fill")
-                }
+                .tabItem { Label("Shop", systemImage: "storefront.fill") }
 
-            // Operator Mode: business owner QR scanner (PIN-gated)
             OperatorScanView()
-                .tabItem {
-                    Label("Operator", systemImage: "qrcode.viewfinder")
-                }
+                .tabItem { Label("Operator", systemImage: "qrcode.viewfinder") }
         }
-        .tint(Color(red: 0.0, green: 0.82, blue: 0.60))  // CMXS brand green
+        .tint(Color(red: 0.0, green: 0.82, blue: 0.60))
     }
 }
 
