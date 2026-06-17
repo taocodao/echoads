@@ -202,7 +202,7 @@ struct LiveGameView: View {
                 .padding(.leading, 12)
 
             // Audience Tier Badge — top-right
-            AudienceTierBadgeView(wallet: PredictionEngine.shared.wallet)
+            AudienceTierBadgeView(aztBalance: PredictionEngine.shared.wallet.aztBalance)
                 .frame(maxWidth: .infinity, alignment: .topTrailing)
                 .padding(.top, 10)
                 .padding(.trailing, 10)
@@ -684,6 +684,4 @@ final class NFLDemoPlayer: ObservableObject {
     }
 }
 
-// MARK: - Local business type alias for LiveGameView
-
-typealias LocalBusiness = BusinessListing
+// LocalBusiness is defined in LocalAdCardView.swift — no alias needed here.
