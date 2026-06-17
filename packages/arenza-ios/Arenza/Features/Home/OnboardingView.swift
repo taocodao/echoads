@@ -213,11 +213,17 @@ struct OnboardingView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(
-                    disabled
-                    ? Color(arenza: "#4a5568")
-                    : LinearGradient(colors: [Color(arenza: "#ff6b35"), Color(arenza: "#ffc107")], startPoint: .leading, endPoint: .trailing)
-                )
+                // Use Group to avoid Color vs LinearGradient ternary type mismatch
+                .background(Group {
+                    if disabled {
+                        Color(arenza: "#4a5568")
+                    } else {
+                        LinearGradient(
+                            colors: [Color(arenza: "#ff6b35"), Color(arenza: "#ffc107")],
+                            startPoint: .leading, endPoint: .trailing
+                        )
+                    }
+                })
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(color: disabled ? .clear : Color(arenza: "#ff6b35").opacity(0.35), radius: 12, y: 4)
         }
