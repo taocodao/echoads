@@ -550,12 +550,15 @@ struct LiveGameView: View {
             startBreak(brk)
         } else {
             // Store pending, poll every 2s, force after 15s grace
+            // Use a box class so the counter can mutate inside the timer closure
+            final class Counter { var value = 0 }
             pendingBreak = brk
-            var waited = 0
-            let poll = Timer(timeInterval: 2, repeats: true) { timer in
-                waited += 2
-                Task { @MainActor in
-                    if !self.isUserBusy() || waited >= 15 {
+            let counter = Counter()
+            let poll = Timer(timeInterval: 2, repeats: true) { [weak self] timer in
+                counter.value += 2
+                Task { @MainActor [weak self] in
+                    guard let self else { timer.invalidate(); return }
+                    if !self.isUserBusy() || counter.value >= 15 {
                         timer.invalidate()
                         if let b = self.pendingBreak {
                             self.pendingBreak = nil
