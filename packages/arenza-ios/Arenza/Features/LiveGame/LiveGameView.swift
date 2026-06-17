@@ -77,6 +77,8 @@ struct LiveGameView: View {
     @State private var adQueue: [AdCreative] = []
     // Ad watch history for Ads tab
     @State private var adHistory: [(ad: AdCreative, txHash: String)] = []
+    // 1Hz publisher — guaranteed to fire regardless of SwiftUI reactivity
+    private let adTick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
@@ -121,9 +123,9 @@ struct LiveGameView: View {
             adEngine.stop()
             autoCycleTimer?.invalidate()
         }
-        // Single clock: drive ad breaks from GameEngine elapsed (matches web demo)
-        .onChange(of: game.elapsedPublic) { elapsed in
-            checkAdBreaks(elapsed: elapsed)
+        // Guaranteed 1Hz ad-break clock — replaces deprecated onChange(of:perform:)
+        .onReceive(adTick) { _ in
+            checkAdBreaks(elapsed: game.elapsedPublic)
         }
         .pointsFlyUp(text: game.flyText)
         .overlay(BingoCelebrationOverlay(lineCount: game.bingoLines))
@@ -234,19 +236,30 @@ struct LiveGameView: View {
     }
 
     private var arenzaLogo: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text("ARENZA")
-                .font(.system(size: 20, weight: .black, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color(arenza: "#00d4a8"), Color(arenza: "#ff6b35")],
-                        startPoint: .leading, endPoint: .trailing
-                    )
-                )
-            Text("TV")
-                .font(.system(size: 9, weight: .heavy))
-                .foregroundColor(T.orange.opacity(0.8))
-                .tracking(4)
+        // Use asset-catalog logo; fall back to styled text if not found
+        Group {
+            if UIImage(named: "arenza-logo") != nil {
+                Image("arenza-logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 28)
+                    .shadow(color: T.orange.opacity(0.5), radius: 8)
+            } else {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("ARENZA")
+                        .font(.system(size: 20, weight: .black, design: .rounded))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color(arenza: "#00d4a8"), Color(arenza: "#ff6b35")],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                    Text("TV")
+                        .font(.system(size: 9, weight: .heavy))
+                        .foregroundColor(T.orange.opacity(0.8))
+                        .tracking(4)
+                }
+            }
         }
         .padding(.horizontal, 10).padding(.vertical, 5)
         .background(Color.black.opacity(0.55))
