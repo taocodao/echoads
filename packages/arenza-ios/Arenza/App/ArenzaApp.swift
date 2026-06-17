@@ -63,69 +63,25 @@ struct ArenzaApp: App {
 }
 
 // MARK: - Root Tab View
+// Architecture mirrors the web demo: LiveGameView is the FIRST thing the user sees
+// (split-screen: 42% video + 58% 9-tab interactive panel).
+// Business Operator scan is a dedicated tab, no longer buried.
 
 struct ContentView: View {
     @EnvironmentObject var env: AppEnvironment
     @State private var onboardingDone = UserDefaults.standard.arenzaOnboardingComplete
-    @State private var showPostGame = false
-    @ObservedObject private var demo = DemoOrchestrator.shared
 
     var body: some View {
         ZStack {
             mainTabs
 
-            // First-launch onboarding
+            // First-launch onboarding (full-screen, dismisses back to LiveGameView)
             if !onboardingDone {
                 OnboardingView { _ in
-                    withAnimation { onboardingDone = true }
+                    withAnimation(.easeInOut(duration: 0.4)) { onboardingDone = true }
                 }
                 .transition(.opacity)
                 .zIndex(100)
-            }
-
-            // Local ad card overlay (fires during demo ad break)
-            if demo.showLocalAdOverlay {
-                VStack {
-                    Spacer()
-                    LocalAdBreakOverlay(
-                        businesses: Array(demoBusinesses.prefix(3)),
-                        onDismiss: { demo.showLocalAdOverlay = false },
-                        onCouponClaim: { biz in
-                            MembershipService.shared.addCoupon(
-                                businessId: biz.id,
-                                offer: biz.activeOffer?.headline ?? "Discount",
-                                value: biz.activeOffer?.value ?? ""
-                            )
-                            demo.showLocalAdOverlay = false
-                        },
-                        onJoinClub: { biz in
-                            MembershipService.shared.addStamp(businessId: biz.id)
-                            demo.showLocalAdOverlay = false
-                        }
-                    )
-                    .padding(.bottom, 100)
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: demo.showLocalAdOverlay)
-                .zIndex(50)
-            }
-
-            // Post-game recap sheet
-            if demo.showPostGameRecap {
-                Color.black.opacity(0.6).ignoresSafeArea().zIndex(60)
-                PostGameRecapView(
-                    points: MembershipService.shared.totalPointsAcrossAllBusinesses + demo.totalAZTEarned,
-                    correctPredictions: PredictionEngine.shared.wallet.currentStreak,
-                    totalPredictions: max(1, PredictionEngine.shared.wallet.currentStreak + 2),
-                    adsWatched: 2,
-                    couponsClaimedCount: MembershipService.shared.allActiveCoupons.count,
-                    homeScore: 27, awayScore: 14
-                ) {
-                    withAnimation { demo.showPostGameRecap = false }
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .animation(.spring(response: 0.45, dampingFraction: 0.82), value: demo.showPostGameRecap)
-                .zIndex(70)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: onboardingDone)
@@ -133,31 +89,28 @@ struct ContentView: View {
 
     private var mainTabs: some View {
         TabView {
-            HomeView()
-                .tabItem { Label("Watch", systemImage: "play.circle.fill") }
+            // Tab 1 — Live Game (matches web demo first screen exactly)
+            LiveGameView()
+                .tabItem {
+                    Label("Live", systemImage: "play.circle.fill")
+                }
+                .tag(0)
 
-            PredictionsTabView()
-                .tabItem { Label("Predict", systemImage: "sparkles") }
-
-            RewardsWalletView()
-                .tabItem { Label("Rewards", systemImage: "gift.fill") }
-
-            QRWalletView()
-                .tabItem { Label("Wallet", systemImage: "qrcode") }
-
-            SponsorCampaignView()
-                .tabItem { Label("Sponsors", systemImage: "megaphone.fill") }
-
+            // Tab 2 — Earnings / Stats
             EarningsView()
-                .tabItem { Label("Earnings", systemImage: "chart.line.uptrend.xyaxis") }
+                .tabItem {
+                    Label("Earnings", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                .tag(1)
 
-            MarketplaceView()
-                .tabItem { Label("Shop", systemImage: "storefront.fill") }
-
+            // Tab 3 — Business Operator QR Scanner
             OperatorScanView()
-                .tabItem { Label("Operator", systemImage: "qrcode.viewfinder") }
+                .tabItem {
+                    Label("Scan", systemImage: "qrcode.viewfinder")
+                }
+                .tag(2)
         }
-        .tint(Color(red: 0.0, green: 0.82, blue: 0.60))
+        .tint(Color(arenza: "#ff6b35"))
     }
 }
 
