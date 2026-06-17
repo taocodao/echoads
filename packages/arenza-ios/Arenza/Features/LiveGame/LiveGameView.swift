@@ -456,7 +456,7 @@ struct LiveGameView: View {
                     ScratchAdCard(engine: game, adEngine: adEngine)
                         .padding(12)
                 case .moreless:
-                    MoreLessAdCard(engine: game)
+                    MoreLessAdCard(engine: game, adEngine: adEngine)
                         .padding(12)
                 case .market:
                     MarketplaceView()
