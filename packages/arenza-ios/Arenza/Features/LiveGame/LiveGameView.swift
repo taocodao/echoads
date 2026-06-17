@@ -72,6 +72,10 @@ struct LiveGameView: View {
     // In-app web
     @State private var webURL: IdentifiableURL? = nil
 
+    // Ad break self-contained timer (more reliable than onChange)
+    @State private var adBreakTimer: Timer? = nil
+    @State private var localElapsed: Int = 0
+
     var body: some View {
         ZStack {
             ArenzaSplitView(state: .constant(.splitView)) {
@@ -105,10 +109,17 @@ struct LiveGameView: View {
         } message: {
             Text("You need 500 points to unlock landscape fullscreen. Keep playing to earn more!")
         }
-        .onAppear { game.start(); adEngine.startCycling(); startAutoCycle() }
-        .onDisappear { game.stop(); adEngine.stop(); autoCycleTimer?.invalidate() }
-        .onChange(of: game.elapsedPublic) { elapsed in
-            checkAdBreaks(elapsed: elapsed)
+        .onAppear {
+            game.start()
+            adEngine.startCycling()
+            startAutoCycle()
+            startAdBreakTimer()
+        }
+        .onDisappear {
+            game.stop()
+            adEngine.stop()
+            autoCycleTimer?.invalidate()
+            adBreakTimer?.invalidate()
         }
         .pointsFlyUp(text: game.flyText)
         .overlay(BingoCelebrationOverlay(lineCount: game.bingoLines))
@@ -130,9 +141,8 @@ struct LiveGameView: View {
                 }
             }
 
-            // ArenzaTV logo
-            Image("arenza-logo").resizable().scaledToFit().frame(height: 54)
-                .shadow(color: T.orange.opacity(0.8), radius: 14)
+            // ArenzaTV text logo (reliable — no asset dependency)
+            arenzaLogo
                 .padding(.top, 8).padding(.leading, 12)
 
             // Tier badge top-right
@@ -219,6 +229,27 @@ struct LiveGameView: View {
         .buttonStyle(.plain)
     }
 
+    private var arenzaLogo: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text("ARENZA")
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color(arenza: "#00d4a8"), Color(arenza: "#ff6b35")],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                )
+            Text("TV")
+                .font(.system(size: 9, weight: .heavy))
+                .foregroundColor(T.orange.opacity(0.8))
+                .tracking(4)
+        }
+        .padding(.horizontal, 10).padding(.vertical, 5)
+        .background(Color.black.opacity(0.55))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(color: T.orange.opacity(0.4), radius: 8)
+    }
+
     private var scoreStrip: some View {
         HStack(spacing: 12) {
             Text("🦅 \(game.homeScore)").font(.system(size: 13, weight: .black, design: .monospaced)).foregroundColor(T.orange)
@@ -236,6 +267,7 @@ struct LiveGameView: View {
             TemporalStatusBanner()
             if let ad = currentAd {
                 inlineAdZone(ad: ad)
+                    .frame(maxHeight: .infinity)
             } else {
                 tabContent.frame(maxHeight: .infinity)
             }
@@ -244,7 +276,7 @@ struct LiveGameView: View {
         .background(T.bg)
     }
 
-    // MARK: - Inline Ad Zone (mirrors web demo exactly)
+    // MARK: - Inline Ad Zone
 
     private func inlineAdZone(ad: AdCreative) -> some View {
         VStack(spacing: 0) {
@@ -278,7 +310,6 @@ struct LiveGameView: View {
             ZStack {
                 if let videoURL = ad.videoURL {
                     AdVideoPlayerView(ad: ad, progress: $adProgress) {
-                        // video.ended — show PoD then dismiss
                         adProgress = 1.0
                         let tx = "0x" + String((0..<16).map { _ in "0123456789abcdef".randomElement()! })
                         podTxHash = tx
@@ -292,11 +323,26 @@ struct LiveGameView: View {
                             }
                         }
                     }
+                } else {
+                    // No URL fallback: show brand card and auto-dismiss after duration
+                    VStack(spacing: 12) {
+                        Text(ad.emoji).font(.system(size: 56))
+                        Text(ad.brand).font(.system(size: 16, weight: .black)).foregroundColor(T.text)
+                        Text(ad.tagline).font(.system(size: 11)).foregroundColor(T.muted)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(ad.primaryColor.opacity(0.08))
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + Double(ad.durationSec)) {
+                            currentAd = nil; isBreakActive = false; adProgress = 0
+                        }
+                    }
                 }
 
                 // PoD verified overlay
                 if podToastVisible {
-                    Color.black.opacity(0.85).ignoresSafeArea()
+                    Color.black.opacity(0.85)
+                        .ignoresSafeArea()
                     VStack(spacing: 6) {
                         Text("✅").font(.system(size: 32))
                         Text("Proof-of-Delivery Verified")
@@ -459,12 +505,35 @@ struct LiveGameView: View {
         .overlay(Rectangle().fill(T.border).frame(height: 1), alignment: .top)
     }
 
-    // MARK: - Ad Break Logic (mirrors web demo)
+    // MARK: - Ad Break Timer (dedicated 1Hz timer, robust vs onChange)
+
+    private func startAdBreakTimer() {
+        adBreakTimer?.invalidate()
+        localElapsed = 0
+        adBreakTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            Task { @MainActor in
+                self.localElapsed += 1
+                // Reset on loop
+                if self.localElapsed > 300 {
+                    self.localElapsed = 1
+                    self._firedBreakIds.removeAll()
+                }
+                self.checkAdBreaks(elapsed: self.localElapsed)
+            }
+        }
+        RunLoop.main.add(adBreakTimer!, forMode: .common)
+    }
+
+    // MARK: - Ad Break Logic
 
     private func checkAdBreaks(elapsed: Int) {
-        if elapsed <= 3 { _firedBreakIds.removeAll() }
         guard !isBreakActive else { return }
-        guard let brk = COMMERCIAL_BREAKS.first(where: { $0.triggerAt == elapsed && !_firedBreakIds.contains($0.id) }) else { return }
+        // Use >= so a skipped tick still fires (within a 2s window)
+        guard let brk = COMMERCIAL_BREAKS.first(where: {
+            elapsed >= $0.triggerAt &&
+            elapsed < $0.triggerAt + 3 &&
+            !_firedBreakIds.contains($0.id)
+        }) else { return }
         _firedBreakIds.insert(brk.id)
         guard let ad = brk.ads.first else { return }
         isBreakActive = true
