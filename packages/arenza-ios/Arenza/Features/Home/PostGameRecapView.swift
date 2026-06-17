@@ -279,7 +279,6 @@ struct PostGameRecapView: View {
             Text(value)
                 .font(.system(size: 22, weight: .black, design: .rounded))
                 .foregroundColor(Color(arenza: color))
-                .lineHeight(1.1)
             Text(label)
                 .font(.system(size: 9))
                 .foregroundColor(Color(arenza: "#4a5568"))
