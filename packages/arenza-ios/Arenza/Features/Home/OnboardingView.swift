@@ -213,17 +213,16 @@ struct OnboardingView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                // Use Group to avoid Color vs LinearGradient ternary type mismatch
-                .background(Group {
-                    if disabled {
-                        Color(arenza: "#4a5568")
-                    } else {
-                        LinearGradient(
-                            colors: [Color(arenza: "#ff6b35"), Color(arenza: "#ffc107")],
-                            startPoint: .leading, endPoint: .trailing
-                        )
-                    }
-                })
+                // Base background is always a solid Color (no type conflict)
+                .background(Color(arenza: disabled ? "#4a5568" : "#ff6b35"))
+                // Gradient overlay layered on top when active
+                .overlay(
+                    LinearGradient(
+                        colors: [Color(arenza: "#ff6b35"), Color(arenza: "#ffc107")],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                    .opacity(disabled ? 0 : 1)
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(color: disabled ? .clear : Color(arenza: "#ff6b35").opacity(0.35), radius: 12, y: 4)
         }
