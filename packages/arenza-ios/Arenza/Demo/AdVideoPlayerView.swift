@@ -23,7 +23,8 @@ final class AdVideoPlayerViewModel: ObservableObject {
         self.onEnded = onEnded
         let item = AVPlayerItem(url: url)
         let p = AVPlayer(playerItem: item)
-        p.isMuted = false
+        p.isMuted = true   // Web demo: ad videos always play silently (v.muted=true; v.volume=0)
+        p.volume = 0
         p.automaticallyWaitsToMinimizeStalling = true
         self.player = p
 

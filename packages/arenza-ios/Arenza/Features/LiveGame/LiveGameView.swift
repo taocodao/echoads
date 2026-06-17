@@ -1,6 +1,7 @@
 // LiveGameView.swift — Arenza
 import SwiftUI
 import AVFoundation
+import Combine
 
 private enum T {
     static let bg      = Color(arenza: "#0d0f14")
@@ -72,9 +73,12 @@ struct LiveGameView: View {
     // In-app web
     @State private var webURL: IdentifiableURL? = nil
 
-    // Ad break self-contained timer (more reliable than onChange)
-    @State private var adBreakTimer: Timer? = nil
-    @State private var localElapsed: Int = 0
+    // Multi-ad queue (mirrors web demo adQueueRef)
+    @State private var adQueue: [AdCreative] = []
+    // Ad watch history for Ads tab
+    @State private var adHistory: [(ad: AdCreative, txHash: String)] = []
+    // Courtesy delay pending break
+    @State private var pendingBreak: CommercialBreak? = nil
 
     var body: some View {
         ZStack {
@@ -113,13 +117,15 @@ struct LiveGameView: View {
             game.start()
             adEngine.startCycling()
             startAutoCycle()
-            startAdBreakTimer()
         }
         .onDisappear {
             game.stop()
             adEngine.stop()
             autoCycleTimer?.invalidate()
-            adBreakTimer?.invalidate()
+        }
+        // Single clock: drive ad breaks from GameEngine elapsed (matches web demo)
+        .onChange(of: game.elapsedPublic) { elapsed in
+            checkAdBreaks(elapsed: elapsed)
         }
         .pointsFlyUp(text: game.flyText)
         .overlay(BingoCelebrationOverlay(lineCount: game.bingoLines))
@@ -310,16 +316,26 @@ struct LiveGameView: View {
             ZStack {
                 if let videoURL = ad.videoURL {
                     AdVideoPlayerView(ad: ad, progress: $adProgress) {
+                        // video.ended — matches web demo exactly
                         adProgress = 1.0
                         let tx = "0x" + String((0..<16).map { _ in "0123456789abcdef".randomElement()! })
                         podTxHash = tx
+                        adHistory.append((ad: ad, txHash: tx))
                         withAnimation { podToastVisible = true }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                        // 1.2s PoD toast — matches web demo (was 2.5s)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                             withAnimation { podToastVisible = false }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 currentAd = nil
-                                isBreakActive = false
                                 adProgress = 0
+                                // Play next ad in queue (multi-ad break support)
+                                if !adQueue.isEmpty {
+                                    let next = adQueue.removeFirst()
+                                    adProgress = 0
+                                    withAnimation(.spring(response: 0.4)) { currentAd = next }
+                                } else {
+                                    isBreakActive = false
+                                }
                             }
                         }
                     }
@@ -505,40 +521,61 @@ struct LiveGameView: View {
         .overlay(Rectangle().fill(T.border).frame(height: 1), alignment: .top)
     }
 
-    // MARK: - Ad Break Timer (dedicated 1Hz timer, robust vs onChange)
-
-    private func startAdBreakTimer() {
-        adBreakTimer?.invalidate()
-        localElapsed = 0
-        adBreakTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            Task { @MainActor in
-                self.localElapsed += 1
-                // Reset on loop
-                if self.localElapsed > 300 {
-                    self.localElapsed = 1
-                    self._firedBreakIds.removeAll()
-                }
-                self.checkAdBreaks(elapsed: self.localElapsed)
-            }
-        }
-        RunLoop.main.add(adBreakTimer!, forMode: .common)
-    }
-
-    // MARK: - Ad Break Logic
+    // MARK: - Ad Break Logic (single clock — mirrors web demo architecture)
 
     private func checkAdBreaks(elapsed: Int) {
-        guard !isBreakActive else { return }
-        // Use >= so a skipped tick still fires (within a 2s window)
+        // Reset fired IDs when game loops (t<=3)
+        if elapsed <= 3 { _firedBreakIds.removeAll() }
+        guard !isBreakActive, pendingBreak == nil else { return }
+        // >= range: handles any occasional missed onChange tick
         guard let brk = COMMERCIAL_BREAKS.first(where: {
             elapsed >= $0.triggerAt &&
             elapsed < $0.triggerAt + 3 &&
             !_firedBreakIds.contains($0.id)
         }) else { return }
         _firedBreakIds.insert(brk.id)
-        guard let ad = brk.ads.first else { return }
+        scheduleBreak(brk)
+    }
+
+    // MARK: - Courtesy Delay (mirrors web demo isUserBusy + scheduleBreak)
+
+    private func isUserBusy() -> Bool {
+        // User is mid-prediction and hasn't voted yet
+        return activeTab == .predict && game.activePrediction != nil
+    }
+
+    private func scheduleBreak(_ brk: CommercialBreak) {
+        guard !isBreakActive else { return }
+        if !isUserBusy() {
+            startBreak(brk)
+        } else {
+            // Store pending, poll every 2s, force after 15s grace
+            pendingBreak = brk
+            var waited = 0
+            let poll = Timer(timeInterval: 2, repeats: true) { timer in
+                waited += 2
+                Task { @MainActor in
+                    if !self.isUserBusy() || waited >= 15 {
+                        timer.invalidate()
+                        if let b = self.pendingBreak {
+                            self.pendingBreak = nil
+                            self.startBreak(b)
+                        }
+                    }
+                }
+            }
+            RunLoop.main.add(poll, forMode: .common)
+        }
+    }
+
+    private func startBreak(_ brk: CommercialBreak) {
+        guard !isBreakActive else { return }
+        guard !brk.ads.isEmpty else { return }
         isBreakActive = true
+        // Load full ad queue (multi-ad break support)
+        adQueue = Array(brk.ads.dropFirst())
         adProgress = 0
-        withAnimation(.spring(response: 0.4)) { currentAd = ad }
+        withAnimation(.spring(response: 0.4)) { currentAd = brk.ads[0] }
     }
 
     // MARK: - Toasts
@@ -633,6 +670,14 @@ final class NFLDemoPlayer: ObservableObject {
         p.isMuted = false
         p.automaticallyWaitsToMinimizeStalling = true
         self.player = p
+        // Watchdog: retry play every 2s if stalled — mirrors web demo setInterval guard
+        let watchdog = Timer(timeInterval: 2, repeats: true) { [weak p] _ in
+            guard let p else { return }
+            if p.timeControlStatus == .paused || p.timeControlStatus == .waitingToPlayAtSpecifiedRate {
+                p.play()
+            }
+        }
+        RunLoop.main.add(watchdog, forMode: .common)
         NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { [weak p] _ in
             p?.seek(to: .zero) { _ in p?.play() }
         }
