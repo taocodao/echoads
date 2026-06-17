@@ -115,8 +115,8 @@ struct ContentView: View {
                 Color.black.opacity(0.6).ignoresSafeArea().zIndex(60)
                 PostGameRecapView(
                     points: MembershipService.shared.totalPointsAcrossAllBusinesses + demo.totalAZTEarned,
-                    correctPredictions: PredictionEngine.shared.wallet.correctStreakCount,
-                    totalPredictions: max(1, PredictionEngine.shared.wallet.correctStreakCount + 2),
+                    correctPredictions: PredictionEngine.shared.wallet.currentStreak,
+                    totalPredictions: max(1, PredictionEngine.shared.wallet.currentStreak + 2),
                     adsWatched: 2,
                     couponsClaimedCount: MembershipService.shared.allActiveCoupons.count,
                     homeScore: 27, awayScore: 14
