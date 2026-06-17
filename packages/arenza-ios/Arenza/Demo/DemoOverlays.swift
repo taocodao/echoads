@@ -163,6 +163,7 @@ struct AdIncomingBadge: View {
 
 // MARK: - 3. Targeting Debug HUD (shake to reveal)
 
+@MainActor
 struct TargetingDebugHUD: View {
     @ObservedObject private var profile = ProfileEngine.shared
     @ObservedObject private var revenue = RevenueReporter.UIProxy.shared

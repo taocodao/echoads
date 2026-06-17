@@ -44,25 +44,51 @@ def add_warning(path, line_num, rule, msg):
     warnings.append(f"[{rule}] {rel}:{line_num}  {msg}")
 
 
+def _collect_main_actor_ranges(lines: list[str]) -> list[tuple[int, int]]:
+    """
+    Pass 1: Find the line ranges (1-indexed, inclusive) of all types/functions
+    that are marked @MainActor.  Returns a list of (start, end) tuples.
+    """
+    ranges: list[tuple[int, int]] = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        # Detect @MainActor attribute (inline or preceding line)
+        is_ma = "@MainActor" in line
+        if not is_ma and i > 0:
+            is_ma = lines[i - 1].strip() == "@MainActor"
+        if is_ma and re.search(r"(class|struct|func|extension)\s+\w+", line):
+            start = i + 1  # 1-indexed
+            # Walk forward counting braces to find the end of this scope
+            depth = 0
+            j = i
+            while j < n:
+                depth += lines[j].count("{") - lines[j].count("}")
+                if depth <= 0 and j > i:
+                    break
+                j += 1
+            ranges.append((start, j + 1))  # 1-indexed end
+        i += 1
+    return ranges
+
+
+def _in_main_actor_range(line_num: int, ranges: list[tuple[int, int]]) -> bool:
+    return any(start <= line_num <= end for start, end in ranges)
+
+
 def check_file(path: Path):
     text = path.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
 
-    # Track current context for actor-isolation checks
-    in_main_actor_class = False
-    in_actor = False
-    in_async_func = False
+    # Pass 1: collect all @MainActor class/struct/func ranges
+    ma_ranges = _collect_main_actor_ranges(lines)
 
     for i, line in enumerate(lines, start=1):
         stripped = line.strip()
 
-        # --- Context tracking ---
-        if re.search(r"@MainActor\s*(final\s*)?class|@MainActor\s*(final\s*)?struct", line):
-            in_main_actor_class = True
-        if re.match(r"\s*(final\s*)?actor\s+\w+", line):
-            in_actor = True
-        if re.search(r"func\s+\w+.*async", line):
-            in_async_func = True
+        in_main_actor_scope = _in_main_actor_range(i, ma_ranges)
+        in_async_func = bool(re.search(r"func\s+\w+.*async", line))
 
         # CHECK 1: Duplicate Data.hexString extension
         if "extension Data" in line and "SecureEnclaveManager" not in str(path):
@@ -83,13 +109,24 @@ def check_file(path: Path):
                 add_error(path, i, "WRONG-ARG",
                     "UserPrediction uses 'streakMultiplierApplied:' not 'streakMultiplier:'")
 
-        # CHECK 4: @MainActor singleton accessed from nonisolated synchronous context
-        if not stripped.startswith("//") and not in_main_actor_class and not in_actor and not in_async_func:
+        # CHECK 4: @MainActor singleton accessed from nonisolated synchronous context.
+        # Skip if: (a) inside a @MainActor class/struct, (b) inside a Task { @MainActor } block,
+        # (c) inside an async function, (d) already commented out.
+        if not stripped.startswith("//") and not in_main_actor_scope and not in_async_func:
             for singleton in MAIN_ACTOR_SINGLETONS:
-                if singleton + "." in line:
-                    # Check it's not inside an async closure or await MainActor.run
-                    context = " ".join(lines[max(0, i-8):i])
-                    if "await MainActor.run" not in context and "Task {" not in context:
+                if singleton + "." in line or singleton + "," in line:
+                    # Look back 15 lines for safety wrappers
+                    context = " ".join(lines[max(0, i-15):i])
+                    safe = (
+                        "await MainActor.run" in context
+                        or "Task { @MainActor" in context
+                        or "MainActor.assumeIsolated" in context
+                        # These patterns are also safe: async func calls and Task { await }
+                        or ("await " + singleton) in line
+                        or re.search(r"Task\s*\{.*await", context)
+                        or "guard await" in context
+                    )
+                    if not safe:
                         add_warning(path, i, "ISOLATION",
                             f"'{singleton}' is @MainActor — accessing from nonisolated sync context may cause Swift 6 error: {stripped[:80]}")
                         break

@@ -61,16 +61,21 @@ final class PollEngine: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     private init() {
-        // Trigger polls on game moments that aren't already used for predictions
-        ContextualMomentService.shared.momentPublisher
-            .receive(on: DispatchQueue.main)
-            .filter { [weak self] m in
-                m.isPollTrigger && self?.activePoll == nil
-            }
-            .sink { [weak self] _ in
-                Task { await self?.triggerDemoPoll() }
-            }
-            .store(in: &cancellables)
+        // Trigger polls on game moments that aren't already used for predictions.
+        // Accessing ContextualMomentService.shared inside a Task { @MainActor } ensures
+        // Swift strict-concurrency isolation is satisfied without changing behaviour.
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            ContextualMomentService.shared.momentPublisher
+                .receive(on: DispatchQueue.main)
+                .filter { [weak self] m in
+                    m.isPollTrigger && self?.activePoll == nil
+                }
+                .sink { [weak self] _ in
+                    Task { await self?.triggerDemoPoll() }
+                }
+                .store(in: &self.cancellables)
+        }
     }
 
     // MARK: - Trigger

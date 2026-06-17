@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@MainActor
 struct PlayerOverlayView: View {
     @ObservedObject var vm: PlayerViewModel
     @ObservedObject var demo: DemoOrchestrator

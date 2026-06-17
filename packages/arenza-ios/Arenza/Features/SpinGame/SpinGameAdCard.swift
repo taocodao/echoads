@@ -7,6 +7,7 @@ import SpriteKit
 
 // MARK: - Main Card
 
+@MainActor
 struct SpinGameAdCard: View {
     @ObservedObject var engine: GameEngine
     @ObservedObject var adEngine: InteractiveAdEngine

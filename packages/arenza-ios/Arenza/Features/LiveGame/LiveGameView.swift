@@ -71,6 +71,7 @@ enum LiveTab: String, CaseIterable, Identifiable {
 
 // MARK: - LiveGameView
 
+@MainActor
 struct LiveGameView: View {
     @EnvironmentObject var env: AppEnvironment
     @StateObject private var game = GameEngine()

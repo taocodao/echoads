@@ -70,15 +70,19 @@ final class TriviaEngine: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     private init() {
-        // Trigger trivia during halftime only
-        ContextualMomentService.shared.momentPublisher
-            .receive(on: DispatchQueue.main)
-            .filter { $0 == .halftime }
-            .filter { [weak self] _ in self?.activeSession == nil }
-            .sink { [weak self] _ in
-                Task { await self?.startDemoSession() }
-            }
-            .store(in: &cancellables)
+        // Trigger trivia during halftime only.
+        // Wrapping in Task { @MainActor } satisfies strict-concurrency isolation.
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            ContextualMomentService.shared.momentPublisher
+                .receive(on: DispatchQueue.main)
+                .filter { $0 == .halftime }
+                .filter { [weak self] _ in self?.activeSession == nil }
+                .sink { [weak self] _ in
+                    Task { await self?.startDemoSession() }
+                }
+                .store(in: &self.cancellables)
+        }
     }
 
     // MARK: - Start session

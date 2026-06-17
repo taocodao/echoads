@@ -26,6 +26,7 @@ private enum SD {
 
 // MARK: - Sponsor Dashboard
 
+@MainActor
 struct SponsorDashboardView: View {
     @ObservedObject var engine: GameEngine
     @Environment(\.dismiss) private var dismiss
