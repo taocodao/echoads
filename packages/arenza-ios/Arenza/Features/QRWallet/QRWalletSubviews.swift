@@ -25,8 +25,8 @@ struct RewardRowView: View {
                     .foregroundColor(Color(arenza: "#8892b0"))
                 HStack(spacing: 4) {
                     statusBadge
-                    if !reward.isExpired, let exp = reward.expiresAt {
-                        Text("Expires \(exp, style: .relative)")
+                    if reward.status == .active {
+                        Text("Expires \(reward.expiresAt, style: .relative)")
                             .font(.system(size: 8))
                             .foregroundColor(Color(arenza: "#4a5568"))
                     }
