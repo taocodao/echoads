@@ -77,8 +77,6 @@ struct LiveGameView: View {
     @State private var adQueue: [AdCreative] = []
     // Ad watch history for Ads tab
     @State private var adHistory: [(ad: AdCreative, txHash: String)] = []
-    // Courtesy delay pending break
-    @State private var pendingBreak: CommercialBreak? = nil
 
     var body: some View {
         ZStack {
@@ -526,7 +524,7 @@ struct LiveGameView: View {
     private func checkAdBreaks(elapsed: Int) {
         // Reset fired IDs when game loops (t<=3)
         if elapsed <= 3 { _firedBreakIds.removeAll() }
-        guard !isBreakActive, pendingBreak == nil else { return }
+        guard !isBreakActive else { return }
         // >= range: handles any occasional missed onChange tick
         guard let brk = COMMERCIAL_BREAKS.first(where: {
             elapsed >= $0.triggerAt &&
@@ -546,29 +544,18 @@ struct LiveGameView: View {
 
     private func scheduleBreak(_ brk: CommercialBreak) {
         guard !isBreakActive else { return }
-        if !isUserBusy() {
-            startBreak(brk)
-        } else {
-            // Store pending, poll every 2s, force after 15s grace
-            // Use a box class so the counter can mutate inside the timer closure
-            final class Counter { var value = 0 }
-            pendingBreak = brk
-            let counter = Counter()
-            let poll = Timer(timeInterval: 2, repeats: true) { [weak self] timer in
-                counter.value += 2
-                Task { @MainActor [weak self] in
-                    guard let self else { timer.invalidate(); return }
-                    if !self.isUserBusy() || counter.value >= 15 {
-                        timer.invalidate()
-                        if let b = self.pendingBreak {
-                            self.pendingBreak = nil
-                            self.startBreak(b)
-                        }
-                    }
+        // Courtesy delay: if user is mid-prediction, retry after 2s (up to 15s then force)
+        func tryStart(retriesLeft: Int) {
+            if !isUserBusy() || retriesLeft <= 0 {
+                startBreak(brk)
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    guard !isBreakActive else { return }  // break fired by other means
+                    tryStart(retriesLeft: retriesLeft - 1)
                 }
             }
-            RunLoop.main.add(poll, forMode: .common)
         }
+        tryStart(retriesLeft: 7)  // 7 × 2s = 14s max courtesy window
     }
 
     private func startBreak(_ brk: CommercialBreak) {
