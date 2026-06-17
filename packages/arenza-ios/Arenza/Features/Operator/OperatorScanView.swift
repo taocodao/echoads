@@ -168,77 +168,124 @@ struct OperatorScanView: View {
     // MARK: - Result
 
     private func resultView(result: ScanResult) -> some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Status header
-                VStack(spacing: 8) {
-                    Image(systemName: result.isValid ? "checkmark.seal.fill" : "xmark.seal.fill")
-                        .font(.system(size: 52))
-                        .foregroundColor(result.isValid ? Color(arenza: "#00c9b1") : Color(arenza: "#ff6b35"))
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                VStack(spacing: 16) {
 
-                    Text(result.isValid ? "Valid Reward" : "Invalid Reward")
-                        .font(.system(size: 22, weight: .black))
-                        .foregroundColor(.white)
-                    Text(result.statusMessage)
-                        .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.5))
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top, 24)
-
-                if result.isValid {
-                    // Customer info card
-                    VStack(alignment: .leading, spacing: 12) {
-                        sectionLabel("CUSTOMER")
-                        infoRow(icon: "person.fill", label: "Member", value: result.memberName)
-                        infoRow(icon: "creditcard.fill", label: "Member ID", value: result.memberId)
-                        infoRow(icon: "star.fill", label: "Tier", value: result.memberTier)
+                    // Status header
+                    VStack(spacing: 8) {
+                        Image(systemName: result.isValid ? "checkmark.seal.fill" : "xmark.seal.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(result.isValid ? Color(arenza: "#22c55e") : Color(arenza: "#ef4444"))
+                        Text(result.isValid ? "Member Verified ✓" : "Invalid QR")
+                            .font(.system(size: 20, weight: .black)).foregroundColor(.white)
+                        Text(result.statusMessage)
+                            .font(.system(size: 12)).foregroundColor(.white.opacity(0.5))
+                            .multilineTextAlignment(.center)
                     }
-                    .padding(16)
-                    .background(Color.white.opacity(0.04))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
 
-                    // Reward info card
-                    VStack(alignment: .leading, spacing: 12) {
-                        sectionLabel("REWARD")
-                        infoRow(icon: "gift.fill", label: "Reward", value: result.rewardLabel)
-                        infoRow(icon: "storefront.fill", label: "Sponsor", value: result.sponsorName)
-                        infoRow(icon: "clock.fill", label: "Expires", value: result.expiryDisplay)
-                        infoRow(icon: "number", label: "Code", value: result.rewardCode)
+                    if result.isValid {
+                        // Member profile card
+                        VStack(alignment: .leading, spacing: 10) {
+                            sectionLabel("MEMBER PROFILE")
+                            infoRow(icon: "person.fill",     label: "Name",    value: result.memberName)
+                            infoRow(icon: "creditcard.fill", label: "ID",      value: result.memberId)
+                            infoRow(icon: "star.fill",       label: "Tier",    value: result.memberTier)
+                            infoRow(icon: "storefront.fill", label: "At",      value: result.sponsorName)
+                            infoRow(icon: "gift.fill",       label: "Status",  value: result.rewardLabel)
+                        }
+                        .padding(16)
+                        .background(Color.white.opacity(0.04))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .padding(.horizontal, 16)
+
+                        // ── Action buttons (ARZ-token path) ───────────────────
+                        if result.userId != nil {
+                            VStack(spacing: 10) {
+                                sectionLabel("ACTIONS").frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 16)
+
+                                // Add Stamp
+                                actionButton(
+                                    emoji: "⭐", title: "Add Stamp",
+                                    subtitle: "Record visit & add loyalty stamp",
+                                    color: "#ff6b35"
+                                ) { vm.addStamp(result: result) }
+
+                                // Active coupons (from MembershipService)
+                                let coupons = result.businessId.flatMap { bizId in
+                                    MembershipService.shared.getMembership(businessId: bizId).activeCouponsFiltered
+                                } ?? []
+                                ForEach(coupons) { coupon in
+                                    actionButton(
+                                        emoji: "🎟", title: "Redeem: \(coupon.offer)",
+                                        subtitle: coupon.value,
+                                        color: "#22c55e"
+                                    ) { vm.redeemCoupon(couponId: coupon.id, result: result) }
+                                }
+
+                                // Record purchase
+                                actionButton(
+                                    emoji: "💳", title: "Record Purchase",
+                                    subtitle: "Log visit & award points",
+                                    color: "#8892b0"
+                                ) { vm.recordPurchase(result: result) }
+                            }
+                        } else {
+                            // Legacy JSON path — single confirm button
+                            Button { vm.confirmRedemption() } label: {
+                                Text(vm.redeemed ? "✓ Redeemed" : "Confirm Redemption")
+                                    .font(.system(size: 15, weight: .black)).foregroundColor(.white)
+                                    .frame(maxWidth: .infinity).padding(.vertical, 14)
+                                    .background(vm.redeemed ? Color(arenza: "#4a5568") : Color(arenza: "#00c9b1"))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                            }
+                            .buttonStyle(.plain).disabled(vm.redeemed).padding(.horizontal, 16)
+                        }
                     }
-                    .padding(16)
-                    .background(Color.white.opacity(0.04))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .padding(.horizontal, 20)
 
-                    // Confirm redemption
-                    Button {
-                        vm.confirmRedemption()
-                    } label: {
-                        Text(vm.redeemed ? "✓ Redeemed" : "Confirm Redemption")
-                            .font(.system(size: 16, weight: .black))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(vm.redeemed ? Color(arenza: "#4a5568") : Color(arenza: "#00c9b1"))
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                    Button { vm.resetToScanning() } label: {
+                        Text("← Scan Another Customer")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Color(arenza: "#00c9b1"))
                     }
-                    .buttonStyle(.plain)
-                    .disabled(vm.redeemed)
-                    .padding(.horizontal, 20)
-                }
-
-                // Scan another
-                Button {
-                    vm.resetToScanning()
-                } label: {
-                    Text("Scan Another")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color(arenza: "#00c9b1"))
+                    .padding(.bottom, 32)
                 }
             }
+
+            // Action toast
+            if !vm.actionToast.isEmpty {
+                Text(vm.actionToast)
+                    .font(.system(size: 12, weight: .bold)).foregroundColor(.white)
+                    .padding(.horizontal, 18).padding(.vertical, 10)
+                    .background(Color(arenza: "#141720"))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(arenza: "#22c55e").opacity(0.4), lineWidth: 1))
+                    .padding(.bottom, 24)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: vm.actionToast)
+    }
+
+    private func actionButton(emoji: String, title: String, subtitle: String, color: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Text(emoji).font(.system(size: 20))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.system(size: 12, weight: .bold)).foregroundColor(.white)
+                    Text(subtitle).font(.system(size: 10)).foregroundColor(Color(arenza: "#8892b0"))
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundColor(Color(arenza: color))
+            }
+            .padding(14)
+            .background(Color(arenza: color).opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(arenza: color).opacity(0.3), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Error
@@ -301,6 +348,9 @@ struct ScanResult {
     let rewardCode: String
     let expiryDisplay: String
     let rawRewardId: UUID?
+    // New ARZ-token fields
+    let userId: String?
+    let businessId: String?
 }
 
 // MARK: - OperatorScanViewModel
@@ -328,6 +378,8 @@ final class OperatorScanViewModel: ObservableObject {
     @Published var enteredPin: String = "" { didSet { if enteredPin.count == 6 { submitPin() } } }
     @Published var pinError: Bool = false
     @Published var redeemed: Bool = false
+    @Published var actionToast: String = ""
+    @Published var currentBizId: String = "roccos"  // default; updated from scan
 
     // MARK: PIN (demo PIN: 123456)
     private let operatorPin = "123456"
@@ -364,7 +416,41 @@ final class OperatorScanViewModel: ObservableObject {
     }
 
     private func validateQRPayload(_ raw: String) -> ScanResult {
-        // Try to decode as JSON (our QR format)
+
+        // ── NEW: ARZ-token format (ArenzaQRToken) ─────────────────────────────
+        if raw.hasPrefix("ARZ-") {
+            let payload = ArenzaQRToken.validate(token: raw)
+            if !payload.valid {
+                return ScanResult(
+                    isValid: false,
+                    statusMessage: payload.error ?? "Invalid token",
+                    memberName: "-", memberId: "-", memberTier: "-",
+                    rewardLabel: "-", sponsorName: "-", rewardCode: raw,
+                    expiryDisplay: "-", rawRewardId: nil,
+                    // Extended fields for new member profile
+                    userId: nil, businessId: nil
+                )
+            }
+            let userId = payload.userId!
+            let bizId  = payload.businessId == "ALL" ? currentBizId : payload.businessId!
+            let biz    = MembershipService.shared.getMembership(businessId: bizId)
+            let bizName = businessCatalog[bizId]?.name ?? bizId
+            return ScanResult(
+                isValid: true,
+                statusMessage: "Member verified ✓ — choose an action below",
+                memberName: MembershipService.shared.displayName,
+                memberId: "MBR-\(userId.suffix(6))",
+                memberTier: biz.memberTier.rawValue,
+                rewardLabel: "\(biz.activeCouponsFiltered.count) coupon(s) · \(biz.stamps)/\(biz.stampsRequired) stamps",
+                sponsorName: bizName,
+                rewardCode: "-",
+                expiryDisplay: "-",
+                rawRewardId: nil,
+                userId: userId, businessId: bizId
+            )
+        }
+
+        // ── LEGACY: JSON payload format ────────────────────────────────────────
         guard let data = raw.data(using: .utf8),
               let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return ScanResult(
@@ -372,7 +458,7 @@ final class OperatorScanViewModel: ObservableObject {
                 statusMessage: "Could not read QR code. Ask customer to open Arenza Wallet.",
                 memberName: "-", memberId: "-", memberTier: "-",
                 rewardLabel: "-", sponsorName: "-", rewardCode: "-",
-                expiryDisplay: "-", rawRewardId: nil
+                expiryDisplay: "-", rawRewardId: nil, userId: nil, businessId: nil
             )
         }
 
@@ -383,8 +469,6 @@ final class OperatorScanViewModel: ObservableObject {
         let sponsorName = payload["sponsor_name"] as? String ?? "-"
         let memberTier  = payload["member_tier"] as? String ?? "Regular"
         let expiresAt   = payload["expires_at"] as? TimeInterval ?? 0
-
-        // Check expiry
         let expiry = Date(timeIntervalSince1970: expiresAt)
         let isExpired = expiry < Date()
 
@@ -395,20 +479,15 @@ final class OperatorScanViewModel: ObservableObject {
                 memberName: "Member \(memberId.prefix(8))",
                 memberId: memberId, memberTier: memberTier,
                 rewardLabel: rewardLabel, sponsorName: sponsorName,
-                rewardCode: rewardCode,
-                expiryDisplay: formatDate(expiry),
-                rawRewardId: UUID(uuidString: rewardId)
+                rewardCode: rewardCode, expiryDisplay: formatDate(expiry),
+                rawRewardId: UUID(uuidString: rewardId), userId: nil, businessId: nil
             )
         }
 
-        // Check against local wallet (real production: would call server)
         let walletReward = QRWalletService.shared.rewards.first {
             $0.rewardCode == rewardCode && $0.status == .active
         }
-
-        let alreadyClaimed = walletReward?.status == .claimed
-
-        if alreadyClaimed {
+        if walletReward?.status == .claimed {
             return ScanResult(
                 isValid: false,
                 statusMessage: "This reward has already been claimed.",
@@ -416,7 +495,7 @@ final class OperatorScanViewModel: ObservableObject {
                 memberId: memberId, memberTier: memberTier,
                 rewardLabel: rewardLabel, sponsorName: sponsorName,
                 rewardCode: rewardCode, expiryDisplay: formatDate(expiry),
-                rawRewardId: UUID(uuidString: rewardId)
+                rawRewardId: UUID(uuidString: rewardId), userId: nil, businessId: nil
             )
         }
 
@@ -426,9 +505,8 @@ final class OperatorScanViewModel: ObservableObject {
             memberName: "Member \(memberId.prefix(8))",
             memberId: memberId, memberTier: memberTier,
             rewardLabel: rewardLabel, sponsorName: sponsorName,
-            rewardCode: rewardCode,
-            expiryDisplay: formatDate(expiry),
-            rawRewardId: UUID(uuidString: rewardId)
+            rewardCode: rewardCode, expiryDisplay: formatDate(expiry),
+            rawRewardId: UUID(uuidString: rewardId), userId: nil, businessId: nil
         )
     }
 
@@ -436,6 +514,33 @@ final class OperatorScanViewModel: ObservableObject {
         guard case .success(let result) = state, let rid = result.rawRewardId else { return }
         QRWalletService.shared.claimReward(id: rid)
         withAnimation { redeemed = true }
+    }
+
+    func addStamp(result: ScanResult) {
+        guard let uid = result.userId, let bizId = result.businessId else { return }
+        currentBizId = bizId
+        let (biz, unlocked) = MembershipService.shared.addStamp(businessId: bizId)
+        showToast(unlocked ? "🎉 Stamp card complete — free reward unlocked!" : "⭐ Stamp added! \(biz.stamps)/\(biz.stampsRequired)")
+        _ = uid  // used for future server sync
+    }
+
+    func redeemCoupon(couponId: String, result: ScanResult) {
+        guard let bizId = result.businessId else { return }
+        let res = MembershipService.shared.redeemCoupon(businessId: bizId, couponId: couponId)
+        showToast(res.success ? "✅ Redeemed: \(res.coupon?.offer ?? "")" : "❌ \(res.error ?? "Failed")")
+    }
+
+    func recordPurchase(result: ScanResult) {
+        guard let bizId = result.businessId else { return }
+        MembershipService.shared.recordPurchase(businessId: bizId, description: "In-store purchase", amount: 35)
+        showToast("💳 Purchase recorded — +350 pts")
+    }
+
+    private func showToast(_ msg: String) {
+        withAnimation { actionToast = msg }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation { self.actionToast = "" }
+        }
     }
 
     func resetToScanning() {
