@@ -1,62 +1,62 @@
 [
   {
     "slide": 0,
-    "startSec": 0.035
+    "startSec": 0.046
   },
   {
     "slide": 1,
-    "startSec": 8.87
+    "startSec": 23.847
   },
   {
     "slide": 2,
-    "startSec": 18.228
+    "startSec": 65.364
   },
   {
     "slide": 3,
-    "startSec": 28.619
+    "startSec": 99.218
   },
   {
     "slide": 4,
-    "startSec": 38.267
+    "startSec": 138.39
   },
   {
     "slide": 5,
-    "startSec": 48.402
+    "startSec": 170.84
   },
   {
     "slide": 6,
-    "startSec": 57.33
+    "startSec": 214.796
   },
   {
     "slide": 7,
-    "startSec": 67.117
+    "startSec": 251.553
   },
   {
     "slide": 8,
-    "startSec": 77.613
+    "startSec": 293.628
   },
   {
     "slide": 9,
-    "startSec": 85.995
+    "startSec": 339.115
   },
   {
     "slide": 10,
-    "startSec": 94.97
+    "startSec": 390.095
   },
   {
     "slide": 11,
-    "startSec": 103.666
+    "startSec": 424.901
   },
   {
     "slide": 12,
-    "startSec": 114.208
+    "startSec": 468.833
   },
   {
     "slide": 13,
-    "startSec": 123.798
+    "startSec": 509.038
   },
   {
     "slide": 14,
-    "startSec": 132.9
+    "startSec": 552.505
   }
 ]
