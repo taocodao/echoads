@@ -18,6 +18,7 @@ import { PostGameRecap } from './components/PostGameRecap';
 import { generateCoupon, buildGameContext } from './lib/couponEngine';
 import { usePersistedState } from './lib/usePersistence';
 import type { BusinessListing } from './lib/sharedTypes';
+import { AppGuide } from './components/AppGuide';
 
 const VIDEO_URL = 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/NFL%20video%20clips%20for%20demo.mp4';
 
@@ -412,7 +413,10 @@ export default function GamePage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '2.5rem', padding: '0 0 4rem', justifyContent: 'center', flexWrap: 'wrap' }}>
 
-      {/* ── iPhone App Preview ─────────────────────────────────────────────── */}
+      {/* ── Interactive Guide (Left) ───────────────────────────────────────── */}
+      <AppGuide />
+
+      {/* ── iPhone App Preview (Center) ────────────────────────────────────── */}
       <IPhoneFrame points={g.points}>
       <div
         onClick={() => {
