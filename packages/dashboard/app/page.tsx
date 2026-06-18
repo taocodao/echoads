@@ -28,10 +28,10 @@ export default function DashboardHome() {
         cuesSrc="/audio/arenza-sports-v1-cues.json"
       />
 
-      {/* Deck 2: LvlUp E-commerce (Sports) */}
+      {/* Deck 2: Arenza Interactive Sports Engagement */}
       <PdfSlideshow
-        title="LvlUp E-commerce"
-        subtitle="Deck 2 — Sports Retail · Fan Commerce · Live Shopping"
+        title="Arenza Interactive Sports Engagement"
+        subtitle="Deck 2 — Live Sports FAST · Gamified Ad Formats · Fan Commerce"
         accent="#8B5CF6"
         slides={SPORTS_SLIDES}
         audioSrc="/audio/arenza-sports.mp3"
