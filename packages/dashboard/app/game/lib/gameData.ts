@@ -20,8 +20,26 @@ export interface AdCreative {
   targetSegment: string;
   whyChosen: string[];
   color: string;
-  appearsAt: number; // seconds into game clock
   durationSec: number;
+  videoUrl?: string;
+  /** Brand website — Button 1: Visit Website */
+  websiteUrl?: string;
+  /** Menu deep-link — Button 2: See Menu */
+  menuUrl?: string;
+  /** Order deep-link — Button 3: Order Now */
+  orderUrl?: string;
+  /** AI-generated coupon headline shown on claim */
+  offerHeadline?: string;
+  /** Coupon value displayed on the claim card, e.g. "20% off" */
+  offerValue?: string;
+}
+
+
+export interface CommercialBreak {
+  id: string;
+  triggerAt: number;   // game-clock seconds to fire the break
+  label: string;       // e.g. "Commercial Break · Timeout"
+  ads: AdCreative[];
 }
 
 export interface GameEvent {
@@ -110,90 +128,136 @@ export const PREDICTIONS: Prediction[] = [
   },
 ];
 
-// ── Ad Catalog ────────────────────────────────────────────────────────────────
+// ── Ad Creatives — Local Restaurant & Bar Partners ──────────────────────────────────
+const AD_AJWARD: AdCreative = {
+  id: 'ad-ajward', brand: 'AJ.Ward', tagline: 'Fine dining, unforgettable moments', emoji: '🍽️', cpm: 45,
+  targetSegment: 'Foodies · Local Diners 25–54',
+  whyChosen: ['Fine dining affinity', 'Local geo-match', 'Won OpenRTB at $45 CPM'],
+  color: '#1a1a2e', durationSec: 31,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/AJ.WARD.mp4',
+  websiteUrl: 'https://www.ajrestaurant.co.uk/',
+  menuUrl: 'https://www.ajrestaurant.co.uk/',
+  orderUrl: 'https://www.ajrestaurant.co.uk/',
+  offerHeadline: 'Game Day — 15% Off Dining',
+  offerValue: '15% off',
+};
+const AD_BONSAI: AdCreative = {
+  id: 'ad-bonsai', brand: 'Bonsai Cafe', tagline: 'Where food meets art', emoji: '🍜', cpm: 38,
+  targetSegment: 'Health-Conscious · Cafe Culture 18–44',
+  whyChosen: ['Cafe culture match', 'Asian cuisine affinity signal', 'Won at $38 CPM'],
+  color: '#2d6a4f', durationSec: 34,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/Bonsai%20Cafe.mp4',
+  websiteUrl: 'https://thedojonorwich.co.uk/bonsai-cafe/',
+  menuUrl: 'https://thedojonorwich.co.uk/bonsai-cafe/',
+  orderUrl: 'https://thedojonorwich.co.uk/bonsai-cafe/',
+  offerHeadline: 'Free Miso Soup on $25+',
+  offerValue: 'Free miso soup',
+};
+const AD_ROCCOS_1: AdCreative = {
+  id: 'ad-roccos-1', brand: "Rocco's Bar & Restaurant", tagline: 'Live it up at Rocco\'s', emoji: '🍸', cpm: 42,
+  targetSegment: 'Nightlife & Dining · 21–45',
+  whyChosen: ['Sports bar affinity', 'Game-day dining context', 'Won at $42 CPM'],
+  color: '#e63946', durationSec: 31,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/ROCCOS%20BAR%20%26%20RESTURANT%201.mp4',
+  websiteUrl: 'http://www.roccos.com',
+  menuUrl: 'http://www.roccos.com',
+  orderUrl: 'http://www.roccos.com',
+  offerHeadline: '$5 Draft Beer — Game Day Special',
+  offerValue: '$5 drafts',
+};
+const AD_ROCCOS_2: AdCreative = {
+  id: 'ad-roccos-2', brand: "Rocco's Bar & Restaurant", tagline: 'Great food, great times', emoji: '🍕', cpm: 42,
+  targetSegment: 'Nightlife & Dining · 21–45',
+  whyChosen: ['Sports bar affinity', 'Return viewer creative rotation', 'Won at $42 CPM'],
+  color: '#c1121f', durationSec: 34,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/ROCCOS%20BAR%20%26%20RESTURANT%202.mp4',
+  websiteUrl: 'http://www.roccos.com',
+  menuUrl: 'http://www.roccos.com',
+  orderUrl: 'http://www.roccos.com',
+  offerHeadline: 'Free Garlic Bread with Pizza',
+  offerValue: 'Free garlic bread',
+};
+const AD_ROOFTOP_1: AdCreative = {
+  id: 'ad-rooftop-1', brand: 'Rooftop Gardens', tagline: 'Elevated dining, stunning views', emoji: '🌿', cpm: 52,
+  targetSegment: 'Premium Diners · Date Night 25–54',
+  whyChosen: ['Premium viewer match', 'Rooftop/experience affinity', 'Won at $52 CPM'],
+  color: '#588157', durationSec: 17,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/Rooftop%20Gardens%202.mp4',
+  websiteUrl: 'https://rooftopgardens.co.uk/',
+  menuUrl: 'https://rooftopgardens.co.uk/',
+  orderUrl: 'https://rooftopgardens.co.uk/',
+  offerHeadline: 'Rooftop Happy Hour — 20% Off',
+  offerValue: '20% off drinks',
+};
+const AD_ROOFTOP_2: AdCreative = {
+  id: 'ad-rooftop-2', brand: 'Rooftop Gardens', tagline: 'Drinks with a view', emoji: '🍹', cpm: 52,
+  targetSegment: 'Premium Diners · Date Night 25–54',
+  whyChosen: ['Premium viewer match', 'Creative rotation — second exposure', 'Won at $52 CPM'],
+  color: '#3a5a40', durationSec: 34,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/Rooftop%20Gardens%203.mp4',
+  websiteUrl: 'https://rooftopgardens.co.uk/',
+  menuUrl: 'https://rooftopgardens.co.uk/',
+  orderUrl: 'https://rooftopgardens.co.uk/',
+  offerHeadline: 'Reserve a Rooftop Table Tonight',
+  offerValue: 'Priority seating',
+};
+const AD_OLDRAM: AdCreative = {
+  id: 'ad-oldram', brand: 'Old Ram Coaching Inn', tagline: 'History, charm & great ales', emoji: '🍺', cpm: 35,
+  targetSegment: 'Pub & Inn Lovers · All Ages',
+  whyChosen: ['Traditional pub affinity', 'Local heritage match', 'Won at $35 CPM'],
+  color: '#7c5c3e', durationSec: 29,
+  videoUrl: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/Old%20Ram%20Coaching%20Inn%20.mp4',
+  websiteUrl: 'https://theoldramfreehouse.com/',
+  menuUrl: 'https://theoldramfreehouse.com/',
+  orderUrl: 'https://theoldramfreehouse.com/',
+  offerHeadline: 'First Pint on Us — Join the Inn',
+  offerValue: 'Free first pint',
+};
 
 export const AD_CATALOG: AdCreative[] = [
-  {
-    id: 'ad-nike',
-    brand: 'Nike',
-    tagline: 'Just Do It',
-    emoji: '👟',
-    cpm: 55,
-    targetSegment: 'Sports Enthusiast · M 25–34',
-    whyChosen: [
-      'High sports engagement score (87/100)',
-      'Male 25–34 demographic match',
-      'Football affinity: 92%',
-      'Won OpenRTB auction at $55 CPM',
-    ],
-    color: '#ff6b35',
-    appearsAt: 10,
-    durationSec: 8,
-  },
-  {
-    id: 'ad-pepsi',
-    brand: 'Pepsi',
-    tagline: 'Game Day Fuel',
-    emoji: '🥤',
-    cpm: 42,
-    targetSegment: 'Mass Market · All Adults 18+',
-    whyChosen: [
-      'Game-day context match',
-      'Food & beverage affinity',
-      'High reach campaign (all segments)',
-      'Won OpenRTB auction at $42 CPM',
-    ],
-    color: '#00c9b1',
-    appearsAt: 32,
-    durationSec: 8,
-  },
-  {
-    id: 'ad-draftkings',
-    brand: 'DraftKings',
-    tagline: 'Bet on the Action',
-    emoji: '🎯',
-    cpm: 68,
-    targetSegment: 'High-Engagement Bettors · 21+',
-    whyChosen: [
-      'Active prediction player (3 bets placed)',
-      'Betting affinity signal detected',
-      '21+ verified via age gate',
-      'Won OpenRTB auction at $68 CPM — highest bidder',
-    ],
-    color: '#7c3aed',
-    appearsAt: 55,
-    durationSec: 8,
-  },
-  {
-    id: 'ad-statefarm',
-    brand: 'State Farm',
-    tagline: 'Like a Good Neighbor',
-    emoji: '🏠',
-    cpm: 38,
-    targetSegment: 'Homeowners · 30–50',
-    whyChosen: [
-      'Homeowner demographic signal',
-      'Premium content viewer (loyalty score: A)',
-      'Timeout moment — attention peak',
-      'Won OpenRTB auction at $38 CPM',
-    ],
-    color: '#ffc107',
-    appearsAt: 70,
-    durationSec: 8,
-  },
+  AD_AJWARD, AD_BONSAI, AD_ROCCOS_1, AD_ROCCOS_2,
+  AD_ROOFTOP_1, AD_ROOFTOP_2, AD_OLDRAM,
 ];
+
+// ── Commercial Breaks ─────────────────────────────────────────────────────────────────
+// All ads are short (17–34s), so we space them ~40s apart for frequent demo visibility.
+// Loop is 300s. Guard in page.tsx prevents overlap if a break is still playing.
+//
+//  t=15  → Rooftop Gardens short (17s)  — quick first impression
+//  t=50  → AJ.Ward (31s)
+//  t=95  → Rocco's #1 (31s)
+//  t=140 → Bonsai Cafe (34s)
+//  t=190 → Old Ram (29s)
+//  t=235 → Rooftop Gardens long (34s)
+//  t=280 → Rocco's #2 (34s)
+//
+export const COMMERCIAL_BREAKS: CommercialBreak[] = [
+  { id: 'break-1', triggerAt: 15,  label: 'Commercial Break', ads: [AD_ROOFTOP_1] },
+  { id: 'break-2', triggerAt: 50,  label: 'Commercial Break', ads: [AD_AJWARD]    },
+  { id: 'break-3', triggerAt: 95,  label: 'Commercial Break', ads: [AD_ROCCOS_1]  },
+  { id: 'break-4', triggerAt: 140, label: 'Commercial Break', ads: [AD_BONSAI]    },
+  { id: 'break-5', triggerAt: 190, label: 'Commercial Break', ads: [AD_OLDRAM]    },
+  { id: 'break-6', triggerAt: 235, label: 'Commercial Break', ads: [AD_ROOFTOP_2] },
+  { id: 'break-7', triggerAt: 280, label: 'Commercial Break', ads: [AD_ROCCOS_2]  },
+];
+
 
 // ── Game Events (auto-trigger bingo + feed) ───────────────────────────────────
 
 export const GAME_EVENTS: GameEvent[] = [
-  { at: 8,  type: 'firstdown',    description: 'Eagles convert on 3rd & 7 — First Down!', team: 'home', bingoCell: 'First Down' },
-  { at: 22, type: 'touchdown',    description: 'TOUCHDOWN EAGLES! #11 Brown — 34-yard strike!', team: 'home', scoreDelta: { home: 6, away: 0 }, bingoCell: 'Touchdown' },
-  { at: 30, type: 'penalty',      description: 'Flag on the play — Holding, Bears #72', team: 'away', bingoCell: 'Penalty Flag' },
-  { at: 42, type: 'sack',         description: 'SACK! Eagles #99 — Bears QB down for -8 yards', team: 'home', bingoCell: 'Sack' },
-  { at: 50, type: 'interception', description: 'INTERCEPTION! Eagles #24 picks it off at midfield!', team: 'home', bingoCell: 'Interception' },
-  { at: 60, type: 'fieldgoal',    description: 'Bears kick a 47-yard field goal — 3 points!', team: 'away', scoreDelta: { home: 0, away: 3 }, bingoCell: 'Field Goal' },
-  { at: 68, type: 'timeout',      description: 'Bears call timeout — 2 remaining in Q3', team: 'away', bingoCell: 'Timeout Called' },
-  { at: 75, type: 'touchdown',    description: 'TOUCHDOWN EAGLES! #82 Smith — 12-yard grab!', team: 'home', scoreDelta: { home: 6, away: 0 }, bingoCell: 'Touchdown' },
+  { at: 8,   type: 'firstdown',    description: 'Eagles convert on 3rd & 7 — First Down!', team: 'home', bingoCell: 'First Down' },
+  { at: 18,  type: 'touchdown',    description: 'TOUCHDOWN EAGLES! #11 Brown — 34-yard strike!', team: 'home', scoreDelta: { home: 6, away: 0 }, bingoCell: 'Touchdown' },
+  // Break 1 at t=25 (Coca-Cola)
+  { at: 45,  type: 'penalty',      description: 'Flag on the play — Holding, Bears #72', team: 'away', bingoCell: 'Penalty Flag' },
+  { at: 55,  type: 'sack',         description: 'SACK! Eagles #99 — Bears QB down for -8 yards', team: 'home', bingoCell: 'Sack' },
+  // Break 2 at t=65 (FIFA)
+  { at: 85,  type: 'interception', description: 'INTERCEPTION! Eagles #24 picks it off at midfield!', team: 'home', bingoCell: 'Interception' },
+  { at: 95,  type: 'fieldgoal',    description: 'Bears kick a 47-yard field goal — 3 points!', team: 'away', scoreDelta: { home: 0, away: 3 }, bingoCell: 'Field Goal' },
+  // Break 3 at t=110 (TV Take)
+  { at: 130, type: 'touchdown',    description: 'TOUCHDOWN EAGLES! #82 Smith — 12-yard grab!', team: 'home', scoreDelta: { home: 6, away: 0 }, bingoCell: 'Touchdown' },
+  { at: 142, type: 'timeout',      description: '⏸️ Eagles call timeout', team: 'home', bingoCell: 'Timeout Called' },
+  // Break 4 at t=155 (iPhone)
+  { at: 175, type: 'fieldgoal',    description: 'Eagles kick a 38-yard FG to seal it!', team: 'home', scoreDelta: { home: 3, away: 0 }, bingoCell: 'Field Goal' },
 ];
 
 // ── Sports Bingo Cells ────────────────────────────────────────────────────────

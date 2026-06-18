@@ -5,6 +5,7 @@ import {
   PREDICTIONS, AD_CATALOG, GAME_EVENTS, CHAT_MESSAGES, GAME_META,
   type Prediction, type AdCreative, type GameEvent, type ChatMessage,
 } from './gameData';
+import { useMatchSimSocket, type MatchSimEvent } from './useMatchSimSocket';
 
 export type FeedEntry = {
   id: string;
@@ -21,6 +22,7 @@ export function useGameEngine() {
   const clockRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [liveMode, setLiveMode] = useState(false); // true = MatchSim WebSocket is connected
 
   // Scoreboard
   const [homeScore, setHomeScore] = useState(GAME_META.homeScore);
@@ -94,8 +96,8 @@ export function useGameEngine() {
       const t = clockRef.current;
       setElapsed(t);
 
-      // Loop at 78s
-      if (t > 78) { clockRef.current = 0; return; }
+      // Loop at 300s — accommodates long ads (Coca-Cola 1:49, FIFA 1:36, iPhone 1:43)
+      if (t > 300) { clockRef.current = 0; return; }
 
       // Update simulated game clock (counts down from 8:44 in Q3)
       const totalSecs = 8 * 60 + 44 - t;
@@ -170,10 +172,11 @@ export function useGameEngine() {
         }
       });
 
-      // Fire ads
+      // Fire ads (appearsAt is optional on AdCreative — COMMERCIAL_BREAKS handles scheduling now)
       AD_CATALOG.forEach(ad => {
         const key = `ad-${ad.id}`;
-        if (t === ad.appearsAt && !firedEvents.current.has(key)) {
+        const appearsAt = (ad as unknown as Record<string, number>)['appearsAt'];
+        if (appearsAt !== undefined && t === appearsAt && !firedEvents.current.has(key)) {
           firedEvents.current.add(key);
           setActiveAd(ad);
           setLastAd(ad);
@@ -204,6 +207,76 @@ export function useGameEngine() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Phase 2.5: MatchSim WebSocket Integration ─────────────────────────────
+  // When MatchSim is running at localhost:3001, live events are applied on top
+  // of the client-side simulation. Falls back silently when offline.
+
+  const handleMatchSimEvent = useCallback((evt: MatchSimEvent) => {
+    switch (evt.type) {
+      case 'timeline_info':
+        setLiveMode(true);
+        addFeed({ type: 'game', text: `🔴 LIVE: ${evt.homeTeam?.name} vs ${evt.awayTeam?.name}`, emoji: '📡' });
+        break;
+
+      case 'score': {
+        const d = evt.data ?? {};
+        if (d.homeScoreDelta) setHomeScore(s => s + d.homeScoreDelta);
+        if (d.awayScoreDelta) setAwayScore(s => s + d.awayScoreDelta);
+        if (d.bingoLabel) markBingoCell(d.bingoLabel);
+        addFeed({ type: 'game', text: d.description ?? 'Score event', emoji: d.emoji ?? '🏈' });
+        break;
+      }
+
+      case 'play': {
+        const d = evt.data ?? {};
+        if (d.bingoLabel) markBingoCell(d.bingoLabel);
+        addFeed({ type: 'game', text: d.description ?? 'Play', emoji: d.emoji ?? '🏟️' });
+        break;
+      }
+
+      case 'prediction': {
+        const d = evt.data ?? {};
+        const livePred: Prediction = {
+          id: `live-${Date.now()}`,
+          question: d.question,
+          options: (d.options ?? ['Yes', 'No']).map((o: string, i: number) => ({
+            label: o, odds: `+${100 + i * 50}`, emoji: i === 0 ? '🟢' : '🔴',
+          })),
+          correctIndex: d.correctIndex ?? 0,
+          pointReward: d.pointReward ?? 100,
+          durationSec: d.durationSec ?? 15,
+          appearsAt: 0,
+          sponsor: d.sponsor,
+        };
+        setActivePrediction(livePred);
+        setPredictionTimer(livePred.durationSec);
+        setUserPick(null);
+        setPredictionResolved(false);
+        addFeed({ type: 'prediction', text: `Live prediction: "${livePred.question}"`, emoji: '🔮', detail: `+${livePred.pointReward} pts` });
+        break;
+      }
+
+      case 'quarter_change': {
+        const d = evt.data ?? {};
+        if (d.newQuarter) setQuarter(d.newQuarter);
+        addFeed({ type: 'game', text: d.description ?? `Q${d.newQuarter} begins`, emoji: d.emoji ?? '🏟️' });
+        break;
+      }
+
+      case 'clock':
+        // Clock sync from MatchSim — override client clock if live
+        if (liveMode && evt.elapsed) {
+          setElapsed(evt.elapsed);
+        }
+        break;
+
+      default:
+        break;
+    }
+  }, [addFeed, markBingoCell, liveMode]);
+
+  const { status: socketStatus } = useMatchSimSocket('eagles-bears-demo', handleMatchSimEvent);
 
   const handlePredictionPick = useCallback((index: number) => {
     if (userPick !== null || predictionResolved) return;
@@ -241,5 +314,6 @@ export function useGameEngine() {
     points, flyPoints,
     feed, chat,
     bingoBoard, bingoLines, handleBingoClick,
+    liveMode, socketStatus,   // Phase 2.5: MatchSim connection state
   };
 }

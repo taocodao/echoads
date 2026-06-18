@@ -55,10 +55,11 @@ body{
   border-color:var(--blue);color:#c7d2fe;
 }
 .play-btn{
-  flex-shrink:0;background:var(--grad);border:none;
-  color:#fff;font-size:.78rem;font-weight:600;
-  padding:.4rem 1rem;border-radius:99px;cursor:pointer;
-  transition:opacity .2s;
+  position:fixed;bottom:2rem;right:2rem;z-index:100;
+  background:var(--grad);border:none;
+  color:#fff;font-size:1rem;font-weight:600;
+  padding:.8rem 1.6rem;border-radius:99px;cursor:pointer;
+  transition:opacity .2s;box-shadow:0 4px 15px rgba(0,0,0,0.5);
 }
 .play-btn:hover{opacity:.85}
 
