@@ -410,17 +410,21 @@ export default function GamePage() {
 
 
   return (
-    <IPhoneFrame points={g.points}>
-    <div 
-      onClick={() => { 
-        if (videoRef.current) { 
-          videoRef.current.muted = false;
-          videoRef.current.volume = 1.0;
-          videoRef.current.play().catch(()=>{});
-        } 
-      }} 
-      style={{ flex: 1, display: 'flex', flexDirection: 'column', background: T.bg, overflow: 'hidden', fontFamily: 'Inter, system-ui, sans-serif', position: 'relative' }}
-    >
+    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '2.5rem', padding: '0 0 4rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+
+      {/* ── iPhone App Preview ─────────────────────────────────────────────── */}
+      <IPhoneFrame points={g.points}>
+      <div
+        onClick={() => {
+          if (videoRef.current) {
+            videoRef.current.muted = false;
+            videoRef.current.volume = 1.0;
+            videoRef.current.play().catch(()=>{});
+          }
+        }}
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', background: T.bg, overflow: 'hidden', fontFamily: 'Inter, system-ui, sans-serif', position: 'relative' }}
+      >
+
 
       {/* ══ TOP 45%: Video ══════════════════════ */}
       <div style={{ flex: '0 0 45%', position: 'relative', background: '#000', overflow: 'hidden' }}>
@@ -719,6 +723,53 @@ export default function GamePage() {
       `}</style>
     </div>
     </IPhoneFrame>
+
+      {/* ── CTA Side Panel ─────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: 340, width: '100%', alignSelf: 'center' }}>
+
+        {/* Try on your iPhone */}
+        <div style={{ background: 'rgba(20,26,40,0.9)', border: '1px solid rgba(0,201,177,0.3)', borderRadius: 20, padding: '1.75rem', boxShadow: '0 8px 32px rgba(0,201,177,0.08)' }}>
+          <div style={{ fontSize: 28, marginBottom: '0.75rem' }}>📲</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#e2e8f0', marginBottom: '0.6rem', lineHeight: 1.3 }}>
+            Experience It on Your iPhone
+          </div>
+          <div style={{ fontSize: '0.85rem', color: '#8892b0', lineHeight: 1.6, marginBottom: '1.1rem' }}>
+            Want to try the real Arenza app on your own device? Send us your Apple ID (email address) and we&apos;ll add you to our TestFlight beta — complete with installation instructions.
+          </div>
+          <a
+            href="mailto:eric@arenza.tv?subject=TestFlight%20Access%20Request&body=Hi%2C%20I'd%20like%20to%20test%20the%20Arenza%20app%20on%20my%20iPhone.%20My%20Apple%20ID%20is%3A%20"
+            style={{ display: 'block', background: 'linear-gradient(135deg, #00c9b1, #00a896)', color: '#000', fontWeight: 800, fontSize: '0.88rem', padding: '0.75rem 1.25rem', borderRadius: 12, textDecoration: 'none', textAlign: 'center', letterSpacing: '0.02em' }}
+          >
+            Request TestFlight Access →
+          </a>
+          <div style={{ fontSize: '0.75rem', color: '#4a5568', marginTop: '0.75rem', textAlign: 'center' }}>
+            eric@arenza.tv · iOS only · Free beta
+          </div>
+        </div>
+
+        {/* General contact */}
+        <div style={{ background: 'rgba(20,26,40,0.9)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 20, padding: '1.75rem', boxShadow: '0 8px 32px rgba(139,92,246,0.06)' }}>
+          <div style={{ fontSize: 28, marginBottom: '0.75rem' }}>💬</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#e2e8f0', marginBottom: '0.6rem', lineHeight: 1.3 }}>
+            Questions & Investment Inquiries
+          </div>
+          <div style={{ fontSize: '0.85rem', color: '#8892b0', lineHeight: 1.6, marginBottom: '1.1rem' }}>
+            Have questions, product suggestions, or interested in investing in Arenza? We&apos;d love to hear from you.
+          </div>
+          <a
+            href="mailto:eric@arenza.tv?subject=Arenza%20Inquiry"
+            style={{ display: 'block', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', fontWeight: 800, fontSize: '0.88rem', padding: '0.75rem 1.25rem', borderRadius: 12, textDecoration: 'none', textAlign: 'center', letterSpacing: '0.02em' }}
+          >
+            Get in Touch →
+          </a>
+          <div style={{ fontSize: '0.75rem', color: '#4a5568', marginTop: '0.75rem', textAlign: 'center' }}>
+            eric@arenza.tv
+          </div>
+        </div>
+
+      </div>
+
+    </div>
   );
 }
 

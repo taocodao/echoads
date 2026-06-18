@@ -6,7 +6,7 @@ const NAV_ITEMS = [
   { href: "/",             label: "📊 Overview"    },
   { href: "/player",       label: "🎥 Video"       },
   { href: "/infographic",  label: "🖼️ Infographic" },
-  { href: "/game",         label: "📱 iPhone Sim"  },
+  { href: "/game",         label: "📱 App Preview" },
   { href: "/demo",         label: "🎬 Demo"        },
   { href: "/auction",      label: "⚡ Auction"     },
   { href: "/token",        label: "🪙 Token"       },
