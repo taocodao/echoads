@@ -2,7 +2,7 @@
 //  ARENZA DEMO — App Logic
 // ═══════════════════════════════════════════
 
-const TOTAL_SLIDES = 8;
+const TOTAL_SLIDES = 9;
 let currentSlide = 0;
 let autoplayTimer = null;
 let isPlaying = false;
@@ -17,7 +17,8 @@ const NARRATIONS = [
   "Unit economics for a single channel with 500,000 monthly viewers: 4 million impressions at $45 verified CPM generates $180,000 gross monthly revenue. The station partner keeps 85% — that's $153,000 per month, or $1.8 million annually — from a channel that requires zero additional staff and zero capital expenditure.",
   "The CMXS token is not speculative. Every dollar of ad spend triggers AdBurn dot sol to non-discretionarily burn tokens. Supply deflates. Price appreciates. Higher token value attracts more node operators. More nodes attract more broadcasters, increasing ad spend. The cycle is mechanical, verifiable on Basescan, and structurally mirrors Helium's proven DePIN model.",
   "Our go-to-market targets local TV stations — the highest-leverage first market. A 90-day cold start needs just 3 to 5 EchoStar tower nodes in the pilot DMA, a Roku FAST channel, and two local direct advertisers. Phase 1 goal: 100,000 real verified impressions and $50,000 in USDC ad revenue on mainnet.",
-  "The ask is simple: a 90-day pilot. Zero technology cost to the station. You bring your content feed and local ad relationships. We bring the full stack. At 90 days, you receive a verified CPM report, auditable on-chain records, and a revenue check. If we don't beat your current FAST CPM, we part ways. We're confident we will."
+  "The ask is simple: a 90-day pilot. Zero technology cost to the station. You bring your content feed and local ad relationships. We bring the full stack. At 90 days, you receive a verified CPM report, auditable on-chain records, and a revenue check. If we don't beat your current FAST CPM, we part ways. We're confident we will.",
+  "This is the ArenzaTV iPhone app experience. Walk through all 11 steps of the Watch-Earn-Shop loop — from channel guide to sponsor dashboard — inside the interactive iPhone mockup. Click through each screen or use the step navigator on the right."
 ];
 
 const AUTOPLAY_DURATION = 18000; // ms per slide
@@ -54,19 +55,48 @@ function goSlide(n) {
   if (currentSlide === 5) triggerBME();
 }
 
+// Unlock audio context on first user interaction (fixes browser autoplay policy)
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const buf = ctx.createBuffer(1, 1, 22050);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.start(0);
+  audioUnlocked = true;
+  document.removeEventListener('click', unlockAudio);
+  document.removeEventListener('touchstart', unlockAudio);
+}
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
+
 function playNarration(index) {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
   }
   const fileNum = String(index + 1).padStart(2, '0');
-  currentAudio = new Audio(`audio/ar${fileNum}.mp3`);
+  const audioFile = `audio/ar${fileNum}.mp3`;
+  // Only play if the audio file exists (slides 0-7 have audio, slide 8+ may not)
+  if (index >= 8) return; // Game slide has no audio narration file
+  currentAudio = new Audio(audioFile);
+  currentAudio.volume = 1.0;
   
   if (isPlaying) {
-    currentAudio.play().catch(err => console.log('Audio autoplay blocked by browser', err));
+    const playPromise = currentAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.log('Audio play failed:', err.message);
+        // Retry once after a short delay (helps with autoplay policy)
+        setTimeout(() => {
+          if (currentAudio) currentAudio.play().catch(() => {});
+        }, 200);
+      });
+    }
     currentAudio.onended = () => {
       if (isPlaying) {
-        // Pause briefly before advancing
         setTimeout(() => {
           const next = (currentSlide + 1) % TOTAL_SLIDES;
           goSlide(next);

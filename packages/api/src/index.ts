@@ -9,6 +9,7 @@ import { priceRouter } from "./price/price.route.js";
 import { ssaiRouter } from "./ssai/ssai.route.js";
 import { nodeSimRouter } from "./node-sim/node-sim.route.js";
 import { simRouter } from "./simulation/sim.route.js";
+import { aiRouter } from "./ai/ai.route.js";
 import { startPodRelayService } from "./delivery/pod-relay.service.js";
 import { startSlaBatchLoop } from "./sla/aggregator.service.js";
 
@@ -45,6 +46,7 @@ app.route("/api/price", priceRouter);
 app.route("/api/ssai", ssaiRouter);
 app.route("/api/sim", nodeSimRouter);
 app.route("/api/demo", simRouter);
+app.route("/api/ai", aiRouter);
 
 export default app;
 

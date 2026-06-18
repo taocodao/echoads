@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="iphone-mockup.css"/>
 </head>
 <body>
 
@@ -27,6 +28,7 @@
       <button class="pill" data-slide="5">Token</button>
       <button class="pill" data-slide="6">Go-To-Market</button>
       <button class="pill" data-slide="7">Ask</button>
+      <button class="pill" data-slide="8">Game</button>
     </div>
     <button id="playBtn" class="play-btn" onclick="toggleAutoplay()">▶ Auto-Play</button>
   </div>
@@ -421,6 +423,108 @@
     </div>
   </section>
 
+  <!-- SLIDE 8: GAME (iPhone Mockup Demo) -->
+  <section class="slide" id="slide-8">
+    <div class="slide-bg slide-bg-game"></div>
+    <div class="slide-content wide">
+      <div class="game-slide-layout">
+        <!-- iPhone Frame -->
+        <div class="iphone-frame">
+          <div class="iphone-dynamic-island"></div>
+          <div class="iphone-status-bar"><span class="isb-time">9:41</span><span class="isb-icons">📶 📡 🔋</span></div>
+          <div class="iphone-screen">
+            <!-- Screen 0: Channel Guide -->
+            <div class="ios-screen active" id="gs-epg">
+              <div class="ios-navbar"><span></span><span class="ios-navbar-title"><img src="public/arenza-logo-white.png" alt="ArenzaTV" style="height:22px;vertical-align:middle"> Channels</span><span class="ios-navbar-icon">🔍</span></div>
+              <div class="ios-content">
+                <div class="epg-card epg-live" onclick="goGameScreen(1)"><div class="epg-sport">🏈</div><div class="epg-info"><div class="epg-teams">Eagles vs Bears</div><div class="epg-meta">NFL Week 14 · Lincoln Financial Field</div></div><div class="epg-badge"><span class="epg-dot"></span> LIVE</div></div>
+                <div class="epg-card"><div class="epg-sport">⚽</div><div class="epg-info"><div class="epg-teams">Chelsea vs Arsenal</div><div class="epg-meta">Premier League · 3:30 PM ET</div></div></div>
+                <div class="epg-card"><div class="epg-sport">🏀</div><div class="epg-info"><div class="epg-teams">Lakers vs Celtics</div><div class="epg-meta">NBA · 7:00 PM ET</div></div></div>
+              </div>
+              <div class="ios-tabbar"><div class="ios-tab active"><span class="ios-tab-icon">📺</span>Watch</div><div class="ios-tab"><span class="ios-tab-icon">🏆</span>Scores</div><div class="ios-tab"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+            </div>
+            <!-- Screen 1: Full-Screen Video -->
+            <div class="ios-screen" id="gs-fullscreen">
+              <div class="video-mock" onclick="goGameScreen(2)"><div class="video-live-badge"><span class="epg-dot"></span> LIVE</div><div class="video-scoreboard"><div class="scoreboard-score">PHI 7 — CHI 3</div><div class="scoreboard-clock">Q2 8:42</div></div><div style="font-size:48px;z-index:1;opacity:.3">🏈</div><div class="video-grabber"><div class="grabber-pill"></div><div class="grabber-hint">↑ Swipe up for more</div></div></div>
+            </div>
+            <!-- Screen 2: Split View — Score -->
+            <div class="ios-screen" id="gs-split-score">
+              <div class="split-video"><div class="video-live-badge" style="top:8px;left:8px"><span class="epg-dot"></span> LIVE</div><div class="video-scoreboard" style="top:8px;right:8px"><div class="scoreboard-score" style="font-size:16px">PHI 14 — CHI 10</div><div class="scoreboard-clock" style="font-size:9px">Q3 4:21</div></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.2">🏈</div></div>
+              <div class="split-companion"><div class="score-big"><div class="score-big-text">PHI 14 — CHI 10</div><div class="score-clock">Q3 · 4:21</div></div><div class="play-by-play">▶ J. Hurts pass complete to D. Smith for 23 yds — PHI 1st &amp; 10 at CHI 42</div><div class="score-stats"><div class="score-stat"><div class="score-stat-val">287</div><div class="score-stat-lbl">PHI Yards</div></div><div class="score-stat"><div class="score-stat-val">1</div><div class="score-stat-lbl">Turnovers</div></div><div class="score-stat"><div class="score-stat-val">18:42</div><div class="score-stat-lbl">TOP</div></div></div>
+                <div class="ios-tabbar"><div class="ios-tab active"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab" onclick="goGameScreen(3)"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+              </div>
+            </div>
+            <!-- Screen 3: Team Trivia -->
+            <div class="ios-screen" id="gs-trivia">
+              <div class="split-video" style="height:35%"><div class="video-scoreboard" style="top:8px;right:8px"><div class="scoreboard-score" style="font-size:14px">PHI 14 — CHI 10</div></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.2">🏈</div></div>
+              <div class="split-companion" style="height:65%"><div class="azt-wallet-bar"><span class="azt-wallet-label">🪙 AZT Balance</span><span class="azt-wallet-val">0 AZT</span></div>
+                <div class="ios-content" style="padding-bottom:70px"><div class="quiz-card"><div class="quiz-header eagles"><span class="quiz-header-icon">🏈</span><div><div class="quiz-header-title">Eagles History Quiz</div><div class="quiz-header-sub">Question 1 of 3 · +25 AZT each</div></div></div><div class="quiz-question">In what year did the Eagles win their first Super Bowl?</div><div class="quiz-options"><div class="quiz-option" data-correct="true" onclick="selectTriviaOption(this,true)"><span class="quiz-option-letter">A</span>2017</div><div class="quiz-option" onclick="selectTriviaOption(this,false)"><span class="quiz-option-letter">B</span>2015</div><div class="quiz-option" onclick="selectTriviaOption(this,false)"><span class="quiz-option-letter">C</span>2020</div><div class="quiz-option" onclick="selectTriviaOption(this,false)"><span class="quiz-option-letter">D</span>2013</div></div></div></div>
+                <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab active"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+              </div>
+            </div>
+            <!-- Screen 4: Prediction -->
+            <div class="ios-screen" id="gs-prediction">
+              <div class="split-video" style="height:35%"><div class="video-scoreboard" style="top:8px;right:8px"><div class="scoreboard-score" style="font-size:14px">PHI 14 — CHI 10</div></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.2">🏈</div></div>
+              <div class="split-companion" style="height:65%"><div class="azt-wallet-bar"><span class="azt-wallet-label">🪙 AZT Balance</span><span class="azt-wallet-val">75 AZT</span></div>
+                <div class="ios-content" style="padding-bottom:70px"><div class="predict-card"><div style="font-size:11px;color:#ff6b35;font-weight:700;letter-spacing:.1em;text-transform:uppercase">⚡ Next Play Prediction</div><div class="predict-timer">0:15</div><div class="predict-q">Will the Eagles score on this drive?</div><div class="predict-options"><button class="predict-btn predict-yes" onclick="selectPrediction(this)">🟢 YES</button><button class="predict-btn predict-no">🔴 NO</button></div><div class="predict-result" style="display:none"></div><div class="streak-badge" style="display:none;margin-top:8px">🔥 3-streak! 2× multiplier active</div></div></div>
+                <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab active"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+              </div>
+            </div>
+            <!-- Screen 5: Sponsor Quiz -->
+            <div class="ios-screen" id="gs-sponsor">
+              <div class="split-video" style="height:35%"><div class="video-scoreboard" style="top:8px;right:8px"><div class="scoreboard-score" style="font-size:14px">PHI 14 — CHI 10</div></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.2">🏈</div></div>
+              <div class="split-companion" style="height:65%"><div class="azt-wallet-bar"><span class="azt-wallet-label">🪙 AZT Balance</span><span class="azt-wallet-val">225 AZT</span></div>
+                <div class="ios-content" style="padding-bottom:70px"><div class="quiz-card"><div class="quiz-header sponsor"><span class="quiz-header-icon">🍕</span><div><div class="quiz-header-title">Pinecrest Pizza Game Break</div><div class="quiz-header-sub">Sponsored · +15 AZT each</div></div></div><div class="quiz-question">What is Pinecrest Pizza's signature crust style?</div><div class="quiz-options"><div class="quiz-option" data-correct="true" onclick="selectTriviaOption(this,true)"><span class="quiz-option-letter">A</span>Wood-fired thin crust</div><div class="quiz-option" onclick="selectTriviaOption(this,false)"><span class="quiz-option-letter">B</span>Deep dish</div><div class="quiz-option" onclick="selectTriviaOption(this,false)"><span class="quiz-option-letter">C</span>New York fold</div><div class="quiz-option" onclick="selectTriviaOption(this,false)"><span class="quiz-option-letter">D</span>Stuffed crust</div></div></div></div>
+                <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab active"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+              </div>
+            </div>
+            <!-- Screen 6: Bingo -->
+            <div class="ios-screen" id="gs-bingo">
+              <div class="split-video" style="height:30%"><div class="video-scoreboard" style="top:8px;right:8px"><div class="scoreboard-score" style="font-size:14px">PHI 21 — CHI 10</div></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.2">🏈</div></div>
+              <div class="split-companion" style="height:70%"><div class="azt-wallet-bar"><span class="azt-wallet-label">🪙 AZT Balance</span><span class="azt-wallet-val">270 AZT</span></div>
+                <div class="ios-content" style="padding-bottom:70px"><div style="text-align:center;font-size:14px;font-weight:700;color:#fff;margin:4px 0">🏈 NFL Game Bingo</div><div class="bingo-grid" id="bingo-grid"><div class="bingo-cell marked">Touch-down</div><div class="bingo-cell">Field Goal</div><div class="bingo-cell">Inter-ception</div><div class="bingo-cell">Sack</div><div class="bingo-cell">Penalty</div><div class="bingo-cell">1st Down</div><div class="bingo-cell marked">Fumble</div><div class="bingo-cell">Challenge</div><div class="bingo-cell">2-Min Warn</div><div class="bingo-cell">Safety</div><div class="bingo-cell">Run Play</div><div class="bingo-cell">Pass 20+</div><div class="bingo-cell free">🍕 FREE</div><div class="bingo-cell">QB Sneak</div><div class="bingo-cell">Punt</div><div class="bingo-cell">Timeout</div><div class="bingo-cell">Flag</div><div class="bingo-cell marked">Hurry Up</div><div class="bingo-cell">Review</div><div class="bingo-cell">Kickoff</div><div class="bingo-cell">FG Miss</div><div class="bingo-cell">Blitz</div><div class="bingo-cell">Screen</div><div class="bingo-cell">Holding</div><div class="bingo-cell marked">TD Celeb</div></div><div style="text-align:center;margin-top:8px"><button class="shop-btn can-buy" onclick="triggerBingo()" style="font-size:12px;padding:8px 20px">▶ Auto-Mark Events</button></div></div>
+                <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab active"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+              </div>
+            </div>
+            <!-- Screen 7: Shop -->
+            <div class="ios-screen" id="gs-shop">
+              <div class="ios-navbar"><span></span><span class="ios-navbar-title">🛍️ Prize Shop</span><span></span></div>
+              <div class="azt-wallet-bar"><span class="azt-wallet-label">🪙 AZT Balance</span><span class="azt-wallet-val">770 AZT</span></div>
+              <div class="ios-content"><div class="shop-card"><div class="shop-icon">🍕</div><div class="shop-info"><div class="shop-name">Pinecrest Pizza — Free Side</div><div class="shop-cost">250 AZT</div></div><button class="shop-btn can-buy" onclick="redeemPrize(this)">Redeem</button></div><div class="shop-card"><div class="shop-icon">🎮</div><div class="shop-info"><div class="shop-name">Arenza Merch Pack</div><div class="shop-cost">1,000 AZT</div></div><button class="shop-btn locked">🔒 Locked</button></div><div class="shop-card"><div class="shop-icon">🏈</div><div class="shop-info"><div class="shop-name">Signed Football</div><div class="shop-cost">2,500 AZT</div></div><button class="shop-btn locked">🔒 Locked</button></div></div>
+              <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab active"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+            </div>
+            <!-- Screen 8: QR Wallet -->
+            <div class="ios-screen" id="gs-wallet">
+              <div class="ios-navbar"><span></span><span class="ios-navbar-title">🎟️ My Coupons</span><span></span></div>
+              <div class="ios-content"><div class="coupon-card"><div class="coupon-header"><span class="coupon-icon">🎟️</span><span class="coupon-title">15% Off Pinecrest Pizza</span></div><div class="coupon-code">ARENZA15</div><div class="coupon-expiry">Expires in 29 days</div><div class="qr-placeholder"></div><button class="apple-wallet-btn"> Add to Apple Wallet</button></div><div class="coupon-card"><div class="coupon-header"><span class="coupon-icon">🍕</span><span class="coupon-title">Free Side — Pinecrest Pizza</span></div><div class="coupon-code">AZTRWD-7F2A</div><div class="coupon-expiry">Valid for 7 days · Just redeemed!</div><div class="qr-placeholder"></div></div></div>
+              <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab active"><span class="ios-tab-icon">👤</span>Profile</div></div>
+            </div>
+            <!-- Screen 9: Profile -->
+            <div class="ios-screen" id="gs-profile">
+              <div class="ios-navbar"><span></span><span class="ios-navbar-title">👤 My Profile</span><span></span></div>
+              <div class="ios-content"><div class="profile-segment"><div style="font-size:48px;margin-bottom:8px">🏆</div><div class="profile-badge">Sports Scholar · Engaged Local Superfan</div></div><div class="profile-stats"><div class="profile-stat"><div class="profile-stat-val">12</div><div class="profile-stat-lbl">Games Played</div></div><div class="profile-stat"><div class="profile-stat-val">87%</div><div class="profile-stat-lbl">Trivia Accuracy</div></div><div class="profile-stat"><div class="profile-stat-val">3</div><div class="profile-stat-lbl">Predictions ✓</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0"><span style="font-size:10px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);padding:3px 8px;border-radius:99px;color:#a5b4fc">SEG-01 Premium</span><span style="font-size:10px;background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);padding:3px 8px;border-radius:99px;color:#67e8f9">SEG-06 Multi-Sport</span><span style="font-size:10px;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.3);padding:3px 8px;border-radius:99px;color:#ff6b35">Brand-Engaged</span></div><div class="privacy-note"><strong>🔒 Privacy First:</strong> Your viewing data stays on your device. Only your segment ID (an integer 1–12) is shared — never your personal information or behavior history.</div></div>
+              <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab active"><span class="ios-tab-icon">👤</span>Profile</div></div>
+            </div>
+            <!-- Screen 10: Sponsor Dashboard -->
+            <div class="ios-screen" id="gs-dashboard">
+              <div class="ios-navbar"><span></span><span class="ios-navbar-title">📊 Sponsor Dashboard</span><span></span></div>
+              <div class="ios-content"><div class="dash-header"><div class="dash-logo">🍕</div><div class="dash-name">Pinecrest Pizza Co.</div><div class="dash-subtitle">Campaign: Game Day Combo</div></div><div class="dash-grid"><div class="dash-metric"><div class="dash-metric-val">6</div><div class="dash-metric-lbl">Ads Served</div></div><div class="dash-metric"><div class="dash-metric-val green">87%</div><div class="dash-metric-lbl">Engagement Rate</div></div><div class="dash-metric"><div class="dash-metric-val gold">3</div><div class="dash-metric-lbl">Coupons Generated</div></div><div class="dash-metric"><div class="dash-metric-val">2</div><div class="dash-metric-lbl">QR Scans</div></div></div><div class="dash-roi"><div class="dash-roi-row"><span>Cost per Engagement</span><span>$0.12</span></div><div class="dash-roi-row"><span>POS Redemptions</span><span>1</span></div><div class="dash-roi-row"><span>Attribution Chain</span><span>Bid → PoD → Basescan</span></div></div><div class="dash-verified">✅ All impressions verified on Base L2</div></div>
+              <div class="ios-tabbar"><div class="ios-tab"><span class="ios-tab-icon">📊</span>Score</div><div class="ios-tab"><span class="ios-tab-icon">🎮</span>Games</div><div class="ios-tab"><span class="ios-tab-icon">⚡</span>Predict</div><div class="ios-tab"><span class="ios-tab-icon">🛍️</span>Shop</div><div class="ios-tab"><span class="ios-tab-icon">👤</span>Profile</div></div>
+            </div>
+          </div><!-- /iphone-screen -->
+        </div><!-- /iphone-frame -->
+        <!-- Step Panel -->
+        <div class="game-step-panel">
+          <div class="slide-eyebrow">INTERACTIVE APP DEMO</div>
+          <h2 class="slide-title" style="font-size:1.8rem">Watch. Play.<br/><span class="grad">Earn. Redeem.</span></h2>
+          <div class="step-indicator" id="stepIndicator"></div>
+          <div class="game-narration" id="gameNarration">Launch ArenzaTV. The channel guide shows live and upcoming games. Tap the featured <strong>Eagles vs. Bears</strong> game to begin.</div>
+          <div class="game-nav-btns"><button class="game-nav-btn prev" id="gamePrevBtn" onclick="goGameScreen(gameScreen-1)" disabled>← Back</button><button class="game-nav-btn next" id="gameNextBtn" onclick="goGameScreen(gameScreen+1)">Next Step →</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- PROGRESS BAR -->
@@ -438,5 +542,6 @@
 <button class="nav-arrow nav-next" onclick="goSlide(currentSlide+1)">›</button>
 
 <script src="app.js"></script>
+<script src="iphone-mockup.js"></script>
 </body>
 </html>

@@ -12,6 +12,12 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
+// ── AI Modules (Phase 2) ───────────────────────────────────────────────────
+const { classifyMoment }      = require('./gameMomentClassifier');
+const { generateCommentary }  = require('./commentaryGenerator');
+const { generatePrediction }  = require('./aiPredictionGenerator');
+const { generateSponsorQuiz } = require('./sponsorQuizGenerator');
+
 const PORT = process.env.PORT || 3001;
 
 // ── Express App ────────────────────────────────────────────────────
@@ -88,6 +94,52 @@ app.get('/api/timeline', (_req, res) => {
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime(), connections: wss.clients.size });
+});
+
+// ── AI REST Endpoints (Phase 2) ────────────────────────────────────────────
+
+// Generate commentary for a game event
+app.post('/api/ai/commentary', async (req, res) => {
+  try {
+    const { event } = req.body;
+    if (!event) return res.status(400).json({ error: 'event required' });
+    const text = await generateCommentary(event);
+    res.json({ commentary: text, model: process.env.OPENAI_API_KEY ? 'gpt-4o-mini' : 'fallback' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Generate a prediction question for a game event
+app.post('/api/ai/prediction', async (req, res) => {
+  try {
+    const { event, gameState } = req.body;
+    if (!event) return res.status(400).json({ error: 'event required' });
+    const prediction = await generatePrediction(event, gameState);
+    res.json({ prediction, model: process.env.OPENAI_API_KEY ? 'gpt-4o-mini' : 'fallback' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Generate AI sponsor quiz
+app.post('/api/ai/sponsor-quiz', async (req, res) => {
+  try {
+    const { sponsorId, sponsorProfile } = req.body;
+    if (!sponsorId) return res.status(400).json({ error: 'sponsorId required' });
+    const quiz = await generateSponsorQuiz(sponsorId, sponsorProfile);
+    if (!quiz) return res.status(404).json({ error: 'No quiz found for sponsor' });
+    res.json({ quiz, model: process.env.OPENAI_API_KEY ? 'gpt-4o' : 'fallback' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get current game moment for a match
+const currentMoments = new Map(); // matchId → { code, multiplier, setAt }
+app.get('/api/ai/moment/:matchId', (req, res) => {
+  const m = currentMoments.get(req.params.matchId) || { code: 'GMS_STANDARD', multiplier: 1.0 };
+  res.json(m);
 });
 
 // ── WebSocket: Timeline Replay ─────────────────────────────────────
