@@ -3,14 +3,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/",          label: "📊 Overview"    },
-  { href: "/player",    label: "🎥 Video"       },
-  { href: "/game",      label: "📱 iPhone Sim"  },
-  { href: "/demo",      label: "🎬 Demo"        },
-  { href: "/auction",   label: "⚡ Auction"     },
-  { href: "/token",     label: "🪙 Token"       },
-  { href: "/treasury",  label: "🏦 Treasury"    },
-  { href: "/chain",     label: "🔗 On-Chain"    },
+  { href: "/",             label: "📊 Overview"    },
+  { href: "/player",       label: "🎥 Video"       },
+  { href: "/infographic",  label: "🖼️ Infographic" },
+  { href: "/game",         label: "📱 iPhone Sim"  },
+  { href: "/demo",         label: "🎬 Demo"        },
+  { href: "/auction",      label: "⚡ Auction"     },
+  { href: "/token",        label: "🪙 Token"       },
+  { href: "/treasury",     label: "🏦 Treasury"    },
 ];
 
 export function NavBar() {

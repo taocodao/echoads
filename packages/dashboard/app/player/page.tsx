@@ -88,7 +88,6 @@ export default function VideoPage() {
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState('0:00');
   const [totalTime, setTotalTime] = useState('0:00');
-  const [slideIdx, setSlideIdx] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const active = VIDEOS.find(v => v.id === activeId)!;
@@ -399,30 +398,6 @@ export default function VideoPage() {
             </button>
           );
         })}
-      </div>
-
-      {/* ── Infographs Slideshow ─────────────────────────────────────────── */}
-      <div style={{ marginTop: '2rem', background: T.surface, border: `1px solid ${T.border}`, borderRadius: 20, padding: '2rem', overflow: 'hidden' }}>
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#00c9b1', letterSpacing: '-0.3px' }}>Platform Blueprint & Strategy</h2>
-          <p style={{ color: T.muted, fontSize: '0.85rem', margin: '0.4rem 0 0' }}>Explore the architecture and market strategy behind the Arenza platform.</p>
-        </div>
-        <div style={{ position: 'relative', maxWidth: 1100, margin: '0 auto', background: '#000', borderRadius: 14, overflow: 'hidden', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #222' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img key={slideIdx} src={`/InfoGraphs/${INFOGRAPHS[slideIdx]}`} alt={INFOGRAPHS[slideIdx].replace(/_/g, ' ').replace('.jpg', '')} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          <button onClick={() => setSlideIdx(i => i === 0 ? INFOGRAPHS.length - 1 : i - 1)} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: '1px solid #444', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, backdropFilter: 'blur(6px)' }}>‹</button>
-          <button onClick={() => setSlideIdx(i => i === INFOGRAPHS.length - 1 ? 0 : i + 1)} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: '1px solid #444', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, backdropFilter: 'blur(6px)' }}>›</button>
-          <div style={{ position: 'absolute', bottom: 14, right: 16, background: 'rgba(0,0,0,0.7)', border: '1px solid #444', padding: '4px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, color: '#fff', backdropFilter: 'blur(6px)' }}>{slideIdx + 1} / {INFOGRAPHS.length}</div>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '1rem', fontWeight: 600, color: T.text }}>{INFOGRAPHS[slideIdx].replace(/_/g, ' ').replace('.jpg', '')}</div>
-        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '1rem 0 0.25rem', marginTop: '0.75rem', scrollbarWidth: 'thin', scrollbarColor: '#444 transparent' }}>
-          {INFOGRAPHS.map((g, i) => (
-            <button key={i} onClick={() => setSlideIdx(i)} style={{ flexShrink: 0, width: 120, height: 68, padding: 0, background: '#000', border: slideIdx === i ? '2px solid #00c9b1' : '2px solid transparent', borderRadius: 8, overflow: 'hidden', cursor: 'pointer', opacity: slideIdx === i ? 1 : 0.35, transition: 'all 0.2s', boxShadow: slideIdx === i ? '0 2px 12px rgba(0,201,177,0.3)' : 'none' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/InfoGraphs/${g}`} alt={`Slide ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </button>
-          ))}
-        </div>
       </div>
 
       <style>{`
