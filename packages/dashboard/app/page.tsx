@@ -54,8 +54,8 @@ export default function DashboardHome() {
         subtitle="Deck 4 — Free Ad-Supported Streaming · Channel Strategy · Revenue Model"
         accent="#06b6d4"
         slides={FAST_SLIDES}
-        audioSrc="/audio/arenza-sports-v1.mp3"
-        cuesSrc="/audio/arenza-sports-v1-cues.json"
+        audioSrc="/audio/fast-blueprint.mp3"
+        cuesSrc="/audio/fast-blueprint-cues.json"
       />
 
       {/* Deck 5: Arenza Strategic Playbook */}
@@ -64,8 +64,8 @@ export default function DashboardHome() {
         subtitle="Deck 5 — Go-To-Market · Partnership Strategy · Growth Roadmap"
         accent="#a855f7"
         slides={STRATEGIC_SLIDES}
-        audioSrc="/audio/arenza-sports.mp3"
-        cuesSrc="/audio/arenza-sports-cues.json"
+        audioSrc="/audio/strategic-playbook.mp3"
+        cuesSrc="/audio/strategic-playbook-cues.json"
       />
 
       {/* Deck 6: Arenza Tactical Blueprint */}
@@ -74,8 +74,8 @@ export default function DashboardHome() {
         subtitle="Deck 6 — Campaign Execution · Ad Formats · Measurement"
         accent="#f43f5e"
         slides={TACTICAL_SLIDES}
-        audioSrc="/audio/arenza-loyalty-a.mp3"
-        cuesSrc="/audio/arenza-loyalty-a-cues.json"
+        audioSrc="/audio/tactical-blueprint.mp3"
+        cuesSrc="/audio/tactical-blueprint-cues.json"
       />
 
       {/* Deck 7: The Arenza Architecture */}
@@ -84,8 +84,8 @@ export default function DashboardHome() {
         subtitle="Deck 7 — Technical Stack · On-Chain PoD · DePIN Infrastructure"
         accent="#10b981"
         slides={ARCHITECTURE_SLIDES}
-        audioSrc="/audio/arenza-loyalty-b.mp3"
-        cuesSrc="/audio/arenza-loyalty-b-cues.json"
+        audioSrc="/audio/architecture.mp3"
+        cuesSrc="/audio/architecture-cues.json"
       />
     </div>
   );
