@@ -1,27 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
-const INFOGRAPHS = [
-  "Future_of_Gamified_Sports_Advertising.jpg",
-  "Future_of_Interactive_Sports_Advertising.jpg",
-  "Gamified_Live_Sports_Advertising_Evolution.jpg",
-  "Gamified_Sports_Advertising_Platform_Infographic.jpg",
-  "Interactive_Sports_Advertising_Infographic.jpg",
-  "Interactive_Sports_Advertising_Solutions.jpg",
-  "Interactive_Sports_Advertising_Strategy.jpg",
-  "Live_Engagement_Market_Trends_Infographic.jpg",
-  "QR-Powered_Restaurant_Engagement_Infographic.jpg",
-  "Restaurant_Engagement_Gamified_QR_Hubs.jpg",
-  "Revolutionizing_Sports_Advertising_Blueprint.jpg",
-  "Sports_Advertising_Architecture_Solution.jpg",
-  "Sports_Platform_Advertising_Infographic.jpg",
-  "Sports_Streaming_and_Gamified_Commerce.jpg",
-  "The_Live_Commerce_Revolution.jpg",
-];
+import { useState, useEffect } from "react";
 
 const T = {
-  bg: "#0b0e14",
   surface: "rgba(20,26,40,0.85)",
   border: "rgba(255,255,255,0.08)",
   text: "#e2e8f0",
@@ -29,11 +10,27 @@ const T = {
 };
 
 export default function InfographicPage() {
+  const [images, setImages] = useState<string[]>([]);
   const [idx, setIdx] = useState(0);
 
-  const prev = () => setIdx(i => (i === 0 ? INFOGRAPHS.length - 1 : i - 1));
-  const next = () => setIdx(i => (i === INFOGRAPHS.length - 1 ? 0 : i + 1));
-  const title = INFOGRAPHS[idx].replace(/_/g, " ").replace(".jpg", "");
+  useEffect(() => {
+    fetch("/api/infographs")
+      .then(r => r.json())
+      .then((files: string[]) => setImages(files))
+      .catch(console.error);
+  }, []);
+
+  const prev = () => setIdx(i => (i === 0 ? images.length - 1 : i - 1));
+  const next = () => setIdx(i => (i === images.length - 1 ? 0 : i + 1));
+  const title = images[idx]?.replace(/_/g, " ").replace(/\.jpe?g$/i, "") ?? "";
+
+  if (images.length === 0) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", color: T.muted, fontSize: "1rem" }}>
+        Loading infographics…
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 1300, margin: "0 auto", padding: "1rem 0 4rem" }}>
@@ -53,20 +50,22 @@ export default function InfographicPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={idx}
-          src={`/InfoGraphs/${INFOGRAPHS[idx]}`}
+          src={`/InfoGraphs/${images[idx]}`}
           alt={title}
           style={{ width: "100%", height: "100%", objectFit: "contain" }}
         />
 
         {/* Left Arrow */}
-        <button onClick={prev} style={{ position: "absolute", left: 20, top: "50%", transform: "translateY(-50%)", width: 52, height: 52, borderRadius: "50%", background: "rgba(0,0,0,0.75)", border: "1px solid #444", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 0.2s" }}
+        <button onClick={prev}
+          style={{ position: "absolute", left: 20, top: "50%", transform: "translateY(-50%)", width: 52, height: 52, borderRadius: "50%", background: "rgba(0,0,0,0.75)", border: "1px solid #444", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = "#00c9b1"; e.currentTarget.style.borderColor = "#00c9b1"; e.currentTarget.style.color = "#000"; }}
           onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.75)"; e.currentTarget.style.borderColor = "#444"; e.currentTarget.style.color = "#fff"; }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
 
         {/* Right Arrow */}
-        <button onClick={next} style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", width: 52, height: 52, borderRadius: "50%", background: "rgba(0,0,0,0.75)", border: "1px solid #444", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 0.2s" }}
+        <button onClick={next}
+          style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", width: 52, height: 52, borderRadius: "50%", background: "rgba(0,0,0,0.75)", border: "1px solid #444", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = "#00c9b1"; e.currentTarget.style.borderColor = "#00c9b1"; e.currentTarget.style.color = "#000"; }}
           onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.75)"; e.currentTarget.style.borderColor = "#444"; e.currentTarget.style.color = "#fff"; }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
@@ -74,7 +73,7 @@ export default function InfographicPage() {
 
         {/* Counter */}
         <div style={{ position: "absolute", bottom: 16, right: 20, background: "rgba(0,0,0,0.75)", border: "1px solid #444", padding: "5px 16px", borderRadius: 24, fontSize: 13, fontWeight: 600, color: "#fff", backdropFilter: "blur(6px)", letterSpacing: "0.5px" }}>
-          {idx + 1} <span style={{ color: "#555", margin: "0 2px" }}>/</span> {INFOGRAPHS.length}
+          {idx + 1} <span style={{ color: "#555", margin: "0 2px" }}>/</span> {images.length}
         </div>
       </div>
 
@@ -85,9 +84,9 @@ export default function InfographicPage() {
 
       {/* Thumbnail Strip */}
       <div style={{ display: "flex", gap: 10, overflowX: "auto", padding: "1.25rem 0 0.5rem", marginTop: "0.5rem", scrollbarWidth: "thin", scrollbarColor: "#333 transparent" }}>
-        {INFOGRAPHS.map((g, i) => (
+        {images.map((g, i) => (
           <button
-            key={i}
+            key={g}
             onClick={() => setIdx(i)}
             style={{ flexShrink: 0, width: 136, height: 77, padding: 0, background: "#000", border: idx === i ? "2px solid #00c9b1" : "2px solid rgba(255,255,255,0.07)", borderRadius: 10, overflow: "hidden", cursor: "pointer", opacity: idx === i ? 1 : 0.35, transition: "all 0.22s", boxShadow: idx === i ? "0 2px 14px rgba(0,201,177,0.35)" : "none" }}
             onMouseOver={e => { if (idx !== i) e.currentTarget.style.opacity = "0.75"; }}
