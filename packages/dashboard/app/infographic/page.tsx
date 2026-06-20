@@ -73,7 +73,7 @@ export default function InfographicPage() {
 
         {/* Counter */}
         <div style={{ position: "absolute", bottom: 16, right: 20, background: "rgba(0,0,0,0.75)", border: "1px solid #444", padding: "5px 16px", borderRadius: 24, fontSize: 13, fontWeight: 600, color: "#fff", backdropFilter: "blur(6px)", letterSpacing: "0.5px" }}>
-          {idx + 1} <span style={{ color: "#555", margin: "0 2px" }}>/</span> {images.length}
+          {idx + 1} <span style={{ color: "#aaa", margin: "0 2px" }}>/</span> {images.length}
         </div>
       </div>
 

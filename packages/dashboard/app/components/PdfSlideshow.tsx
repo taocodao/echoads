@@ -174,9 +174,9 @@ export function PdfSlideshow({
         {/* Counter */}
         <div style={{
           position: "absolute", top: 12, right: 14,
-          background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+          background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)",
           borderRadius: 8, padding: "4px 10px",
-          fontSize: 12, fontWeight: 600, color: "#cbd5e1", fontFamily: "monospace",
+          fontSize: 12, fontWeight: 600, color: "#f1f5f9", fontFamily: "monospace",
         }}>
           {currentSlide + 1} / {slides.length}
         </div>
@@ -184,9 +184,9 @@ export function PdfSlideshow({
         {duration > 0 && (
           <div style={{
             position: "absolute", top: 12, left: 14,
-            background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+            background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)",
             borderRadius: 8, padding: "4px 10px",
-            fontSize: 12, color: "#64748b", fontFamily: "monospace",
+            fontSize: 12, color: "#f1f5f9", fontFamily: "monospace", fontWeight: 600,
           }}>
             {Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, "0")}
             {" / "}
