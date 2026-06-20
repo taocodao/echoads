@@ -1,117 +1,189 @@
 """
-Regenerate audio + cues for the three legacy decks using updated narration scripts.
-Decks: arenza-loyalty, arenza-sports, arenza-sports-v1
+Regenerate audio + cues for the three legacy decks using the CORRECT method:
+  - ElevenLabs /stream/with-timestamps endpoint for character-level alignment
+  - Build cues from actual character start times, not bitrate estimation
+  
+This mirrors the proven approach in generate_cues.py that produced the working
+fast-blueprint, strategic-playbook, tactical-blueprint, and architecture decks.
 """
 
-import os, sys, json, requests, time, pathlib
+import base64, json, os, sys, pathlib, time
+import requests
 
-sys.stdout.reconfigure(encoding="utf-8")
-sys.stderr.reconfigure(encoding="utf-8")
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-# ── Config ─────────────────────────────────────────────────────────────────────
 API_KEY  = os.environ.get("ELEVENLABS_API_KEY", "")
-VOICE_ID = "cgSgspJ2msm6clMCkdW9"   # same voice as other decks
-MODEL    = "eleven_multilingual_v2"
-BASE_URL = "https://api.elevenlabs.io/v1"
+VOICE_ID = "cgSgspJ2msm6clMCkdW9"   # Same voice as the 4 blueprint decks
+MODEL_ID = "eleven_multilingual_v2"
 
 ROOT      = pathlib.Path(__file__).parent.parent
 AUDIO_DIR = ROOT / "public" / "audio"
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
-# ── Import scripts ─────────────────────────────────────────────────────────────
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from slide_texts_v2 import LOYALTY, SPORTS, SPORTS_V1
 
 DECKS = [
-    {"key": "arenza-loyalty",   "slides": LOYALTY,    "count": 15},
-    {"key": "arenza-sports",    "slides": SPORTS,     "count": 15},
-    {"key": "arenza-sports-v1", "slides": SPORTS_V1,  "count": 15},
+    {"key": "arenza-loyalty",   "slides": LOYALTY},
+    {"key": "arenza-sports",    "slides": SPORTS},
+    {"key": "arenza-sports-v1", "slides": SPORTS_V1},
 ]
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
-def tts(text: str) -> bytes:
-    """Call ElevenLabs TTS and return raw MP3 bytes."""
-    url = f"{BASE_URL}/text-to-speech/{VOICE_ID}"
+
+def mp3_duration_seconds(mp3_bytes: bytes) -> float:
+    """Estimate MP3 duration by scanning frame headers."""
+    RATES = [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0]
+    i, duration = 0, 0.0
+    while i < len(mp3_bytes) - 4:
+        b = mp3_bytes[i:i+4]
+        if b[0] == 0xFF and (b[1] & 0xE0) == 0xE0:
+            br_idx = (b[2] >> 4) & 0xF
+            sr_idx = (b[2] >> 2) & 0x3
+            sr = [44100,48000,32000,0][sr_idx]
+            br = RATES[br_idx] * 1000
+            if br > 0 and sr > 0:
+                padding = (b[2] >> 1) & 1
+                frame_size = 144 * br // sr + padding
+                duration += 1152 / sr
+                i += frame_size
+                continue
+        i += 1
+    return duration
+
+
+def call_elevenlabs_with_timestamps(text: str) -> tuple[bytes, list[str], list[float]]:
+    """
+    Call /stream/with-timestamps endpoint.
+    Returns (audio_bytes, characters_list, start_times_seconds_list).
+    """
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream/with-timestamps"
     headers = {"xi-api-key": API_KEY, "Content-Type": "application/json"}
     payload = {
         "text": text,
-        "model_id": MODEL,
+        "model_id": MODEL_ID,
         "voice_settings": {"stability": 0.45, "similarity_boost": 0.82, "style": 0.2},
     }
-    resp = requests.post(url, headers=headers, json=payload, timeout=120)
+    resp = requests.post(url, headers=headers, json=payload, stream=True, timeout=300)
     resp.raise_for_status()
-    return resp.content
+
+    audio_bytes = b""
+    all_chars: list[str] = []
+    all_starts: list[float] = []
+
+    for raw_line in resp.iter_lines():
+        if not raw_line:
+            continue
+        try:
+            chunk = json.loads(raw_line)
+        except json.JSONDecodeError:
+            continue
+        if chunk.get("audio_base64"):
+            audio_bytes += base64.b64decode(chunk["audio_base64"])
+        aln = chunk.get("normalized_alignment") or chunk.get("alignment")
+        if aln:
+            all_chars.extend(aln.get("characters", []))
+            all_starts.extend(aln.get("character_start_times_seconds", []))
+
+    return audio_bytes, all_chars, all_starts
 
 
-def mp3_duration(data: bytes) -> float:
-    """Estimate MP3 duration from bitrate header (128 kbps fallback)."""
-    # Try to read the bitrate from ID3/frame header
-    bitrate_kbps = 128
-    for i in range(min(len(data) - 4, 10000)):
-        b0, b1 = data[i], data[i + 1]
-        if b0 == 0xFF and (b1 & 0xE0) == 0xE0:
-            bitrate_index = (data[i + 2] >> 4) & 0x0F
-            rates = [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320]
-            if 1 <= bitrate_index <= 14:
-                bitrate_kbps = rates[bitrate_index]
-            break
-    return len(data) * 8 / (bitrate_kbps * 1000)
+def build_cues(slide_texts: list[str], chars: list[str], starts: list[float]) -> list[dict]:
+    """
+    Map each slide's first non-whitespace character to a precise startSec
+    using the character-level alignment data from ElevenLabs.
+    """
+    sep = "\n\n"
+    cues = []
+    char_pos = 0
+
+    for i, text in enumerate(slide_texts):
+        # Skip whitespace chars at current position
+        while char_pos < len(chars) and chars[char_pos].strip() == "":
+            char_pos += 1
+        if char_pos < len(starts):
+            cues.append({
+                "slide": i,
+                "startSec": round(starts[char_pos], 3),
+            })
+        # Advance by text length + separator
+        char_pos += len(text) + len(sep)
+
+    return cues
 
 
 def generate_deck(deck: dict):
     key    = deck["key"]
     slides = deck["slides"]
-    n      = deck["count"]
-
-    assert len(slides) == n, f"{key}: expected {n} slides, got {len(slides)}"
+    n      = len(slides)
 
     print(f"\n{'='*60}")
     print(f"  Generating: {key}  ({n} slides)")
     print(f"{'='*60}")
 
-    chunks     = []   # list of (mp3_bytes, duration_sec)
-    slide_cues = []   # list of start times (seconds)
+    # Check if text is under ~5000 chars (ElevenLabs single-request limit)
+    full_text = "\n\n".join(slides)
+    char_count = len(full_text)
+    print(f"  Total characters: {char_count}")
 
-    for i, text in enumerate(slides, 1):
-        print(f"  Slide {i:02d}/{n} ... ", end="", flush=True)
-        for attempt in range(3):
-            try:
-                mp3 = tts(text)
-                dur = mp3_duration(mp3)
-                chunks.append((mp3, dur))
-                print(f"OK  ({dur:.1f}s)")
-                break
-            except Exception as e:
-                print(f"  retry {attempt+1}: {e}")
-                time.sleep(3)
-        else:
-            print(f"  FAILED — aborting")
-            sys.exit(1)
+    if char_count > 4800:
+        # Split into two parts and merge (same approach as loyalty in generate_cues.py)
+        mid = n // 2
+        part_a_slides = slides[:mid]
+        part_b_slides = slides[mid:]
 
-        time.sleep(0.5)  # rate-limit courtesy
+        text_a = "\n\n".join(part_a_slides)
+        text_b = "\n\n".join(part_b_slides)
 
-    # Concatenate MP3 frames
-    combined = b"".join(mp3 for mp3, _ in chunks)
+        print(f"  Splitting: Part A ({len(part_a_slides)} slides, {len(text_a)} chars)")
+        print(f"             Part B ({len(part_b_slides)} slides, {len(text_b)} chars)")
 
-    # Build cue list (cumulative start times)
-    t = 0.0
-    for _, dur in chunks:
-        slide_cues.append(round(t, 3))
-        t += dur
+        # Generate Part A
+        print(f"  Generating Part A ...", end=" ", flush=True)
+        audio_a, chars_a, starts_a = call_elevenlabs_with_timestamps(text_a)
+        cues_a = build_cues(part_a_slides, chars_a, starts_a)
+        dur_a = mp3_duration_seconds(audio_a)
+        print(f"OK ({dur_a:.1f}s, {len(audio_a)//1024} KB)")
 
-    total = round(t, 2)
-    print(f"\n  Total duration: {total}s")
+        time.sleep(1)  # rate-limit courtesy
+
+        # Generate Part B
+        print(f"  Generating Part B ...", end=" ", flush=True)
+        audio_b, chars_b, starts_b = call_elevenlabs_with_timestamps(text_b)
+        cues_b_raw = build_cues(part_b_slides, chars_b, starts_b)
+        dur_b = mp3_duration_seconds(audio_b)
+        print(f"OK ({dur_b:.1f}s, {len(audio_b)//1024} KB)")
+
+        # Merge
+        combined_audio = audio_a + audio_b
+        merged_cues = cues_a + [
+            {"slide": c["slide"] + mid, "startSec": round(c["startSec"] + dur_a, 3)}
+            for c in cues_b_raw
+        ]
+        total = dur_a + dur_b
+    else:
+        # Single request (small enough)
+        print(f"  Generating single request ...", end=" ", flush=True)
+        combined_audio, chars, starts = call_elevenlabs_with_timestamps(full_text)
+        merged_cues = build_cues(slides, chars, starts)
+        total = mp3_duration_seconds(combined_audio)
+        print(f"OK ({total:.1f}s, {len(combined_audio)//1024} KB)")
 
     # Write MP3
     mp3_path = AUDIO_DIR / f"{key}.mp3"
-    mp3_path.write_bytes(combined)
-    print(f"  Wrote: {mp3_path.name}  ({len(combined)//1024} KB)")
+    mp3_path.write_bytes(combined_audio)
+    print(f"  Wrote: {mp3_path.name}  ({len(combined_audio)//1024} KB)")
 
-    # Write cues.json — must be array of {slide, startSec} objects for PdfSlideshow
-    cues_obj = [{"slide": i, "startSec": round(t, 3)} for i, t in enumerate(slide_cues)]
+    # Write cues.json
     cues_path = AUDIO_DIR / f"{key}-cues.json"
-    cues_path.write_text(json.dumps(cues_obj, indent=2))
+    cues_path.write_text(json.dumps(merged_cues, indent=2))
     print(f"  Wrote: {cues_path.name}")
+
+    # Print cue table
+    for c in merged_cues:
+        m, s = divmod(int(c["startSec"]), 60)
+        print(f"    Slide {c['slide']+1:2d}  ->  {m}:{s:02d}.{int((c['startSec']%1)*1000):03d}")
 
     return total
 
@@ -122,6 +194,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"ElevenLabs key: {API_KEY[:8]}...")
+    print(f"Voice: {VOICE_ID}")
+    print(f"Using /stream/with-timestamps for precise cue alignment")
 
     totals = {}
     for deck in DECKS:
