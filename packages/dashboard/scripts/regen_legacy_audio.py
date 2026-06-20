@@ -107,10 +107,10 @@ def generate_deck(deck: dict):
     mp3_path.write_bytes(combined)
     print(f"  Wrote: {mp3_path.name}  ({len(combined)//1024} KB)")
 
-    # Write cues.json
-    cues = {"totalDuration": total, "cues": slide_cues}
+    # Write cues.json — must be array of {slide, startSec} objects for PdfSlideshow
+    cues_obj = [{"slide": i, "startSec": round(t, 3)} for i, t in enumerate(slide_cues)]
     cues_path = AUDIO_DIR / f"{key}-cues.json"
-    cues_path.write_text(json.dumps(cues, indent=2))
+    cues_path.write_text(json.dumps(cues_obj, indent=2))
     print(f"  Wrote: {cues_path.name}")
 
     return total
