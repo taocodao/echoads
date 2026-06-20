@@ -1,62 +1,20 @@
-[
-  {
-    "slide": 0,
-    "startSec": 0.07
-  },
-  {
-    "slide": 1,
-    "startSec": 9.416
-  },
-  {
-    "slide": 2,
-    "startSec": 36.083
-  },
-  {
-    "slide": 3,
-    "startSec": 62.252
-  },
-  {
-    "slide": 4,
-    "startSec": 87.516
-  },
-  {
-    "slide": 5,
-    "startSec": 123.169
-  },
-  {
-    "slide": 6,
-    "startSec": 141.931
-  },
-  {
-    "slide": 7,
-    "startSec": 172.337
-  },
-  {
-    "slide": 8,
-    "startSec": 200.208
-  },
-  {
-    "slide": 9,
-    "startSec": 224.438
-  },
-  {
-    "slide": 10,
-    "startSec": 249.969
-  },
-  {
-    "slide": 11,
-    "startSec": 275.291
-  },
-  {
-    "slide": 12,
-    "startSec": 303.341
-  },
-  {
-    "slide": 13,
-    "startSec": 336.778
-  },
-  {
-    "slide": 14,
-    "startSec": 355.458
-  }
-]
+{
+  "totalDuration": 556.89,
+  "cues": [
+    0.0,
+    20.822,
+    45.589,
+    79.551,
+    118.058,
+    152.308,
+    191.024,
+    230.602,
+    275.718,
+    311.927,
+    350.826,
+    387.948,
+    430.609,
+    469.038,
+    515.774
+  ]
+}
