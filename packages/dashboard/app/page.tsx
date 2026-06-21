@@ -9,6 +9,10 @@ const FAST_SLIDES         = Array.from({ length: 15 }, (_, i) => ({ src: `/slide
 const STRATEGIC_SLIDES    = Array.from({ length: 20 }, (_, i) => ({ src: `/slides/strategic-playbook/p${i + 1}.png` }));
 const TACTICAL_SLIDES     = Array.from({ length: 13 }, (_, i) => ({ src: `/slides/tactical-blueprint/p${i + 1}.png` }));
 const ARCHITECTURE_SLIDES = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/architecture/p${i + 1}.png` }));
+const CMXS_INFRASTRUCTURE_SLIDES = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/cmxs-infrastructure-engine/p${i + 1}.png` }));
+const THE_35_SECOND_ENGINE_SLIDES = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/the-35-second-engine/p${i + 1}.png` }));
+const VERIFIED_BROADCAST_SLIDES = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/verified-broadcast-blueprint/p${i + 1}.png` }));
+const CMXS_VERIFIED_MEDIA_SLIDES = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/cmxs-verified-media-infrastructure/p${i + 1}.png` }));
 
 /* ── Page ──────────────────────────────────────────────────── */
 
@@ -86,6 +90,46 @@ export default function DashboardHome() {
         slides={ARCHITECTURE_SLIDES}
         audioSrc="/audio/architecture.mp3"
         cuesSrc="/audio/architecture-cues.json"
+      />
+
+      {/* Deck 8: CMXS Infrastructure Engine */}
+      <PdfSlideshow
+        title="CMXS Infrastructure Engine"
+        subtitle="Deck 8 — Media over QUIC · DePIN Edge · Base L2 PoD"
+        accent="#f59e0b"
+        slides={CMXS_INFRASTRUCTURE_SLIDES}
+        audioSrc="/audio/cmxs-infrastructure-engine.mp3"
+        cuesSrc="/audio/cmxs-infrastructure-engine-cues.json"
+      />
+
+      {/* Deck 9: The 35-Second Engine */}
+      <PdfSlideshow
+        title="The 35-Second Engine"
+        subtitle="Deck 9 — Operational Blueprint · Settlement Mechanism · Verification"
+        accent="#3B82F6"
+        slides={THE_35_SECOND_ENGINE_SLIDES}
+        audioSrc="/audio/the-35-second-engine.mp3"
+        cuesSrc="/audio/the-35-second-engine-cues.json"
+      />
+
+      {/* Deck 10: Verified Broadcast Blueprint */}
+      <PdfSlideshow
+        title="Verified Broadcast Blueprint"
+        subtitle="Deck 10 — DePIN Nodes · MoQ Protocol · Base L2 Revenue Ceiling"
+        accent="#8B5CF6"
+        slides={VERIFIED_BROADCAST_SLIDES}
+        audioSrc="/audio/verified-broadcast-blueprint.mp3"
+        cuesSrc="/audio/verified-broadcast-blueprint-cues.json"
+      />
+
+      {/* Deck 11: CMXS Verified Media Infrastructure */}
+      <PdfSlideshow
+        title="CMXS Verified Media Infrastructure"
+        subtitle="Deck 11 — Glass-Box Architecture · Measurement Vacuum · Token Flywheel"
+        accent="#ec4899"
+        slides={CMXS_VERIFIED_MEDIA_SLIDES}
+        audioSrc="/audio/cmxs-verified-media-infrastructure.mp3"
+        cuesSrc="/audio/cmxs-verified-media-infrastructure-cues.json"
       />
     </div>
   );
