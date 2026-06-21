@@ -68,6 +68,42 @@ const VIDEOS = [
     color: '#ef4444',
     url: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/video/The_Screen-to-Sale_Pipeline.mp4',
   },
+  {
+    id: 'cmxs-protocol',
+    title: 'Architecting the Next-Gen FAST Stack',
+    subtitle: 'The CMXS Protocol',
+    duration: 'TBD',
+    tag: 'Protocol',
+    color: '#06b6d4',
+    url: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/video/Architecting_the_Next-Gen_FAST_Stack__The_CMXS_Protocol.mp4',
+  },
+  {
+    id: 'engineering-trust',
+    title: 'Engineering Trust',
+    subtitle: 'The 5-Layer Architecture of the CMXS Sports',
+    duration: 'TBD',
+    tag: 'Architecture',
+    color: '#8b5cf6',
+    url: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/video/Engineering_Trust__The_5-Layer_Architecture_of_the_CMXS_Sports_.mp4',
+  },
+  {
+    id: 'depin-blueprint',
+    title: 'The 2026 DePIN Blueprint',
+    subtitle: 'Launching a Compliant Token',
+    duration: 'TBD',
+    tag: 'Tokenomics',
+    color: '#f59e0b',
+    url: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/video/The_2026_DePIN_Blueprint__Launching_a_Compliant_Token.mp4',
+  },
+  {
+    id: '35-second-lifecycle',
+    title: 'The 35-Second Ad Lifecycle',
+    subtitle: 'Engineering Verified CPMs',
+    duration: 'TBD',
+    tag: 'Revenue',
+    color: '#10b981',
+    url: 'https://lavcma6duvpplftv.public.blob.vercel-storage.com/video/The_35-Second_Ad_Lifecycle__Engineering_Verified_CPMs.mp4',
+  },
 ];
 
 /* ── Styles ────────────────────────────────────────────────────────────────── */
@@ -348,7 +384,7 @@ export default function VideoPage() {
 
       {/* ── Bottom Feature Cards ──────────────────────────────────────────── */}
       <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
         gap: '0.75rem', marginTop: '1.5rem',
       }}>
         {VIDEOS.map(v => {
