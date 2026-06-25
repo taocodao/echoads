@@ -6,7 +6,7 @@ def generate():
     base_dir = r"d:\Projects\echoads\packages\dashboard"
     assets_dir = os.path.join(base_dir, "public", "assets")
     os.makedirs(assets_dir, exist_ok=True)
-    out_path = os.path.join(assets_dir, "og-preview-v3.jpg")
+    out_path = os.path.join(assets_dir, "og-preview-v4.jpg")
     logo_path = os.path.join(base_dir, "public", "arenza-logo-real.png")
 
     W, H = 1200, 627
@@ -26,7 +26,7 @@ def generate():
     logo = logo.resize((target_w, target_h), Image.Resampling.LANCZOS)
 
     logo_x = (W - target_w) // 2
-    logo_y = 35
+    logo_y = 100
 
     # Composite using the existing alpha channel
     bg.paste(logo, (logo_x, logo_y), logo)
