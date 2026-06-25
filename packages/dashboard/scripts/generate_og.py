@@ -15,7 +15,7 @@ def generate_og_image():
     # Image specs
     width = 1200
     height = 627
-    bg_color = (10, 10, 12) # very dark, almost black
+    bg_color = (10, 10, 12) # very dark
     
     # Create background
     img = Image.new('RGB', (width, height), color=bg_color)
@@ -31,32 +31,48 @@ def generate_og_image():
         logo_w, logo_h = logo.size
         aspect = logo_w / logo_h
         
-        # Keep logo relatively large but sharp
-        new_logo_h = 180
+        # Increase logo size a bit
+        new_logo_h = 240
         new_logo_w = int(new_logo_h * aspect)
         logo = logo.resize((new_logo_w, new_logo_h), Image.Resampling.LANCZOS)
         
-        # Center logo vertically shifted up slightly
+        # Center logo vertically shifted up more
         logo_x = (width - new_logo_w) // 2
-        logo_y = (height - new_logo_h) // 2 - 40
+        logo_y = (height - new_logo_h) // 2 - 60
         
         # Paste logo using alpha channel as mask
         img.paste(logo, (logo_x, logo_y), logo)
     except Exception as e:
         print(f"Error loading logo: {e}")
-        logo_y = height // 2 - 100
-        new_logo_h = 200
+        logo_y = height // 2 - 120
+        new_logo_h = 240
 
     # Add text
     text = "Gamified Sports FAST Ads for Local Commerce"
-    # Try to use a Bold font for clarity
-    try:
-        font = ImageFont.truetype("arialbd.ttf", 48)
-    except:
+    
+    # Try absolute paths for Windows fonts to ensure they load
+    font_paths = [
+        r"C:\Windows\Fonts\arialbd.ttf",
+        r"C:\Windows\Fonts\segoeuib.ttf",
+        r"C:\Windows\Fonts\trebucbd.ttf",
+        r"C:\Windows\Fonts\tahoma.ttf",
+        "arialbd.ttf"
+    ]
+    
+    font = None
+    # Use a large size for maximum clarity
+    font_size = 64
+    for path in font_paths:
         try:
-            font = ImageFont.truetype("segoeuib.ttf", 48)
+            font = ImageFont.truetype(path, font_size)
+            print(f"Successfully loaded font: {path}")
+            break
         except:
-            font = ImageFont.load_default()
+            continue
+            
+    if font is None:
+        print("Warning: Could not load any TrueType font. Falling back to default.")
+        font = ImageFont.load_default()
         
     try:
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -67,13 +83,14 @@ def generate_og_image():
         text_w, text_h = draw.textsize(text, font=font)
     
     text_x = (width - text_w) // 2
-    text_y = logo_y + new_logo_h + 60
+    # Ensure there is enough padding below logo
+    text_y = logo_y + new_logo_h + 50
         
-    # Draw text in crisp white for maximum contrast
+    # Draw text in crisp white
     draw.text((text_x, text_y), text, fill=(255, 255, 255), font=font)
     
-    # Save optimized JPG with higher quality for clarity
-    img.save(out_path, format="JPEG", quality=98, optimize=True)
+    # Save optimized JPG with highest quality
+    img.save(out_path, format="JPEG", quality=100, optimize=True)
     
     print(f"Saved {out_path} ({os.path.getsize(out_path)} bytes)")
 
