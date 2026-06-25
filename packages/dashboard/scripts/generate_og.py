@@ -1,98 +1,85 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 
-def generate_og_image():
-    # Set paths
+def composite_og_image():
     base_dir = r"d:\Projects\echoads\packages\dashboard"
     assets_dir = os.path.join(base_dir, "public", "assets")
     os.makedirs(assets_dir, exist_ok=True)
     out_path = os.path.join(assets_dir, "og-preview.jpg")
+    logo_path = os.path.join(base_dir, "public", "arenza-logo.png")
     
-    logo_path = os.path.join(base_dir, "public", "arenza-logo-real.png")
-    if not os.path.exists(logo_path):
-        logo_path = os.path.join(base_dir, "public", "arenza-logo.png")
-    
-    # Image specs
-    width = 1200
-    height = 627
-    bg_color = (10, 10, 12) # very dark
-    
-    # Create background
-    img = Image.new('RGB', (width, height), color=bg_color)
-    draw = ImageDraw.Draw(img)
-    
-    # Subtle background element
-    draw.ellipse((-200, -200, 400, 400), outline=(25, 25, 30), width=10)
-    draw.ellipse((800, 300, 1500, 1000), outline=(20, 20, 25), width=15)
-    
-    # Load and resize logo
-    try:
-        logo = Image.open(logo_path).convert("RGBA")
-        logo_w, logo_h = logo.size
-        aspect = logo_w / logo_h
-        
-        # Increase logo size a bit
-        new_logo_h = 240
-        new_logo_w = int(new_logo_h * aspect)
-        logo = logo.resize((new_logo_w, new_logo_h), Image.Resampling.LANCZOS)
-        
-        # Center logo vertically shifted up more
-        logo_x = (width - new_logo_w) // 2
-        logo_y = (height - new_logo_h) // 2 - 60
-        
-        # Paste logo using alpha channel as mask
-        img.paste(logo, (logo_x, logo_y), logo)
-    except Exception as e:
-        print(f"Error loading logo: {e}")
-        logo_y = height // 2 - 120
-        new_logo_h = 240
+    W, H = 1200, 627
 
-    # Add text
+    # ── 1. Build a clean dark background ──
+    bg = Image.new("RGB", (W, H), (8, 8, 15))
+
+    # Subtle dark radial glow in centre
+    for radius, alpha in [(350, 18), (250, 25), (150, 32)]:
+        overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        od = ImageDraw.Draw(overlay)
+        cx, cy = W // 2, H // 2
+        od.ellipse((cx - radius, cy - radius, cx + radius, cy + radius),
+                   fill=(20, 30, 70, alpha))
+        bg = Image.alpha_composite(bg.convert("RGBA"), overlay).convert("RGB")
+
+    # ── 2. Paste the real ArenzaTV logo (make white bg transparent) ──
+    logo = Image.open(logo_path).convert("RGBA")
+    arr = np.array(logo)
+    r, g, b, a = arr[:,:,0], arr[:,:,1], arr[:,:,2], arr[:,:,3]
+    white = (r > 230) & (g > 230) & (b > 230)
+    arr[:,:,3] = np.where(white, 0, a)
+    logo = Image.fromarray(arr)
+
+    lw, lh = logo.size
+    # Scale logo: 300px tall, max 950px wide
+    target_h = 300
+    target_w = int(lw * (target_h / lh))
+    if target_w > 950:
+        target_w = 950
+        target_h = int(lh * (target_w / lw))
+    logo = logo.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+    logo_x = (W - target_w) // 2
+    logo_y = 50
+    bg.paste(logo, (logo_x, logo_y), logo)
+
+    # ── 3. Draw the tagline — find largest size that fits in one line ──
+    draw = ImageDraw.Draw(bg)
     text = "Gamified Sports FAST Ads for Local Commerce"
-    
-    # Try absolute paths for Windows fonts to ensure they load
-    font_paths = [
-        r"C:\Windows\Fonts\arialbd.ttf",
-        r"C:\Windows\Fonts\segoeuib.ttf",
-        r"C:\Windows\Fonts\trebucbd.ttf",
-        r"C:\Windows\Fonts\tahoma.ttf",
-        "arialbd.ttf"
-    ]
-    
-    font = None
-    # Use a large size for maximum clarity
-    font_size = 64
-    for path in font_paths:
+    font_path = r"C:\Windows\Fonts\ariblk.ttf"
+    best_font = None
+    best_size = 12
+
+    for size in range(72, 20, -1):
         try:
-            font = ImageFont.truetype(path, font_size)
-            print(f"Successfully loaded font: {path}")
-            break
+            f = ImageFont.truetype(font_path, size)
+            bbox = draw.textbbox((0, 0), text, font=f)
+            tw = bbox[2] - bbox[0]
+            if tw <= 1140:
+                best_font = f
+                best_size = size
+                print(f"Font size {size}px  width={tw}px")
+                break
         except:
-            continue
-            
-    if font is None:
-        print("Warning: Could not load any TrueType font. Falling back to default.")
-        font = ImageFont.load_default()
-        
-    try:
-        bbox = draw.textbbox((0, 0), text, font=font)
-        text_w = bbox[2] - bbox[0]
-        text_h = bbox[3] - bbox[1]
-    except AttributeError:
-        # For older Pillow versions
-        text_w, text_h = draw.textsize(text, font=font)
-    
-    text_x = (width - text_w) // 2
-    # Ensure there is enough padding below logo
-    text_y = logo_y + new_logo_h + 50
-        
-    # Draw text in crisp white
-    draw.text((text_x, text_y), text, fill=(255, 255, 255), font=font)
-    
-    # Save optimized JPG with highest quality
-    img.save(out_path, format="JPEG", quality=100, optimize=True)
-    
-    print(f"Saved {out_path} ({os.path.getsize(out_path)} bytes)")
+            pass
+
+    if best_font is None:
+        best_font = ImageFont.load_default()
+
+    bbox = draw.textbbox((0, 0), text, font=best_font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+
+    tx = (W - tw) // 2
+    text_zone_top = logo_y + target_h + 15
+    ty = text_zone_top + ((H - text_zone_top - th) // 2)
+
+    draw.text((tx, ty), text, fill=(255, 255, 255), font=best_font)
+
+    # ── 4. Save ──
+    bg.save(out_path, format="JPEG", quality=95, optimize=True)
+    print(f"Saved {out_path}  ({os.path.getsize(out_path) // 1024} KB)")
 
 if __name__ == "__main__":
-    generate_og_image()
+    composite_og_image()
