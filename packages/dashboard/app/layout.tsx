@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: "ArenzaTV",
     images: [
       {
-        url: "https://arenza.tv/assets/og-preview-v2.jpg",
+        url: "https://arenza.tv/assets/og-preview-v3.jpg",
         width: 1200,
         height: 627,
         type: "image/jpeg",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ArenzaTV — Gamified Sports FAST Ads for Local Commerce",
     description: "Fan plays. Wins a reward. Walks into your business. No app download. No POS needed.",
-    images: ["https://arenza.tv/assets/og-preview-v2.jpg"],
+    images: ["https://arenza.tv/assets/og-preview-v3.jpg"],
     site: "@arenzatv",
   },
 };
