@@ -6,8 +6,30 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ArenzaTV — Sports FAST Dashboard",
-  description: "Real-time ad delivery, PoD verification, DePIN node rewards, and CMXS token lifecycle",
+  title: "ArenzaTV — Gamified Sports FAST Ads for Local Commerce",
+  description: "ArenzaTV connects Sports FAST viewers to local merchants at the moment of peak fan engagement. Gamified fan games. Apple Wallet rewards. Verified in-store redemption. No POS integration required.",
+  openGraph: {
+    title: "ArenzaTV — Gamified Sports FAST Ads for Local Commerce",
+    description: "Fan plays. Wins a reward. Walks into your business. No app download. No POS needed. Live MVP at arenza.tv.",
+    url: "https://arenza.tv",
+    siteName: "ArenzaTV",
+    images: [
+      {
+        url: "https://arenza.tv/assets/og-preview.jpg",
+        width: 1200,
+        height: 627,
+        type: "image/jpeg",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ArenzaTV — Gamified Sports FAST Ads for Local Commerce",
+    description: "Fan plays. Wins a reward. Walks into your business. No app download. No POS needed.",
+    images: ["https://arenza.tv/assets/og-preview.jpg"],
+    site: "@arenzatv",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
