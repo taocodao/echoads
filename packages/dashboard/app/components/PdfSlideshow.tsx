@@ -146,9 +146,7 @@ export function PdfSlideshow({
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 4 }}>
-            {subtitle}
-          </div>
+          {/* Subtitle removed per request */}
           <h2 style={{ fontSize: 20, fontWeight: 800, color: "#f1f5f9", margin: 0, letterSpacing: "-0.02em" }}>
             {slides[currentSlide]?.title || title}
           </h2>
