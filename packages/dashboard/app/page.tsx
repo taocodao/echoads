@@ -2,7 +2,22 @@ import { PdfSlideshow } from "./components/PdfSlideshow";
 
 /* ── Slide data (timing comes from cues.json, not hardcoded) ── */
 
-const FRICTIONLESS_SPORTS_SLIDES  = Array.from({ length: 14 }, (_, i) => ({ src: `/slides/frictionless-sports-engagement/p${i + 1}.png` }));
+const FRICTIONLESS_SPORTS_SLIDES = [
+  { src: `/slides/frictionless-sports-engagement/p1.png`, title: "The Future of Frictionless Sports Engagement" },
+  { src: `/slides/frictionless-sports-engagement/p2.png`, title: "Five Colliding Market Forces Validate the ArenzaTV Model" },
+  { src: `/slides/frictionless-sports-engagement/p3.png`, title: "The Collapse of RSNs is Driving a FAST Sports Supercycle" },
+  { src: `/slides/frictionless-sports-engagement/p4.png`, title: "Local Businesses Are Locked Out of Ads and Trapped by POS Loyalty" },
+  { src: `/slides/frictionless-sports-engagement/p5.png`, title: "Eliminating the Hardware Barrier: The QR Hub Leap" },
+  { src: `/slides/frictionless-sports-engagement/p6.png`, title: "Second-Screen Gamification Turns Distraction into Purchase Intent" },
+  { src: `/slides/frictionless-sports-engagement/p7.png`, title: "The B2B2C Ecosystem Resolves the Market Fragmentation" },
+  { src: `/slides/frictionless-sports-engagement/p8.png`, title: "The Generational Infrastructure Moat: DePIN Powered by MOQ" },
+  { src: `/slides/frictionless-sports-engagement/p9.png`, title: "The Frictionless Attribution Loop in Action" },
+  { src: `/slides/frictionless-sports-engagement/p10.png`, title: "Stacked Revenue Streams Replace Traditional SaaS Models" },
+  { src: `/slides/frictionless-sports-engagement/p11.png`, title: "A Fragmented FAST Landscape Offers Immediate Partnership Targets" },
+  { src: `/slides/frictionless-sports-engagement/p12.png`, title: "Proactive Mitigations for Key Structural Risks" },
+  { src: `/slides/frictionless-sports-engagement/p13.png`, title: "A Multi-Billion Dollar Disruption Opportunity" },
+  { src: `/slides/frictionless-sports-engagement/p14.png`, title: "Redefining Local Sports Monetization at Scale" },
+];
 const SPORTS_V1_SLIDES    = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/sports-v1/p${i + 1}.png` }));
 const SPORTS_SLIDES       = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/sports/p${i + 1}.png` }));
 const LOYALTY_SLIDES      = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/loyalty/p${i + 1}.png` }));
