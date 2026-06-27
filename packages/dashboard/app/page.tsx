@@ -2,6 +2,7 @@ import { PdfSlideshow } from "./components/PdfSlideshow";
 
 /* ── Slide data (timing comes from cues.json, not hardcoded) ── */
 
+const FRICTIONLESS_SPORTS_SLIDES  = Array.from({ length: 14 }, (_, i) => ({ src: `/slides/frictionless-sports-engagement/p${i + 1}.png` }));
 const SPORTS_V1_SLIDES    = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/sports-v1/p${i + 1}.png` }));
 const SPORTS_SLIDES       = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/sports/p${i + 1}.png` }));
 const LOYALTY_SLIDES      = Array.from({ length: 15 }, (_, i) => ({ src: `/slides/loyalty/p${i + 1}.png` }));
@@ -20,7 +21,15 @@ export default function DashboardHome() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
 
-
+      {/* Deck 12: ArenzaTV Frictionless Sports Engagement (NEW) */}
+      <PdfSlideshow
+        title="ArenzaTV: Frictionless Sports Engagement"
+        subtitle="Deck 12 — FAST Streaming · Local Loyalty · Fan Gamification · DePIN Infrastructure"
+        accent="#22d3ee"
+        slides={FRICTIONLESS_SPORTS_SLIDES}
+        audioSrc="/audio/frictionless-sports-engagement.mp3"
+        cuesSrc="/audio/frictionless-sports-engagement-cues.json"
+      />
 
       {/* Deck 1: Interactive Canvas (Sports V1) */}
       <PdfSlideshow
