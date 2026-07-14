@@ -245,7 +245,7 @@ export function PdfSlideshow({
                 fontWeight: 800,
                 whiteSpace: "nowrap"
               }}>
-                <span style={{ fontSize: 12, marginBottom: 2, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", padding: "4px 10px", borderRadius: 12, border: \`1px solid \${accent}55\` }}>Click to Play</span>
+                <span style={{ fontSize: 12, marginBottom: 2, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", padding: "4px 10px", borderRadius: 12, border: `1px solid ${accent}55` }}>Click to Play</span>
                 <span style={{ fontSize: 20 }}>👇</span>
               </div>
             </>
