@@ -37,14 +37,37 @@ export default function DashboardHome() {
     <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
 
       {/* Deck 12: ArenzaTV Frictionless Sports Engagement (NEW) */}
-      <PdfSlideshow
-        title="ArenzaTV: Frictionless Sports Engagement"
-        subtitle="Deck 12 — FAST Streaming · Local Loyalty · Fan Gamification · DePIN Infrastructure"
-        accent="#22d3ee"
-        slides={FRICTIONLESS_SPORTS_SLIDES}
-        audioSrc="/audio/frictionless-sports-engagement.mp3"
-        cuesSrc="/audio/frictionless-sports-engagement-cues.json"
-      />
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", position: "relative" }}>
+        <PdfSlideshow
+          title="ArenzaTV: Frictionless Sports Engagement"
+          subtitle="Deck 12 — FAST Streaming · Local Loyalty · Fan Gamification · DePIN Infrastructure"
+          accent="#22d3ee"
+          slides={FRICTIONLESS_SPORTS_SLIDES}
+          audioSrc="/audio/frictionless-sports-engagement.mp3"
+          cuesSrc="/audio/frictionless-sports-engagement-cues.json"
+        />
+        
+        <div style={{
+          alignSelf: "flex-end",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          animation: "bounce-down-scroll 2s infinite",
+          color: "#22d3ee",
+          fontSize: "14px",
+          fontWeight: 600,
+          paddingRight: "10px",
+          pointerEvents: "none"
+        }}>
+          <style>{`
+            @keyframes bounce-down-scroll {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(8px); }
+            }
+          `}</style>
+          Scroll for more pitch decks <span style={{ fontSize: 18 }}>👇</span>
+        </div>
+      </div>
 
       {/* Deck 1: Interactive Canvas (Sports V1) */}
       <PdfSlideshow

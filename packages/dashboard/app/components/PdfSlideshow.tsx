@@ -211,16 +211,46 @@ export function PdfSlideshow({
             color: currentSlide === 0 ? "#334155" : "#94a3b8", transition: "all 0.15s",
           }}>◀</button>
 
-        <button onClick={togglePlay}
-          style={{
-            background: isPlaying ? "rgba(255,255,255,0.08)" : `linear-gradient(135deg, ${accent}, ${accent}cc)`,
-            border: `1px solid ${isPlaying ? "rgba(255,255,255,0.1)" : accent}`,
-            borderRadius: 8, padding: "6px 18px", fontSize: 13, fontWeight: 700,
-            color: isPlaying ? "#e2e8f0" : "#fff", cursor: "pointer",
-            display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
-          }}>
-          {isPlaying ? "⏸ Pause" : "▶ Play"}
-        </button>
+        <div style={{ position: "relative" }}>
+          <button onClick={togglePlay}
+            style={{
+              background: isPlaying ? "rgba(255,255,255,0.08)" : `linear-gradient(135deg, ${accent}, ${accent}cc)`,
+              border: `1px solid ${isPlaying ? "rgba(255,255,255,0.1)" : accent}`,
+              borderRadius: 8, padding: "6px 18px", fontSize: 13, fontWeight: 700,
+              color: isPlaying ? "#e2e8f0" : "#fff", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
+            }}>
+            {isPlaying ? "⏸ Pause" : "▶ Play"}
+          </button>
+          {!isPlaying && currentSlide === 0 && currentTime === 0 && (
+            <>
+              <style>{`
+                @keyframes pointer-bounce-down {
+                  0%, 100% { transform: translate(-50%, 0); }
+                  50% { transform: translate(-50%, -8px); }
+                }
+              `}</style>
+              <div style={{
+                position: "absolute",
+                top: "-48px",
+                left: "50%",
+                animation: "pointer-bounce-down 1.5s infinite",
+                pointerEvents: "none",
+                zIndex: 10,
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                color: accent,
+                fontWeight: 800,
+                whiteSpace: "nowrap"
+              }}>
+                <span style={{ fontSize: 12, marginBottom: 2, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", padding: "4px 10px", borderRadius: 12, border: \`1px solid \${accent}55\` }}>Click to Play</span>
+                <span style={{ fontSize: 20 }}>👇</span>
+              </div>
+            </>
+          )}
+        </div>
 
         <button onClick={handleNext} disabled={currentSlide === slides.length - 1}
           style={{
