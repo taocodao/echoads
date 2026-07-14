@@ -291,7 +291,7 @@ export function PdfSlideshow({
             `}</style>
             Scroll for more pitch decks <span style={{ fontSize: 16 }}>👇</span>
           </div>
-          <span style={{ fontSize: 11, color: "#475569", fontFamily: "monospace" }}>
+          <span style={{ fontSize: 11, color: "#94a3b8", fontFamily: "monospace", whiteSpace: "nowrap", flexShrink: 0 }}>
             {cues.length > 0 ? "audio-synced" : "manual"}
           </span>
         </div>
