@@ -272,9 +272,29 @@ export function PdfSlideshow({
           ))}
         </div>
 
-        <span style={{ fontSize: 11, color: "#475569", fontFamily: "monospace" }}>
-          {cues.length > 0 ? "audio-synced" : "manual"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            animation: "bounce-down-scroll 2s infinite",
+            color: accent,
+            fontSize: "13px",
+            fontWeight: 700,
+            pointerEvents: "none"
+          }}>
+            <style>{`
+              @keyframes bounce-down-scroll {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(5px); }
+              }
+            `}</style>
+            Scroll for more pitch decks <span style={{ fontSize: 16 }}>👇</span>
+          </div>
+          <span style={{ fontSize: 11, color: "#475569", fontFamily: "monospace" }}>
+            {cues.length > 0 ? "audio-synced" : "manual"}
+          </span>
+        </div>
       </div>
 
       {audioSrc && (
